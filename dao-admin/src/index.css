@@ -1,0 +1,68 @@
+@import "tailwindcss";
+
+/*
+ * DAO design tokens for the admin. Same palette as the mobile app.
+ * Semantic tokens switch between DAO Botanical (default) and DAO Midnight (.dark).
+ */
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --font-display: "Cormorant Garamond", "Noto Sans Thai", "Noto Sans Myanmar", serif;
+  --font-sans: "DM Sans", "Noto Sans Thai", "Noto Sans Myanmar", system-ui, sans-serif;
+
+  --color-sage: #9ead91;
+  --color-deep-sage: #66745e;
+  --color-ivory: #fff9f1;
+  --color-cream: #f4ebdd;
+  --color-pearl: #f5efe6;
+  --color-cocoa: #5c493f;
+  --color-rose: #d9a5a5;
+  --color-dusty-rose: #c99598;
+  --color-gold: #c9a96e;
+  --color-midnight: #171917;
+
+  /* semantic (botanical) */
+  --color-bg: #fff9f1;
+  --color-surface: #ffffff;
+  --color-muted: #f5efe6;
+  --color-ink: #5c493f;
+  --color-ink-muted: #85746a;
+  --color-ink-subtle: #a99a8f;
+  --color-line: #ece3d5;
+  --color-primary: #66745e;
+  --color-primary-soft: #e6ece1;
+  --color-on-primary: #ffffff;
+  --color-danger: #b5555a;
+  --color-danger-soft: #f7e3e2;
+  --color-gold-soft: #f3eadb;
+  --color-sidebar: #ffffff;
+
+  --radius-card: 18px;
+  --shadow-soft: 0 4px 12px rgb(92 73 63 / 0.06);
+  --shadow-card: 0 8px 18px rgb(92 73 63 / 0.08);
+}
+
+.dark {
+  --color-bg: #171917;
+  --color-surface: #202320;
+  --color-muted: #2a2e2a;
+  --color-ink: #f5efe6;
+  --color-ink-muted: #bdb5aa;
+  --color-ink-subtle: #8e877e;
+  --color-line: #303530;
+  --color-primary: #788a70;
+  --color-primary-soft: #2c352a;
+  --color-on-primary: #101210;
+  --color-danger: #d9807f;
+  --color-danger-soft: #3b2626;
+  --color-gold: #d4b477;
+  --color-gold-soft: #3a3324;
+  --color-sidebar: #1c1f1c;
+}
+
+html, body, #root { height: 100%; }
+body {
+  @apply bg-bg text-ink font-sans antialiased;
+}
+:focus-visible { outline: 2px solid var(--color-primary); outline-offset: 2px; }
+.font-display { letter-spacing: 0.01em; }

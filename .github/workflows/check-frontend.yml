@@ -1,0 +1,17 @@
+name: Check Mobile App
+on:
+  push: { paths: ['dao-frontend/**', '.github/workflows/check-frontend.yml'] }
+  pull_request: { paths: ['dao-frontend/**'] }
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    defaults: { run: { working-directory: dao-frontend } }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: npm, cache-dependency-path: dao-frontend/package-lock.json }
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run ts:check
+      - run: npm test -- --ci
+      - run: npm run i18n:check

@@ -44,4 +44,3 @@ In local development `SMS_DRIVER=log` writes OTP codes to `dao-backend/storage/l
 - [docs/roadmap.md](docs/roadmap.md) — phases, status, known limitations
 - [docs/setup-production.md](docs/setup-production.md) — droplet, CI/CD, EAS, Vercel
 - [CLAUDE.md](CLAUDE.md) — engineering rules for future AI/dev sessions
-# Dao
