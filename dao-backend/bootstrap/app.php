@@ -38,6 +38,15 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->trustProxies(at: '*');
         $middleware->api(append: [SetLocale::class]);
+        // Laravel's $middlewarePriority pulls Authenticate (via the AuthenticatesRequests
+        // interface it implements) ahead of the 'api' group's SubstituteBindings, and since
+        // AdminTokenFromCookie isn't in that priority list, it got left behind — auth:sanctum
+        // ran before the cookie was ever copied into the Authorization header. Priority-listing
+        // it right alongside Authenticate fixes that.
+        $middleware->prependToPriorityList(
+            before: \Illuminate\Contracts\Auth\Middleware\AuthenticatesRequests::class,
+            prepend: AdminTokenFromCookie::class,
+        );
         $middleware->alias([
             'admin.cookie' => AdminTokenFromCookie::class,
             'admin' => EnsureAdmin::class,

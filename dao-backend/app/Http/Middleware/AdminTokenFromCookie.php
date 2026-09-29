@@ -10,6 +10,10 @@ use Symfony\Component\HttpFoundation\Response;
  * The admin dashboard keeps its Sanctum token in an httpOnly, Secure, SameSite=Strict cookie
  * (unreadable by JavaScript). This copies it into the Authorization header.
  *
+ * Must run before auth:sanctum — see the priority registration in bootstrap/app.php, which
+ * is required because Laravel's default $middlewarePriority otherwise pulls Authenticate
+ * ahead of any unlisted middleware such as this one.
+ *
  * CSRF: state-changing requests authenticated by the cookie must carry X-Requested-With,
  * which a cross-site form cannot set and a cross-origin fetch cannot send without passing CORS.
  */
