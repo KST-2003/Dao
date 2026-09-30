@@ -355,6 +355,8 @@ export const en = {
     deleteAccount: "Delete account",
     deleteAccountConfirm: "This permanently deletes your DAO account, points and saved items.",
     editProfile: "Edit profile",
+    changePhoto: "Change photo",
+    photoPermissionDenied: "DAO needs access to your photos to set a profile picture.",
     referralTitle: "Share DAO with a friend",
     referralBody: "When they place their first order you get {{referrer}} points and they get {{referee}}.",
     shareCode: "Share my code",

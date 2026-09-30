@@ -76,6 +76,21 @@ export function useUpdateProfile() {
   });
 }
 
+/** Backend requires POST (not PATCH) for the multipart avatar upload. */
+export function useUpdateAvatar() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (localUri: string) => {
+      const form = new FormData();
+      const filename = localUri.split('/').pop() ?? 'avatar.jpg';
+      const ext = filename.split('.').pop()?.toLowerCase();
+      form.append('avatar', { uri: localUri, name: filename, type: ext === 'png' ? 'image/png' : 'image/jpeg' } as unknown as Blob);
+      return api.post<User>('/me', form, { headers: { 'Content-Type': 'multipart/form-data' } });
+    },
+    onSuccess: (user) => qc.setQueryData(qk.me, user),
+  });
+}
+
 export function useSignOut() {
   const qc = useQueryClient();
   const signOut = useAuthStore((s) => s.signOut);

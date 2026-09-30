@@ -1,8 +1,8 @@
-import { View } from 'react-native';
+import { Pressable, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import {
-  DAOAvatar, DAOButton, DAOCard, DAODivider, DAOListItem, DAOLoadingSkeleton, DAOLogo, DAOModal, DAOPointCard, DAOScreen, DAOText,
+  DAOAvatar, DAOButton, DAOCard, DAODivider, DAOIconButton, DAOListItem, DAOLoadingSkeleton, DAOLogo, DAOModal, DAOPointCard, DAOScreen, DAOText,
 } from '@/shared/components';
 import { LOCALE_NATIVE_NAMES } from '@/shared/i18n';
 import { useLocale } from '@/shared/hooks/useLocale';
@@ -39,13 +39,14 @@ export default function MeScreen() {
   const name = user?.display_name || user?.name || t('profile.defaultName');
   return (
     <DAOScreen header={<View style={{ height: insets.top + spacing.md }} />} refreshing={vm.me.isRefetching} onRefresh={vm.refresh}>
-      <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md, marginBottom: spacing.xl }}>
+      <Pressable onPress={() => vm.go('/edit-profile')} style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md, marginBottom: spacing.xl }}>
         <DAOAvatar uri={user?.avatar_url} name={name} size={56} />
         <View style={{ flex: 1 }}>
           <DAOText variant="heading">{t('profile.hello', { name })}</DAOText>
           {user?.phone || user?.email ? <DAOText variant="caption" tone="textMuted">{user.phone ?? user.email}</DAOText> : null}
         </View>
-      </View>
+        <DAOIconButton icon="edit-2" accessibilityLabel={t('profile.editProfile')} tone="plain" onPress={() => vm.go('/edit-profile')} />
+      </Pressable>
 
       {m ? (
         <DAOPointCard tier={m.tier} balance={m.balance} progress={m.progress} pointsToNext={m.points_to_next} nextTierName={m.next_tier?.name ?? null} onPress={() => vm.go('/membership')} />

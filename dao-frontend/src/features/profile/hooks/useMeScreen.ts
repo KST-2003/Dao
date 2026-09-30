@@ -20,7 +20,7 @@ export function useMeScreen() {
     closeLogout: () => setConfirmLogout(false),
     logout: () => signOut.mutate(undefined, { onSettled: () => setConfirmLogout(false) }),
     loggingOut: signOut.isPending,
-    go: (path: '/orders' | '/wishlist' | '/rewards' | '/addresses' | '/payment-methods' | '/language' | '/notifications' | '/settings' | '/referral' | '/membership' | '/points') =>
+    go: (path: '/orders' | '/wishlist' | '/rewards' | '/addresses' | '/payment-methods' | '/language' | '/notifications' | '/settings' | '/referral' | '/membership' | '/points' | '/edit-profile') =>
       router.push(path),
     goSaved: (tab: 'product' | 'video' | 'recipe') => router.push({ pathname: '/wishlist', params: { tab } }),
     signIn: () => router.push('/(auth)/login'),

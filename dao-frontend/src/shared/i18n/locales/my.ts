@@ -358,6 +358,8 @@ export const my: TranslationShape<typeof en> = {
     deleteAccount: "အကောင့် ဖျက်မည်",
     deleteAccountConfirm: "ဤလုပ်ဆောင်ချက်သည် သင့် DAO အကောင့်၊ အမှတ်များကို အပြီးဖျက်မည်။",
     editProfile: "ပရိုဖိုင် ပြင်မည်",
+    changePhoto: "ဓာတ်ပုံ ပြောင်းမည်",
+    photoPermissionDenied: "ပရိုဖိုင်ပုံ သတ်မှတ်ရန် DAO အား ဓာတ်ပုံများကို ဝင်ရောက်ခွင့် ပေးရပါမည်။",
     referralTitle: "သူငယ်ချင်းကို DAO မျှဝေပါ",
     referralBody: "သူတို့ ပထမဆုံးအော်ဒါတင်လျှင် သင် {{referrer}} မှတ်၊ သူတို့ {{referee}} မှတ် ရမည်။",
     shareCode: "ကုဒ် မျှဝေမည်",

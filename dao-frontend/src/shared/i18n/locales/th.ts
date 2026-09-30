@@ -358,6 +358,8 @@ export const th: TranslationShape<typeof en> = {
     deleteAccount: "ลบบัญชี",
     deleteAccountConfirm: "การดำเนินการนี้จะลบบัญชี คะแนน และรายการที่บันทึกไว้ถาวร",
     editProfile: "แก้ไขโปรไฟล์",
+    changePhoto: "เปลี่ยนรูปภาพ",
+    photoPermissionDenied: "DAO ต้องการสิทธิ์เข้าถึงรูปภาพเพื่อตั้งเป็นรูปโปรไฟล์",
     referralTitle: "ชวนเพื่อนมาใช้ DAO",
     referralBody: "เมื่อเพื่อนสั่งซื้อครั้งแรก คุณได้ {{referrer}} คะแนน เพื่อนได้ {{referee}} คะแนน",
     shareCode: "แชร์รหัสของฉัน",

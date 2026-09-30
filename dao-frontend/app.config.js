@@ -25,7 +25,7 @@ module.exports = {
     scheme: 'dao',
     version: '1.0.0',
     orientation: 'portrait',
-    icon: './assets/icon.png',
+    icon: './assets/dao-logo.png',
     userInterfaceStyle: 'automatic',
     newArchEnabled: true,
     runtimeVersion: { policy: 'appVersion' },
@@ -53,7 +53,7 @@ module.exports = {
       package: BUNDLE_ID,
       versionCode: 1,
       adaptiveIcon: {
-        foregroundImage: './assets/adaptive-icon.png',
+        foregroundImage: './assets/dao-logo.png',
         backgroundColor: '#FBF6EC',
       },
       edgeToEdgeEnabled: true,
@@ -69,8 +69,8 @@ module.exports = {
       ['expo-notifications', { color: '#66745E' }],
       [
         'expo-splash-screen',
-        { image: './assets/splash-icon.png', imageWidth: 220, resizeMode: 'contain', backgroundColor: '#FBF6EC',
-          dark: { image: './assets/splash-icon.png', backgroundColor: '#171917' } },
+        { image: './assets/dao-logo.png', imageWidth: 220, resizeMode: 'contain', backgroundColor: '#FBF6EC',
+          dark: { image: './assets/dao-logo.png', backgroundColor: '#171917' } },
       ],
     ],
     experiments: { typedRoutes: true },
