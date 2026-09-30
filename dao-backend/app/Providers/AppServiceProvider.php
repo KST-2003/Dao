@@ -4,7 +4,7 @@ namespace App\Providers;
 
 use App\Contracts\FileStorageInterface;
 use App\Contracts\PushProviderInterface;
-use App\Contracts\SmsProviderInterface;
+use App\Contracts\OtpProviderInterface;
 use App\Models;
 use App\Services\Auth\GoogleIdentityProvider;
 use App\Services\Auth\LineIdentityProvider;
@@ -14,10 +14,10 @@ use App\Services\Payments\Gateways\CashOnDeliveryGateway;
 use App\Services\Payments\Gateways\StripeCheckoutGateway;
 use App\Services\Payments\PaymentManager;
 use App\Services\Settings\SettingsService;
-use App\Services\Sms\FakeSmsProvider;
-use App\Services\Sms\LogSmsProvider;
-use App\Services\Sms\ThaiBulkSmsProvider;
-use App\Services\Sms\UnconfiguredSmsProvider;
+use App\Services\Sms\FakeOtpProvider;
+use App\Services\Sms\LogOtpProvider;
+use App\Services\Sms\ThaiBulkSmsOtpProvider;
+use App\Services\Sms\UnconfiguredOtpProvider;
 use App\Services\Storage\FileStorageService;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Database\Eloquent\Relations\Relation;
@@ -32,16 +32,16 @@ class AppServiceProvider extends ServiceProvider
     {
         $this->app->singleton(SettingsService::class);
 
-        // --- SMS: never pretend. "log" only in local; "fake" only in tests; otherwise a real provider or 503. ---
-        $this->app->singleton(SmsProviderInterface::class, function ($app) {
+        // --- OTP: never pretend. "log" only in local; "fake" only in tests; otherwise a real provider or 503. ---
+        $this->app->singleton(OtpProviderInterface::class, function ($app) {
             $driver = config('dao.sms.driver');
             $env = $app->environment();
 
             return match (true) {
-                $driver === 'thaibulksms' => new ThaiBulkSmsProvider(config('services.thaibulksms.key'), config('services.thaibulksms.secret'), config('services.thaibulksms.sender')),
-                $driver === 'fake' && $env === 'testing' => new FakeSmsProvider,
-                $driver === 'log' && $env === 'local' => new LogSmsProvider,
-                default => new UnconfiguredSmsProvider,
+                $driver === 'thaibulksms' => new ThaiBulkSmsOtpProvider(config('services.thaibulksms.key'), config('services.thaibulksms.secret'), config('services.thaibulksms.sender')),
+                $driver === 'fake' && $env === 'testing' => new FakeOtpProvider,
+                $driver === 'log' && $env === 'local' => new LogOtpProvider,
+                default => new UnconfiguredOtpProvider,
             };
         });
 

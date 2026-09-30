@@ -1,6 +1,6 @@
 <?php
 
-use App\Contracts\SmsProviderInterface;
+use App\Contracts\OtpProviderInterface;
 use App\Models\LoyaltyAccount;
 use App\Models\User;
 use App\Models\UserAuthProvider;
@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Http;
 
 function lastOtp(string $phone): ?string
 {
-    return app(SmsProviderInterface::class)->lastCodeFor($phone);
+    return app(OtpProviderInterface::class)->lastCodeFor($phone);
 }
 
 it('registers a new customer with SMS OTP, gives the signup bonus and entry tier', function () {

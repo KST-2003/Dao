@@ -8,7 +8,7 @@ class OtpChallenge extends Model
 {
     protected $guarded = ['id'];
 
-    protected $hidden = ['code_hash'];
+    protected $hidden = ['code_hash', 'provider_token'];
 
     protected function casts(): array
     {

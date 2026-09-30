@@ -2,18 +2,19 @@
 
 namespace App\Services\Auth;
 
-use App\Contracts\SmsProviderInterface;
+use App\Contracts\OtpProviderInterface;
 use App\Exceptions\DomainException;
 use App\Models\OtpChallenge;
 use Illuminate\Support\Facades\DB;
 
 /**
- * SMS one-time passwords: hashed at rest, expiring, attempt-limited, resend cooldown,
- * per-phone hourly cap (per-IP limits are applied by the `otp` rate limiter on the route).
+ * SMS one-time passwords: expiring, attempt-limited, resend cooldown, per-phone hourly cap
+ * (per-IP limits are applied by the `otp` rate limiter on the route). Generation and pin
+ * checking are delegated to OtpProviderInterface — see its docblock for why.
  */
 class OtpService
 {
-    public function __construct(private readonly SmsProviderInterface $sms) {}
+    public function __construct(private readonly OtpProviderInterface $provider) {}
 
     /** @return array{expires_in: int, resend_in: int} */
     public function request(string $phone, ?string $ip, string $locale): array
@@ -31,21 +32,15 @@ class OtpService
             throw DomainException::of('OTP_RATE_LIMITED', 429);
         }
 
-        $code = str_pad((string) random_int(0, 10 ** $cfg['length'] - 1), $cfg['length'], '0', STR_PAD_LEFT);
+        $result = $this->provider->request($phone, $locale); // throws SMS_NOT_CONFIGURED | SMS_SEND_FAILED
 
-        $challenge = OtpChallenge::query()->create([
+        OtpChallenge::query()->create([
             'phone' => $phone,
-            'code_hash' => $this->hash($phone, $code),
+            'code_hash' => $result['code_hash'],
+            'provider_token' => $result['provider_token'],
             'expires_at' => now()->addSeconds($cfg['ttl_seconds']),
             'ip' => $ip,
         ]);
-
-        try {
-            $this->sms->send($phone, __('auth.otp_sms', ['code' => $code, 'minutes' => intdiv($cfg['ttl_seconds'], 60)], $locale));
-        } catch (\Throwable $e) {
-            $challenge->delete(); // do not count a message that was never sent
-            throw $e;
-        }
 
         return ['expires_in' => $cfg['ttl_seconds'], 'resend_in' => $cfg['resend_cooldown_seconds']];
     }
@@ -55,7 +50,9 @@ class OtpService
     {
         $max = config('dao.otp.max_attempts');
 
-        $error = DB::transaction(function () use ($phone, $code, $max): ?DomainException {
+        // Locally-owned bookkeeping (expiry, attempt counting) happens under a lock; the
+        // provider check — possibly a network call — happens after the lock is released.
+        $challenge = DB::transaction(function () use ($phone, $max): OtpChallenge {
             /** @var OtpChallenge|null $challenge */
             $challenge = OtpChallenge::query()
                 ->where('phone', $phone)
@@ -65,32 +62,19 @@ class OtpService
                 ->first();
 
             if (! $challenge || $challenge->expires_at->isPast()) {
-                return DomainException::of('OTP_EXPIRED', 422);
+                throw DomainException::of('OTP_EXPIRED', 422);
             }
             if ($challenge->attempts >= $max) {
-                return DomainException::of('OTP_TOO_MANY_ATTEMPTS', 429);
+                throw DomainException::of('OTP_TOO_MANY_ATTEMPTS', 429);
             }
 
             $challenge->increment('attempts');
 
-            if (! hash_equals($challenge->code_hash, $this->hash($phone, $code))) {
-                $left = max(0, $max - $challenge->attempts);
-
-                return DomainException::of('OTP_INVALID', 422, [], ['attempts_remaining' => $left]);
-            }
-
-            $challenge->forceFill(['consumed_at' => now()])->save();
-
-            return null;
+            return $challenge;
         });
 
-        if ($error) {
-            throw $error; // thrown outside the transaction so the attempt counter is persisted
-        }
-    }
+        $this->provider->verify($challenge, $code); // throws OTP_INVALID
 
-    private function hash(string $phone, string $code): string
-    {
-        return hash_hmac('sha256', $phone.'|'.$code, (string) config('app.key'));
+        $challenge->forceFill(['consumed_at' => now()])->save();
     }
 }
