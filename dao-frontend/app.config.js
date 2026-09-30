@@ -69,8 +69,7 @@ module.exports = {
       ['expo-notifications', { color: '#66745E' }],
       [
         'expo-splash-screen',
-        { image: './assets/dao-logo.png', imageWidth: 220, resizeMode: 'contain', backgroundColor: '#FBF6EC',
-          dark: { image: './assets/dao-logo.png', backgroundColor: '#171917' } },
+        { image: './assets/dao-logo.png', imageWidth: 220, resizeMode: 'contain', backgroundColor: '#FBF6EC' },
       ],
     ],
     experiments: { typedRoutes: true },
