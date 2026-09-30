@@ -10,8 +10,8 @@ const UPDATES_CHANNEL_BY_PROFILE = new Map([
 const updatesChannel = UPDATES_CHANNEL_BY_PROFILE.get(process.env.EAS_BUILD_PROFILE ?? '') ?? 'production';
 
 // Filled after `eas init` (see README). Placeholders keep the app buildable locally.
-const EAS_PROJECT_ID = process.env.EAS_PROJECT_ID ?? '';
-const EAS_OWNER = process.env.EAS_OWNER ?? undefined;
+const EAS_PROJECT_ID = process.env.EAS_PROJECT_ID ?? '765a5e49-b1c4-4772-8abf-0efc85a17131';
+const EAS_OWNER = process.env.EAS_OWNER ?? 'kaungsithu03-2';
 const BUNDLE_ID = process.env.APP_BUNDLE_ID ?? 'com.daoapp.customer';
 
 /** @type {import('expo/config').ExpoConfig} */

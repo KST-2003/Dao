@@ -22,7 +22,7 @@ class ConfigController extends Controller
             'auth' => [
                 'google' => $google->isConfigured(),
                 'line' => $line->isConfigured(),
-                'sms' => in_array(config('dao.sms.driver'), ['twilio', 'log', 'fake'], true),
+                'sms' => in_array(config('dao.sms.driver'), ['thaibulksms', 'log', 'fake'], true),
             ],
             'payment_methods' => array_map(fn ($g) => $g->method()->value, $payments->available()),
             'loyalty' => [

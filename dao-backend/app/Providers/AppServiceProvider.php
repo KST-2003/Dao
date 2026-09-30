@@ -16,7 +16,7 @@ use App\Services\Payments\PaymentManager;
 use App\Services\Settings\SettingsService;
 use App\Services\Sms\FakeSmsProvider;
 use App\Services\Sms\LogSmsProvider;
-use App\Services\Sms\TwilioSmsProvider;
+use App\Services\Sms\ThaiBulkSmsProvider;
 use App\Services\Sms\UnconfiguredSmsProvider;
 use App\Services\Storage\FileStorageService;
 use Illuminate\Cache\RateLimiting\Limit;
@@ -38,7 +38,7 @@ class AppServiceProvider extends ServiceProvider
             $env = $app->environment();
 
             return match (true) {
-                $driver === 'twilio' => new TwilioSmsProvider(config('services.twilio.sid'), config('services.twilio.token'), config('services.twilio.from')),
+                $driver === 'thaibulksms' => new ThaiBulkSmsProvider(config('services.thaibulksms.key'), config('services.thaibulksms.secret'), config('services.thaibulksms.sender')),
                 $driver === 'fake' && $env === 'testing' => new FakeSmsProvider,
                 $driver === 'log' && $env === 'local' => new LogSmsProvider,
                 default => new UnconfiguredSmsProvider,

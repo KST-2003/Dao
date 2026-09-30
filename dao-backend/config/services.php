@@ -11,10 +11,10 @@ return [
         'channel_secret' => env('LINE_CHANNEL_SECRET'),
     ],
 
-    'twilio' => [
-        'sid' => env('TWILIO_ACCOUNT_SID'),
-        'token' => env('TWILIO_AUTH_TOKEN'),
-        'from' => env('TWILIO_FROM'),
+    'thaibulksms' => [
+        'key' => env('THAIBULKSMS_KEY'),
+        'secret' => env('THAIBULKSMS_SECRET'),
+        'sender' => env('THAIBULKSMS_SENDER'),
     ],
 
     'stripe' => [
