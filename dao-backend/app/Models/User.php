@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Casts\MediaUrl;
 use App\Enums\Gender;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -41,6 +42,7 @@ class User extends Authenticatable
             'gender' => Gender::class,
             'profile_completed' => 'boolean',
             'last_active_at' => 'datetime',
+            'avatar_url' => MediaUrl::class,
         ];
     }
 

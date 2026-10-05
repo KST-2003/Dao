@@ -27,6 +27,7 @@ Route::middleware(['auth:sanctum', 'admin', 'throttle:api'])->group(function () 
         Route::post('/products/{id}/variants', [Admin\ProductController::class, 'storeVariant'])->whereNumber('id');
         Route::put('/products/{id}/variants/{variantId}', [Admin\ProductController::class, 'updateVariant'])->whereNumber(['id', 'variantId']);
         Route::delete('/products/{id}/variants/{variantId}', [Admin\ProductController::class, 'destroyVariant'])->whereNumber(['id', 'variantId']);
+        Route::post('/products/{id}/images/presign', [Admin\ProductController::class, 'presignImage'])->whereNumber('id');
         Route::post('/products/{id}/images', [Admin\ProductController::class, 'storeImage'])->whereNumber('id');
         Route::put('/products/{id}/images/order', [Admin\ProductController::class, 'reorderImages'])->whereNumber('id');
         Route::delete('/products/{id}/images/{imageId}', [Admin\ProductController::class, 'destroyImage'])->whereNumber(['id', 'imageId']);

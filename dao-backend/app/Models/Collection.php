@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Casts\MediaUrl;
 use App\Traits\HasTranslations;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -23,6 +24,7 @@ class Collection extends Model
             'is_vip_only' => 'boolean',
             'starts_at' => 'datetime',
             'ends_at' => 'datetime',
+            'hero_image_url' => MediaUrl::class,
         ];
     }
 

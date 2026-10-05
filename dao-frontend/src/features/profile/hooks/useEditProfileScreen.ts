@@ -29,7 +29,11 @@ export function useEditProfileScreen() {
     if (result.canceled || !result.assets[0]) {
       return;
     }
-    avatar.mutate(result.assets[0].uri, { onError: (e) => toast.error(message(e)) });
+    const asset = result.assets[0];
+    // The presign endpoint only accepts these three — anything else (e.g. HEIC) falls back to jpeg.
+    const allowed = ['image/jpeg', 'image/png', 'image/webp'];
+    const contentType = allowed.includes(asset.mimeType ?? '') ? (asset.mimeType as string) : 'image/jpeg';
+    avatar.mutate({ uri: asset.uri, contentType }, { onError: (e) => toast.error(message(e)) });
   };
 
   const save = () => {

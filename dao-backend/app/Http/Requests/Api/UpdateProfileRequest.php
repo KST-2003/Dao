@@ -24,7 +24,11 @@ class UpdateProfileRequest extends FormRequest
             'country' => ['sometimes', 'nullable', Rule::in(['TH', 'MM'])],
             'date_of_birth' => ['sometimes', 'nullable', 'date', 'before:today', 'after:1900-01-01'],
             'gender' => ['sometimes', 'nullable', Rule::enum(Gender::class)],
-            'avatar' => ['sometimes', 'nullable', 'image', 'max:5120'],
+            'avatar_key' => ['sometimes', 'nullable', 'string', 'max:500', function ($attribute, $value, $fail) {
+                if ($value && ! str_starts_with($value, "avatars/{$this->user()?->id}/")) {
+                    $fail('Invalid avatar key.');
+                }
+            }],
         ];
     }
 }

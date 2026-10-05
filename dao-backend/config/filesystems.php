@@ -16,6 +16,12 @@ return [
             'url' => env('R2_PUBLIC_URL'),
             'use_path_style_endpoint' => true,
             'throw' => true,
+            // aws-sdk-php >=3.337 signs a CRC32 checksum into every request by default, including
+            // presigned PUT URLs — but a presigned PUT has no body yet at signing time, so it signs
+            // the checksum of an empty payload. R2 then rejects the real upload as a checksum
+            // mismatch. This restores the pre-3.337 behaviour (only checksum when explicitly asked).
+            'request_checksum_calculation' => 'when_required',
+            'response_checksum_validation' => 'when_required',
         ],
     ],
 

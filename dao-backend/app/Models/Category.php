@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Casts\MediaUrl;
 use App\Traits\HasTranslations;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -17,7 +18,7 @@ class Category extends Model
 
     protected function casts(): array
     {
-        return ['is_active' => 'boolean'];
+        return ['is_active' => 'boolean', 'image_url' => MediaUrl::class];
     }
 
     public function translations(): HasMany

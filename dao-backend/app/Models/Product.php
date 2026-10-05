@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Casts\MediaUrl;
 use App\Enums\ProductStatus;
 use App\Traits\HasTranslations;
 use Illuminate\Database\Eloquent\Builder;
@@ -43,6 +44,7 @@ class Product extends Model
             'cost' => 'integer',
             'rating_avg' => 'float',
             'published_at' => 'datetime',
+            'video_url' => MediaUrl::class,
         ];
     }
 
@@ -98,10 +100,14 @@ class Product extends Model
             && ($this->published_at === null || $this->published_at->lte(now()));
     }
 
+    /**
+     * The raw storage key, not a resolved URL — this feeds order_items.image_url, a
+     * permanent snapshot, so it must never be a presigned URL that later expires.
+     */
     public function coverImageUrl(): ?string
     {
         $images = $this->relationLoaded('images') ? $this->images : $this->images()->get();
 
-        return $images->first()?->url;
+        return $images->first()?->getRawOriginal('url');
     }
 }

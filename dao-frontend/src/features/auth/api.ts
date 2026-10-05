@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import * as FileSystem from 'expo-file-system/legacy';
 import { api } from '@/shared/api/client';
 import { qk } from '@/shared/constants/queryKeys';
 import { useLocale } from '@/shared/hooks/useLocale';
@@ -76,16 +77,24 @@ export function useUpdateProfile() {
   });
 }
 
-/** Backend requires POST (not PATCH) for the multipart avatar upload. */
+/**
+ * Presign → PUT straight to R2 (never through our server) → PATCH /me with the key.
+ * contentType must match exactly what was presigned (it's bound into the signature).
+ */
 export function useUpdateAvatar() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (localUri: string) => {
-      const form = new FormData();
-      const filename = localUri.split('/').pop() ?? 'avatar.jpg';
-      const ext = filename.split('.').pop()?.toLowerCase();
-      form.append('avatar', { uri: localUri, name: filename, type: ext === 'png' ? 'image/png' : 'image/jpeg' } as unknown as Blob);
-      return api.post<User>('/me', form, { headers: { 'Content-Type': 'multipart/form-data' } });
+    mutationFn: async ({ uri, contentType }: { uri: string; contentType: string }) => {
+      const { upload_url, key } = await api.post<{ upload_url: string; key: string }>('/me/avatar/presign', { content_type: contentType });
+      const put = await FileSystem.uploadAsync(upload_url, uri, {
+        httpMethod: 'PUT',
+        uploadType: FileSystem.FileSystemUploadType.BINARY_CONTENT,
+        headers: { 'Content-Type': contentType },
+      });
+      if (put.status < 200 || put.status >= 300) {
+        throw new Error('Upload to storage failed');
+      }
+      return api.patch<User>('/me', { avatar_key: key });
     },
     onSuccess: (user) => qc.setQueryData(qk.me, user),
   });

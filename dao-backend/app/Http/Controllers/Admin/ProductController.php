@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Contracts\FileStorageInterface;
+use App\Contracts\MediaStorageInterface;
 use App\Enums\InventoryReason;
 use App\Enums\ProductStatus;
 use App\Exceptions\DomainException;
@@ -16,6 +16,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
 
 class ProductController extends AdminController
 {
@@ -163,19 +164,33 @@ class ProductController extends AdminController
 
     // ---------- Images ----------
 
-    public function storeImage(Request $request, int $id, FileStorageInterface $files): JsonResponse
+    /** Content type must match exactly what the client then PUTs with — see MediaStorageInterface. */
+    public function presignImage(Request $request, int $id, MediaStorageInterface $media): JsonResponse
     {
         $product = Product::query()->findOrFail($id);
-        $cfg = config('dao.uploads');
-        $request->validate([
-            'file' => ['required', 'file', 'image', 'mimes:'.implode(',', $cfg['image_mimes']), 'max:'.$cfg['image_max_kb']],
+        $data = $request->validate(['content_type' => ['required', Rule::in(['image/jpeg', 'image/png', 'image/webp', 'image/heic'])]]);
+        $ext = str($data['content_type'])->after('/')->toString();
+        $key = $media->makeKey('products', $product->id, $ext);
+
+        return response()->json(['data' => ['upload_url' => $media->createUploadUrl($key, $data['content_type']), 'key' => $key]]);
+    }
+
+    public function storeImage(Request $request, int $id, MediaStorageInterface $media): JsonResponse
+    {
+        $product = Product::query()->findOrFail($id);
+        $data = $request->validate([
+            'key' => ['required', 'string', 'max:500', function ($attribute, $value, $fail) use ($product) {
+                if (! str_starts_with($value, "products/{$product->id}/")) {
+                    $fail('Invalid image key.');
+                }
+            }],
             'color' => ['nullable', 'string', 'max:50'],
             'alt' => ['nullable', 'string', 'max:190'],
         ]);
-        $stored = $files->putImage($request->file('file'), 'products/'.$product->id);
+        // No server-side thumbnail: the file never passes through this server to resize.
         $image = $product->images()->create([
-            'url' => $stored->url, 'thumbnail_url' => $stored->thumbnailUrl,
-            'color' => $request->input('color'), 'alt' => $request->input('alt'),
+            'url' => $data['key'], 'thumbnail_url' => null,
+            'color' => $data['color'] ?? null, 'alt' => $data['alt'] ?? null,
             'sort_order' => (int) $product->images()->max('sort_order') + 1,
         ]);
         $this->audit('product.image_added', $product, ['image_id' => $image->id]);
@@ -193,9 +208,14 @@ class ProductController extends AdminController
         return response()->json(['data' => ['reordered' => true]]);
     }
 
-    public function destroyImage(int $id, int $imageId): JsonResponse
+    public function destroyImage(int $id, int $imageId, MediaStorageInterface $media): JsonResponse
     {
-        ProductImage::query()->where('product_id', $id)->findOrFail($imageId)->delete();
+        $image = ProductImage::query()->where('product_id', $id)->findOrFail($imageId);
+        $media->delete($image->getRawOriginal('url'));
+        if ($image->getRawOriginal('thumbnail_url')) {
+            $media->delete($image->getRawOriginal('thumbnail_url'));
+        }
+        $image->delete();
         $this->audit('product.image_removed', Product::query()->find($id), ['image_id' => $imageId]);
 
         return response()->json(['data' => ['deleted' => true]]);

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Casts\MediaUrl;
 use App\Enums\RewardType;
 use App\Traits\HasTranslations;
 use Illuminate\Database\Eloquent\Builder;
@@ -29,6 +30,7 @@ class Reward extends Model
             'is_active' => 'boolean',
             'starts_at' => 'datetime',
             'ends_at' => 'datetime',
+            'image_url' => MediaUrl::class,
         ];
     }
 

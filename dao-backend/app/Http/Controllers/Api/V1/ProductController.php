@@ -11,7 +11,7 @@ use App\Http\Resources\Api\ProductResource;
 use App\Http\Resources\Api\ReviewResource;
 use App\Models\Product;
 use App\Models\Review;
-use App\Contracts\FileStorageInterface;
+use App\Contracts\MediaStorageInterface;
 use App\Services\Catalog\ProductQueryService;
 use App\Services\Content\EngagementService;
 use App\Services\Content\ReviewService;
@@ -113,10 +113,22 @@ class ProductController extends Controller
         ]])->response();
     }
 
-    public function storeReview(ReviewRequest $request, int $id, ReviewService $reviews, FileStorageInterface $files): ReviewResource
+    /** Content type must match exactly what the client then PUTs with — see MediaStorageInterface. */
+    public function presignReviewPhoto(Request $request, MediaStorageInterface $media): JsonResponse
+    {
+        $data = $request->validate([
+            'content_type' => ['required', Rule::in(['image/jpeg', 'image/png', 'image/webp'])],
+        ]);
+        $ext = ['image/jpeg' => 'jpg', 'image/png' => 'png', 'image/webp' => 'webp'][$data['content_type']];
+        $key = $media->makeKey('reviews', $request->user()->id, $ext);
+
+        return $this->ok(['upload_url' => $media->createUploadUrl($key, $data['content_type']), 'key' => $key]);
+    }
+
+    public function storeReview(ReviewRequest $request, int $id, ReviewService $reviews): ReviewResource
     {
         $product = Product::query()->published()->findOrFail($id);
-        $photos = collect($request->file('photos', []))->map(fn ($f) => $files->putImage($f, 'reviews')->url)->all();
+        $photos = $request->input('photos', []);
 
         return new ReviewResource($reviews->submit($request->user(), $product, (int) $request->input('rating'), $request->input('body'), $photos)->load('user'));
     }

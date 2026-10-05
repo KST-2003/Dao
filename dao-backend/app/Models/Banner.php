@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Casts\MediaUrl;
 use App\Enums\BannerPlacement;
 use App\Traits\HasTranslations;
 use Illuminate\Database\Eloquent\Builder;
@@ -16,7 +17,7 @@ class Banner extends Model
 
     protected function casts(): array
     {
-        return ['placement' => BannerPlacement::class, 'is_active' => 'boolean', 'starts_at' => 'datetime', 'ends_at' => 'datetime'];
+        return ['placement' => BannerPlacement::class, 'is_active' => 'boolean', 'starts_at' => 'datetime', 'ends_at' => 'datetime', 'image_url' => MediaUrl::class];
     }
 
     public function translations(): HasMany

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Casts\MediaUrl;
 use App\Enums\ContentType;
 use App\Enums\PublishStatus;
 use App\Traits\HasTranslations;
@@ -35,6 +36,8 @@ class Video extends Model
             'like_count' => 'integer',
             'comment_count' => 'integer',
             'published_at' => 'datetime',
+            'thumbnail_url' => MediaUrl::class,
+            'video_url' => MediaUrl::class,
         ];
     }
 

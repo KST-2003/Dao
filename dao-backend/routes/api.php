@@ -49,7 +49,8 @@ Route::prefix('v1')->middleware('throttle:api')->name('v1.')->group(function () 
 
         Route::get('/me', [V1\MeController::class, 'show']);
         Route::patch('/me', [V1\MeController::class, 'update']);
-        Route::post('/me', [V1\MeController::class, 'update']); // multipart avatar upload
+        Route::post('/me', [V1\MeController::class, 'update']);
+        Route::post('/me/avatar/presign', [V1\MeController::class, 'presignAvatar']);
         Route::delete('/me', [V1\MeController::class, 'destroy']);
         Route::post('/me/providers/{provider}', [V1\MeController::class, 'linkProvider'])->middleware('throttle:auth');
         Route::delete('/me/providers/{provider}', [V1\MeController::class, 'unlinkProvider']);
@@ -70,6 +71,7 @@ Route::prefix('v1')->middleware('throttle:api')->name('v1.')->group(function () 
 
         Route::get('/me/recently-viewed', [V1\ProductController::class, 'recentlyViewed']);
         Route::post('/products/{id}/reviews', [V1\ProductController::class, 'storeReview'])->whereNumber('id')->middleware('throttle:writes');
+        Route::post('/reviews/photos/presign', [V1\ProductController::class, 'presignReviewPhoto'])->middleware('throttle:writes');
         Route::post('/reviews/{reviewId}/report', [V1\ProductController::class, 'reportReview'])->whereNumber('reviewId')->middleware('throttle:writes');
 
         Route::get('/me/saved/{type}', [V1\SavedItemController::class, 'index']);

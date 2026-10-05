@@ -18,7 +18,11 @@ class ReviewRequest extends FormRequest
             'rating' => ['required', 'integer', 'min:1', 'max:5'],
             'body' => ['nullable', 'string', 'max:2000'],
             'photos' => ['nullable', 'array', 'max:5'],
-            'photos.*' => ['image', 'mimes:jpg,jpeg,png,webp,heic', 'max:10240'],
+            'photos.*' => ['string', 'max:500', function ($attribute, $value, $fail) {
+                if (! str_starts_with($value, "reviews/{$this->user()?->id}/")) {
+                    $fail('Invalid photo key.');
+                }
+            }],
         ];
     }
 }

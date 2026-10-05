@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\Api\V1;
 
-use App\Contracts\FileStorageInterface;
+use App\Contracts\MediaStorageInterface;
 use App\DTOs\SocialIdentity;
 use App\Enums\AuthProvider;
 use App\Exceptions\DomainException;
@@ -19,6 +19,7 @@ use App\Services\Auth\OtpService;
 use App\Services\Auth\PhoneNormalizer;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 
 class MeController extends Controller
 {
@@ -29,12 +30,28 @@ class MeController extends Controller
         return new UserResource($request->user()->load('authProviders'));
     }
 
-    public function update(UpdateProfileRequest $request, FileStorageInterface $files): UserResource
+    /** Content type must match exactly what the client then PUTs with — see MediaStorageInterface. */
+    public function presignAvatar(Request $request, MediaStorageInterface $media): JsonResponse
+    {
+        $data = $request->validate([
+            'content_type' => ['required', Rule::in(['image/jpeg', 'image/png', 'image/webp'])],
+        ]);
+        $ext = ['image/jpeg' => 'jpg', 'image/png' => 'png', 'image/webp' => 'webp'][$data['content_type']];
+        $key = $media->makeKey('avatars', $request->user()->id, $ext);
+
+        return $this->ok(['upload_url' => $media->createUploadUrl($key, $data['content_type']), 'key' => $key]);
+    }
+
+    public function update(UpdateProfileRequest $request, MediaStorageInterface $media): UserResource
     {
         $user = $request->user();
-        $data = collect($request->validated())->except('avatar')->all();
-        if ($request->hasFile('avatar')) {
-            $data['avatar_url'] = $files->putImage($request->file('avatar'), 'avatars')->url;
+        $data = collect($request->validated())->except('avatar_key')->all();
+        if ($request->filled('avatar_key')) {
+            $old = $user->getRawOriginal('avatar_url');
+            $data['avatar_url'] = $request->input('avatar_key');
+            if ($old) {
+                $media->delete($old);
+            }
         }
         $user->fill($data);
         $user->profile_completed = $user->profile_completed || (bool) ($user->display_name || $user->name);

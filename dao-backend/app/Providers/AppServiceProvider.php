@@ -2,7 +2,7 @@
 
 namespace App\Providers;
 
-use App\Contracts\FileStorageInterface;
+use App\Contracts\MediaStorageInterface;
 use App\Contracts\PushProviderInterface;
 use App\Contracts\OtpProviderInterface;
 use App\Models;
@@ -18,7 +18,7 @@ use App\Services\Sms\FakeOtpProvider;
 use App\Services\Sms\LogOtpProvider;
 use App\Services\Sms\ThaiBulkSmsOtpProvider;
 use App\Services\Sms\UnconfiguredOtpProvider;
-use App\Services\Storage\FileStorageService;
+use App\Services\Storage\R2MediaService;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Http\Request;
@@ -60,7 +60,7 @@ class AppServiceProvider extends ServiceProvider
 
         $this->app->singleton(PushProviderInterface::class, fn () => new ExpoPushProvider(config('services.expo.access_token')));
 
-        $this->app->bind(FileStorageInterface::class, fn () => new FileStorageService(
+        $this->app->bind(MediaStorageInterface::class, fn () => new R2MediaService(
             Storage::disk(config('filesystems.default')),
             (string) config('filesystems.r2_public_url', ''),
         ));

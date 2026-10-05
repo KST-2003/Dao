@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Casts\MediaUrlList;
 use App\Enums\ReviewStatus;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -14,7 +15,7 @@ class Review extends Model
     {
         return [
             'status' => ReviewStatus::class,
-            'photos' => 'array',
+            'photos' => MediaUrlList::class,
             'rating' => 'integer',
             'is_verified_purchase' => 'boolean',
             'moderated_at' => 'datetime',

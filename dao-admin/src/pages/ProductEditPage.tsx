@@ -9,6 +9,7 @@ import {
 } from '@/components/ui'
 import { api, ApiError, errorMessage } from '@/lib/api'
 import { fromLocalInput, toLocalInput, toMajor, toMinor } from '@/lib/format'
+import { uploadViaPresign } from '@/lib/upload'
 import type { Paged, ProductDetail, Translations } from '@/types/api'
 
 const BADGES = ['new', 'bestseller', 'dao_pick', 'limited', 'vip', 'sale'] as const
@@ -63,7 +64,7 @@ export default function ProductEditPage() {
   const remove = useMutation({ mutationFn: () => api.del(`/products/${id}`), onSuccess: () => { toast('Product archived'); navigate('/products') } })
   const imageAction = useMutation({
     mutationFn: async (a: { kind: 'upload'; file: File; color: string } | { kind: 'delete'; imageId: number } | { kind: 'order'; ids: number[] }) => {
-      if (a.kind === 'upload') { const fd = new FormData(); fd.append('file', a.file); if (a.color) fd.append('color', a.color); return api.upload(`/products/${id}/images`, fd) }
+      if (a.kind === 'upload') { const { key } = await uploadViaPresign(`/products/${id}/images/presign`, a.file); return api.post(`/products/${id}/images`, { key, color: a.color || undefined }) }
       if (a.kind === 'delete') return api.del(`/products/${id}/images/${a.imageId}`)
       return api.put(`/products/${id}/images/order`, { ids: a.ids })
     },

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Casts\MediaUrl;
 use App\Enums\Difficulty;
 use App\Enums\PublishStatus;
 use App\Traits\HasTranslations;
@@ -29,6 +30,7 @@ class Recipe extends Model
             'is_featured' => 'boolean',
             'spice_level' => 'integer',
             'published_at' => 'datetime',
+            'cover_image_url' => MediaUrl::class,
         ];
     }
 
