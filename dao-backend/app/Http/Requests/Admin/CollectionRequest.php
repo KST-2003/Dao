@@ -12,7 +12,7 @@ class CollectionRequest extends AdminRequest
 
         return array_merge([
             'slug' => [$id ? 'sometimes' : 'required', 'string', 'max:190', 'alpha_dash', Rule::unique('collections', 'slug')->ignore($id)],
-            'hero_image_url' => ['nullable', 'url', 'max:500'],
+            'hero_image_url' => ['nullable', 'string', 'max:500'],
             'sort_order' => ['sometimes', 'integer', 'min:0'],
             'is_published' => ['sometimes', 'boolean'],
             'is_featured' => ['sometimes', 'boolean'],

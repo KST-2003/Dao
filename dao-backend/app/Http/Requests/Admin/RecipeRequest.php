@@ -16,7 +16,7 @@ class RecipeRequest extends AdminRequest
             'video_id' => ['nullable', 'integer', 'exists:videos,id'],
             'slug' => [$id ? 'sometimes' : 'required', 'string', 'max:190', 'alpha_dash', Rule::unique('recipes', 'slug')->ignore($id)],
             'category' => ['nullable', 'string', 'max:40'],
-            'cover_image_url' => ['nullable', 'url', 'max:500'],
+            'cover_image_url' => ['nullable', 'string', 'max:500'],
             'prep_minutes' => ['sometimes', 'integer', 'min:0', 'max:1440'],
             'cook_minutes' => ['sometimes', 'integer', 'min:0', 'max:1440'],
             'servings' => ['sometimes', 'integer', 'min:1', 'max:50'],
@@ -36,7 +36,7 @@ class RecipeRequest extends AdminRequest
             'steps.*.instruction' => ['required', 'array'],
             'steps.*.instruction.'.config('dao.fallback_locale') => ['required', 'string', 'max:2000'],
             'steps.*.instruction.*' => ['nullable', 'string', 'max:2000'],
-            'steps.*.image_url' => ['nullable', 'url', 'max:500'],
+            'steps.*.image_url' => ['nullable', 'string', 'max:500'],
             'steps.*.timer_seconds' => ['nullable', 'integer', 'min:0'],
         ], $this->translationRules(['title' => 'string|max:190', 'description' => 'string|max:5000', 'tips' => 'string|max:2000'], ['title']));
     }

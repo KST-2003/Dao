@@ -13,7 +13,7 @@ class BannerRequest extends AdminRequest
 
         return array_merge([
             'placement' => [$id ? 'sometimes' : 'required', Rule::enum(BannerPlacement::class)],
-            'image_url' => [$id ? 'sometimes' : 'required', 'url', 'max:500'],
+            'image_url' => [$id ? 'sometimes' : 'required', 'string', 'max:500'],
             'link_type' => ['nullable', Rule::in(['product', 'collection', 'category', 'video', 'recipe', 'url'])],
             'link_value' => ['nullable', 'string', 'max:500'],
             'theme' => ['sometimes', Rule::in(['botanical', 'midnight'])],

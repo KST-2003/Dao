@@ -21,7 +21,7 @@ class RewardRequest extends AdminRequest
             'min_tier_id' => ['nullable', 'integer', 'exists:membership_tiers,id'],
             'stock' => ['nullable', 'integer', 'min:0'],
             'coupon_valid_days' => ['sometimes', 'integer', 'min:1', 'max:365'],
-            'image_url' => ['nullable', 'url', 'max:500'],
+            'image_url' => ['nullable', 'string', 'max:500'],
             'is_active' => ['sometimes', 'boolean'],
             'starts_at' => ['nullable', 'date'],
             'ends_at' => ['nullable', 'date', 'after:starts_at'],
