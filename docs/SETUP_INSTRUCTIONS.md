@@ -699,7 +699,9 @@ php artisan migrate --force
 sudo chgrp -R www-data storage bootstrap/cache
 sudo chmod -R ug+rwX storage bootstrap/cache
 
-php artisan config:cache && php artisan route:cache && php artisan view:cache && php artisan event:cache
+php artisan config:cache && php artisan route:cache && php artisan event:cache
+# No view:cache — this app ships no Blade views (resources/views doesn't exist), and that
+# command hard-errors on a missing views directory instead of just no-op'ing.
 ```
 
 ### 5.8 Nginx
@@ -871,7 +873,6 @@ jobs:
             php artisan migrate --force
             php artisan config:cache
             php artisan route:clear && php artisan route:cache
-            php artisan view:cache
             php artisan event:cache
             php artisan queue:restart
             sudo supervisorctl restart "dao-worker:*"
