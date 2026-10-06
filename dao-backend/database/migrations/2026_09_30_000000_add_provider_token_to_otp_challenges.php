@@ -15,12 +15,18 @@ return new class extends Migration
             $table->string('provider_token')->nullable()->after('code_hash');
         });
 
-        DB::statement('ALTER TABLE otp_challenges MODIFY code_hash VARCHAR(64) NULL');
+        // MySQL-only raw SQL (doctrine/dbal isn't installed, so Schema::change() isn't available).
+        // Tests run on SQLite, which doesn't need this: FakeOtpProvider always sets code_hash, never null.
+        if (DB::connection()->getDriverName() === 'mysql') {
+            DB::statement('ALTER TABLE otp_challenges MODIFY code_hash VARCHAR(64) NULL');
+        }
     }
 
     public function down(): void
     {
-        DB::statement('ALTER TABLE otp_challenges MODIFY code_hash VARCHAR(64) NOT NULL');
+        if (DB::connection()->getDriverName() === 'mysql') {
+            DB::statement('ALTER TABLE otp_challenges MODIFY code_hash VARCHAR(64) NOT NULL');
+        }
 
         Schema::table('otp_challenges', function (Blueprint $table) {
             $table->dropColumn('provider_token');

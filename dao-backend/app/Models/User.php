@@ -65,7 +65,7 @@ class User extends Authenticatable
 
     public function authProviders(): HasMany
     {
-        return $this->hasMany(UserAuthProvider::class);
+        return $this->hasMany(UserAuthProvider::class)->orderBy('id');
     }
 
     public function addresses(): HasMany
