@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Requests\Admin\VideoRequest;
 use App\Models\Video;
+use App\Services\Home\HomeService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -48,6 +49,7 @@ class VideoController extends AdminController
             return $video;
         });
         $this->audit('video.created', $video);
+        HomeService::flushCache(); // could land in from_dao
 
         return response()->json(['data' => $this->present($video)], 201);
     }
@@ -65,6 +67,7 @@ class VideoController extends AdminController
             }
         });
         $this->audit('video.updated', $video, $request->safe()->except('translations'));
+        HomeService::flushCache();
 
         return response()->json(['data' => $this->present($video->fresh())]);
     }
@@ -74,6 +77,7 @@ class VideoController extends AdminController
         $video = Video::query()->findOrFail($id);
         $video->delete();
         $this->audit('video.deleted', $video);
+        HomeService::flushCache();
 
         return response()->json(['data' => ['deleted' => true]]);
     }

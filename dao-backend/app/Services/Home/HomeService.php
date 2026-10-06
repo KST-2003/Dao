@@ -4,6 +4,7 @@ namespace App\Services\Home;
 
 use App\Enums\BannerPlacement;
 use App\Enums\ContentType;
+use App\Enums\Locale;
 use App\Enums\OrderStatus;
 use App\Enums\ProductBadge;
 use App\Models\Banner;
@@ -41,6 +42,18 @@ class HomeService
                 'kitchen' => Recipe::query()->published()->with('translations')->orderByDesc('is_featured')->latest('published_at')->limit(4)->get(),
             ];
         });
+    }
+
+    /**
+     * Call whenever something publicSections() reads from changes: banners, a featured
+     * collection, a new/dao_pick product, a vlog video, or a recipe. Cheap — just a few key
+     * deletes — so admin writes call it unconditionally rather than working out what changed.
+     */
+    public static function flushCache(): void
+    {
+        foreach (Locale::values() as $locale) {
+            Cache::forget("home:v1:{$locale}");
+        }
     }
 
     /** Personalized greeting key + params, resolved by the app's i18n. */

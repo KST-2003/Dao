@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Requests\Admin\AdminRequest;
 use App\Http\Requests\Admin\CollectionRequest;
 use App\Models\Collection;
+use App\Services\Home\HomeService;
 use Illuminate\Database\Eloquent\Model;
 
 class CollectionController extends TranslatedCrudController
@@ -35,6 +36,12 @@ class CollectionController extends TranslatedCrudController
             $sync = collect($request->input('product_ids'))->values()->mapWithKeys(fn ($id, $i) => [$id => ['sort_order' => $i]])->all();
             $model->products()->sync($sync);
         }
+        HomeService::flushCache(); // the featured collection is part of the cached home feed
+    }
+
+    protected function beforeDelete(Model $model): void
+    {
+        HomeService::flushCache();
     }
 
     protected function present(Model $model): array

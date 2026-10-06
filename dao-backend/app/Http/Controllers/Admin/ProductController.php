@@ -12,6 +12,7 @@ use App\Models\InventoryMovement;
 use App\Models\Product;
 use App\Models\ProductImage;
 use App\Models\ProductVariant;
+use App\Services\Home\HomeService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -66,6 +67,7 @@ class ProductController extends AdminController
             return $product;
         });
         $this->audit('product.created', $product);
+        HomeService::flushCache(); // could land in new_arrivals / dao_picks
 
         return response()->json(['data' => $this->present($product)], 201);
     }
@@ -85,6 +87,7 @@ class ProductController extends AdminController
             }
         });
         $this->audit('product.updated', $product, $request->safe()->except('translations'));
+        HomeService::flushCache();
 
         return response()->json(['data' => $this->present($product->fresh())]);
     }
@@ -97,6 +100,7 @@ class ProductController extends AdminController
         }
         $product->forceFill(['status' => ProductStatus::Published, 'published_at' => $product->published_at ?? now()])->save();
         $this->audit('product.published', $product);
+        HomeService::flushCache();
 
         return response()->json(['data' => $this->present($product)]);
     }
@@ -106,6 +110,7 @@ class ProductController extends AdminController
         $product = Product::query()->findOrFail($id);
         $product->forceFill(['status' => ProductStatus::Draft])->save();
         $this->audit('product.unpublished', $product);
+        HomeService::flushCache();
 
         return response()->json(['data' => $this->present($product)]);
     }
@@ -116,6 +121,7 @@ class ProductController extends AdminController
         $product->forceFill(['status' => ProductStatus::Archived])->save();
         $product->delete(); // soft delete: order history keeps its snapshot
         $this->audit('product.deleted', $product);
+        HomeService::flushCache();
 
         return response()->json(['data' => ['deleted' => true]]);
     }

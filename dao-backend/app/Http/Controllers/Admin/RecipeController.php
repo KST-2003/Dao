@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Requests\Admin\RecipeRequest;
 use App\Models\Recipe;
+use App\Services\Home\HomeService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -45,6 +46,7 @@ class RecipeController extends AdminController
             return $recipe;
         });
         $this->audit('recipe.created', $recipe);
+        HomeService::flushCache(); // could land in kitchen
 
         return response()->json(['data' => $this->present($recipe)], 201);
     }
@@ -60,6 +62,7 @@ class RecipeController extends AdminController
             $this->replaceChildren($recipe, $request);
         });
         $this->audit('recipe.updated', $recipe, $request->safe()->except(['translations', 'ingredients', 'steps']));
+        HomeService::flushCache();
 
         return response()->json(['data' => $this->present($recipe->fresh())]);
     }
@@ -69,6 +72,7 @@ class RecipeController extends AdminController
         $recipe = Recipe::query()->findOrFail($id);
         $recipe->delete();
         $this->audit('recipe.deleted', $recipe);
+        HomeService::flushCache();
 
         return response()->json(['data' => ['deleted' => true]]);
     }
