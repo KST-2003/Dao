@@ -63,6 +63,15 @@ export interface ProductDetail {
   images: ProductImage[]; variants: Variant[]; collection_ids: number[]
 }
 
+export interface CouponRedemption {
+  id: number
+  customer: { id: number; name: string | null; phone: string | null; email: string | null }
+  order: { id: number; number: string }
+  discount_amount: number
+  redeemed_at: string
+  released_at: string | null
+}
+
 export interface OrderRow {
   id: number; order_number: string; customer: string | null; status: string; payment_status: string; payment_method: string
   grand_total: number; currency: string; items_count: number; placed_at: string | null

@@ -1,4 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
+import { Link } from 'react-router-dom'
 import { ResourcePage, type ResourceConfig } from '@/components/resource/ResourcePage'
 import { DAOStatusBadge } from '@/components/ui'
 import { api } from '@/lib/api'
@@ -148,7 +149,7 @@ export function CouponsPage() {
       { key: 'code', header: 'Code', render: (r) => <span className="font-mono">{s(r.code)}</span> },
       { key: 'type', header: 'Type', render: (r) => s(r.type) },
       { key: 'value', header: 'Value', render: (r) => (r.type === 'percentage' ? `${r.value}%` : r.type === 'fixed' ? money(r.value as number) : 'Free shipping') },
-      { key: 'used', header: 'Used', render: (r) => `${num(r.used_count as number)}${r.usage_limit ? ` / ${r.usage_limit}` : ''}` },
+      { key: 'used', header: 'Used', render: (r) => <Link to={`/coupons/${r.id}/redemptions`} className="text-primary hover:underline" onClick={(e) => e.stopPropagation()}>{num(r.used_count as number)}{r.usage_limit ? ` / ${r.usage_limit}` : ''}</Link> },
       { key: 'ends', header: 'Ends', render: (r) => date(r.ends_at as string) },
       { key: 'active', header: 'Status', render: (r) => active(r.is_active) },
     ],

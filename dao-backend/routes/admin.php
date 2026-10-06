@@ -84,6 +84,7 @@ Route::middleware(['auth:sanctum', 'admin', 'throttle:api'])->group(function () 
             Route::put("/{$uri}/{id}", [$controller, 'update'])->whereNumber('id');
             Route::delete("/{$uri}/{id}", [$controller, 'destroy'])->whereNumber('id');
         }
+        Route::get('/coupons/{id}/redemptions', [Admin\CouponController::class, 'redemptions'])->whereNumber('id');
     });
 
     Route::middleware('admin.can:content.manage')->group(function () {

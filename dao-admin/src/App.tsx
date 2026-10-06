@@ -14,6 +14,7 @@ const Orders = lazy(() => import('@/pages/OrdersPage'))
 const OrderDetail = lazy(() => import('@/pages/OrderDetailPage'))
 const Customers = lazy(() => import('@/pages/CustomersPage'))
 const CustomerDetail = lazy(() => import('@/pages/CustomerDetailPage'))
+const CouponRedemptions = lazy(() => import('@/pages/CouponRedemptionsPage'))
 const Points = lazy(() => import('@/pages/PointsPage'))
 const Reviews = lazy(() => import('@/pages/ReviewsPage'))
 const Notifications = lazy(() => import('@/pages/NotificationsPage'))
@@ -61,6 +62,7 @@ export default function App() {
             <Route path="points" element={g(['loyalty.manage'], <Points />)} />
             <Route path="rewards" element={g(['loyalty.manage'], <Rewards />)} />
             <Route path="coupons" element={g(['marketing.manage'], <Coupons />)} />
+            <Route path="coupons/:id/redemptions" element={g(['marketing.manage'], <CouponRedemptions />)} />
             <Route path="banners" element={g(['marketing.manage'], <Banners />)} />
             <Route path="notifications" element={g(['notifications.send'], <Notifications />)} />
             <Route path="videos" element={g(['content.manage'], <Videos />)} />

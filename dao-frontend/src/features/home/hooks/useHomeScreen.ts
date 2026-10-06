@@ -1,4 +1,6 @@
 import { router } from 'expo-router';
+import { useState } from 'react';
+import type { NativeScrollEvent, NativeSyntheticEvent } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useToggleSaved, useHome } from '@/features/shop/api';
 import { useNotificationsBadge } from '@/features/profile/api';
@@ -21,12 +23,17 @@ export function openBannerLink(banner: Banner): void {
   }
 }
 
-export function useHomeScreen() {
+export function useHomeScreen(heroWidth: number) {
   const { t } = useTranslation();
   const home = useHome();
   const toggleSaved = useToggleSaved();
   const signedIn = useAuthStore((s) => s.status) === 'authenticated';
   const unread = useNotificationsBadge();
+  const [heroIndex, setHeroIndex] = useState(0);
+
+  const onHeroScrollEnd = (e: NativeSyntheticEvent<NativeScrollEvent>) => {
+    setHeroIndex(Math.round(e.nativeEvent.contentOffset.x / Math.max(1, heroWidth)));
+  };
 
   const g = home.data?.greeting;
   const key: GreetingKey = g && (GREETINGS as readonly string[]).includes(g.key) ? (g.key as GreetingKey) : 'home.greeting.new';
@@ -39,6 +46,8 @@ export function useHomeScreen() {
     greetingOrderId: g?.order_id,
     signedIn,
     unread,
+    heroIndex,
+    onHeroScrollEnd,
     onToggleSave: (p: ProductCard) => toggleSaved('product', p.id, p.is_saved),
     openBanner: openBannerLink,
     goSearch: () => router.push('/search'),

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Requests\Admin\CouponRequest;
 use App\Models\Coupon;
+use App\Models\CouponRedemption;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -53,6 +54,21 @@ class CouponController extends AdminController
         $this->audit('coupon.updated', $coupon, $request->validated());
 
         return response()->json(['data' => $this->present($coupon->fresh(), true)]);
+    }
+
+    public function redemptions(int $id): JsonResponse
+    {
+        Coupon::query()->findOrFail($id);
+        $query = CouponRedemption::query()->where('coupon_id', $id)->with(['user', 'order'])->latest('id');
+
+        return $this->paginated($query->paginate($this->perPage()), fn (CouponRedemption $r) => [
+            'id' => $r->id,
+            'customer' => ['id' => $r->user->id, 'name' => $r->user->display_name ?? $r->user->name, 'phone' => $r->user->phone, 'email' => $r->user->email],
+            'order' => ['id' => $r->order_id, 'number' => $r->order->order_number],
+            'discount_amount' => $r->discount_amount,
+            'redeemed_at' => $r->created_at->toIso8601String(),
+            'released_at' => $r->released_at?->toIso8601String(),
+        ]);
     }
 
     public function destroy(int $id): JsonResponse

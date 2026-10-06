@@ -28,6 +28,8 @@ export const palette = {
 export const media = {
   text: '#FFF9F1',
   textMuted: 'rgba(255,249,241,0.85)',
+  textOnLight: '#5C493F',
+  textOnLightMuted: 'rgba(92,73,63,0.8)',
   track: 'rgba(255,249,241,0.25)',
   chip: 'rgba(23,25,23,0.55)',
   scrim: 'rgba(23,25,23,0.62)',
@@ -42,7 +44,10 @@ export const media = {
 export const gradients = {
   member: ['#8FA083', '#66745E'] as [string, string],
   premium: ['#171917', '#2E332C'] as [string, string],
+  /** For a banner photo dark enough to need light text (banner.theme === 'midnight'). */
   photoFade: ['transparent', 'rgba(23,25,23,0.62)'] as [string, string],
+  /** For a banner photo light enough to need dark text instead (banner.theme === 'botanical'). */
+  photoFadeLight: ['transparent', 'rgba(245,239,230,0.78)'] as [string, string],
 };
 
 /** Onboarding slide tones (DAO Fashion · Life · Kitchen · Members). */
