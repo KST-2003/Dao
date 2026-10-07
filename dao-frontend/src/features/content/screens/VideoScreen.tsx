@@ -44,12 +44,6 @@ export default function VideoScreen() {
                   </View>
                 </View>
               )}
-              <View pointerEvents="box-none" style={{ position: 'absolute', top: 0, left: 0, right: 0, zIndex: 10, elevation: 10 }}>
-                <LinearGradient pointerEvents="none" colors={[media.scrim, 'transparent']} style={{ position: 'absolute', top: 0, left: 0, right: 0, height: insets.top + 56 }} />
-                <View style={{ paddingTop: insets.top + 8, paddingHorizontal: spacing.gutter }}>
-                  <DAOIconButton icon="chevron-left" tone="glass" accessibilityLabel={t('common.back')} onPress={() => router.back()} />
-                </View>
-              </View>
             </View>
             <View style={{ padding: spacing.gutter, gap: spacing.md }}>
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md }}>
@@ -107,6 +101,23 @@ export default function VideoScreen() {
           <DAOIconButton icon="send" tone="primary" accessibilityLabel={t('vlog.post')} onPress={vm.postComment} />
         </View>
       </DAOBottomSheet>
+      {/*
+        Fixed top navbar, deliberately OUTSIDE AsyncState and the scrolling content:
+        - Always on screen, including while the video is loading or failed to load (it used
+          to live inside AsyncState's success branch only, so there was no way back during
+          loading, and the default loading state is a plain skeleton with nothing in it).
+        - Rendered as the very last sibling in the whole screen (React Native paints later
+          siblings on top), not nested alongside the video, so it can't end up underneath
+          the native video surface the way a sibling nested in the same row could.
+        - Pinned to the screen with pointerEvents="box-none" so only the button itself
+          intercepts touches; scrolling the content underneath still works.
+      */}
+      <View pointerEvents="box-none" style={{ position: 'absolute', top: 0, left: 0, right: 0 }}>
+        <LinearGradient pointerEvents="none" colors={[media.scrim, 'transparent']} style={{ position: 'absolute', top: 0, left: 0, right: 0, height: insets.top + 56 }} />
+        <View style={{ paddingTop: insets.top + 8, paddingHorizontal: spacing.gutter }}>
+          <DAOIconButton icon="chevron-left" tone="glass" accessibilityLabel={t('common.back')} onPress={() => router.back()} />
+        </View>
+      </View>
     </View>
   );
 }
