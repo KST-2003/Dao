@@ -75,6 +75,32 @@ function HeroCarousel({
   );
 }
 
+function FeatureBannerRail({ banners, onOpen }: { banners: Banner[]; onOpen: (b: Banner) => void }) {
+  const s = useStyles();
+  return (
+    <FlatList
+      horizontal
+      data={banners}
+      keyExtractor={(b) => String(b.id)}
+      showsHorizontalScrollIndicator={false}
+      contentContainerStyle={s.rail}
+      renderItem={({ item: b }) => {
+        const light = b.theme === 'botanical';
+        return (
+          <Pressable accessibilityRole="button" onPress={() => onOpen(b)} style={({ pressed }) => [s.featureCard, { opacity: pressed ? 0.94 : 1 }]}>
+            <DAOImage uri={b.image_url} ratio={ratios.collection} />
+            <LinearGradient colors={light ? gradients.photoFadeLight : gradients.photoFade} style={{ position: 'absolute', left: 0, right: 0, bottom: 0, height: '60%' }} />
+            <View style={s.featureText}>
+              {b.eyebrow ? <DAOText variant="overline" style={{ color: light ? media.textOnLightMuted : media.textMuted }}>{b.eyebrow}</DAOText> : null}
+              <DAOText variant="title" style={{ color: light ? media.textOnLight : media.text }}>{b.title}</DAOText>
+            </View>
+          </Pressable>
+        );
+      }}
+    />
+  );
+}
+
 export default function HomeScreen() {
   const { t } = useTranslation();
   const insets = useSafeAreaInsets();
@@ -122,6 +148,12 @@ export default function HomeScreen() {
               <View style={s.section}>
                 <DAOSectionHeader title={t('home.daoPicks')} subtitle={t('home.daoPicksSubtitle')} />
                 <ProductRail products={home.dao_picks} onToggleSave={vm.onToggleSave} />
+              </View>
+            ) : null}
+
+            {home.feature_banners.length > 0 ? (
+              <View style={s.section}>
+                <FeatureBannerRail banners={home.feature_banners} onOpen={vm.openBanner} />
               </View>
             ) : null}
 

@@ -12,6 +12,8 @@ export const useStyles = makeStyles(({ colors, spacing, radius }) => ({
   heroDotActive: { backgroundColor: colors.primary, width: 16 },
   section: { marginBottom: spacing.xxxl },
   rail: { paddingHorizontal: spacing.gutter, gap: spacing.md },
+  featureCard: { width: 260, borderRadius: radius.lg, overflow: 'hidden' },
+  featureText: { position: 'absolute', left: spacing.lg, bottom: spacing.lg, right: spacing.lg },
   collection: { marginHorizontal: spacing.gutter, gap: spacing.lg },
   kitchenRow: { flexDirection: 'row', paddingHorizontal: spacing.gutter, gap: spacing.md },
   kitchenCard: { backgroundColor: colors.surfaceMuted, borderRadius: radius.xl, marginHorizontal: spacing.gutter, padding: spacing.lg, gap: spacing.md },
