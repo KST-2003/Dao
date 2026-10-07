@@ -1,16 +1,22 @@
-import { useQuery } from '@tanstack/react-query'
+import { useMutation, useQuery } from '@tanstack/react-query'
 import { Link, useParams } from 'react-router-dom'
-import { DAOAdminCard, DAOAdminHeader, DAOStatusBadge, ErrorState, TableSkeleton } from '@/components/ui'
+import { DAOAdminCard, DAOAdminHeader, DAOStatusBadge, ErrorState, TableSkeleton, Toggle, useToast } from '@/components/ui'
 import { PointsAdjustForm } from '@/components/loyalty/PointsAdjustForm'
 import { useAuth } from '@/auth/AuthProvider'
-import { api } from '@/lib/api'
+import { api, errorMessage } from '@/lib/api'
 import { date, dateTime, money, num } from '@/lib/format'
 import type { CustomerDetail } from '@/types/api'
 
 export default function CustomerDetailPage() {
   const { id } = useParams()
   const { can } = useAuth()
+  const toast = useToast()
   const q = useQuery({ queryKey: ['customer', id], queryFn: () => api.get<CustomerDetail>(`/customers/${id}`) })
+  const contentAccess = useMutation({
+    mutationFn: (body: { screenshot_override?: boolean; download_override?: boolean }) => api.put(`/customers/${id}/content-access`, body),
+    onSuccess: () => { toast('Saved'); void q.refetch() },
+    onError: (e) => toast(errorMessage(e), 'error'),
+  })
   if (q.isPending) return <TableSkeleton />
   if (q.isError) return <ErrorState error={q.error} onRetry={() => void q.refetch()} />
   const c = q.data
@@ -41,6 +47,17 @@ export default function CustomerDetailPage() {
         <div className="space-y-6">
           <DAOAdminCard title="Profile"><dl className="space-y-2 text-sm">{rows.map(([k, v]) => <div key={k} className="flex justify-between gap-3"><dt className="text-ink-muted">{k}</dt><dd className="text-right">{v}</dd></div>)}</dl></DAOAdminCard>
           <DAOAdminCard title="Sign-in methods"><ul className="space-y-1 text-sm">{c.providers.map((p) => <li key={p.provider} className="flex justify-between"><span className="uppercase">{p.provider}</span><span className="text-ink-muted">{date(p.linked_at)}</span></li>)}</ul></DAOAdminCard>
+          {can('customers.manage') ? (
+            <DAOAdminCard title="Content access">
+              <div className="space-y-3">
+                <Toggle label="Can screenshot/record video content" checked={c.screenshot_override}
+                  onChange={(v) => contentAccess.mutate({ screenshot_override: v })} />
+                <Toggle label="Can download videos to their device" checked={c.download_override}
+                  onChange={(v) => contentAccess.mutate({ download_override: v })} />
+              </div>
+              <p className="mt-3 text-xs text-ink-subtle">Independent of their membership tier &mdash; for staff, press or partners who need access regardless of tier.</p>
+            </DAOAdminCard>
+          ) : null}
         </div>
       </div>
     </>

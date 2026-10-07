@@ -39,6 +39,19 @@ class VideoController extends AdminController
         return response()->json(['data' => $this->present(Video::query()->findOrFail($id))]);
     }
 
+    /** Distinct tags already in use, for the admin form's autocomplete — keeps admins converging on one spelling. */
+    public function tags(Request $request): JsonResponse
+    {
+        $q = mb_strtolower((string) $request->input('q', ''));
+        $tags = Video::query()->whereNotNull('tags')->pluck('tags')
+            ->flatten()->unique()->sort()->values();
+        if ($q !== '') {
+            $tags = $tags->filter(fn ($tag) => str_contains($tag, $q))->values();
+        }
+
+        return response()->json(['data' => $tags->take(20)->all()]);
+    }
+
     public function store(VideoRequest $request): JsonResponse
     {
         $video = DB::transaction(function () use ($request) {
@@ -51,7 +64,7 @@ class VideoController extends AdminController
         $this->audit('video.created', $video);
         HomeService::flushCache(); // could land in from_dao
 
-        return response()->json(['data' => $this->present($video)], 201);
+        return response()->json(['data' => $this->present($video->fresh())], 201);
     }
 
     public function update(VideoRequest $request, int $id): JsonResponse

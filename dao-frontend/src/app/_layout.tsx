@@ -6,6 +6,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { persistOptions, queryClient } from '@/shared/api/queryClient';
 import { DAOCelebration, DAOToastHost } from '@/shared/components';
 import { useAppBootstrap } from '@/shared/hooks/useAppBootstrap';
+import { useContentProtection } from '@/shared/hooks/useContentProtection';
 import { initI18n } from '@/shared/i18n';
 import { usePrefsStore } from '@/shared/store/prefsStore';
 import { ThemeProvider, useTheme, media } from '@/shared/theme';
@@ -14,6 +15,7 @@ initI18n(usePrefsStore.getState().locale);
 
 function ThemedStack() {
   const { colors } = useTheme();
+  useContentProtection();
   return (
     <>
       <StatusBar style={colors.statusBar} />

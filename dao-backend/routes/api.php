@@ -97,6 +97,7 @@ Route::prefix('v1')->middleware('throttle:api')->name('v1.')->group(function () 
         Route::post('/videos/{id}/like', [V1\VideoController::class, 'like'])->whereNumber('id');
         Route::delete('/videos/{id}/like', [V1\VideoController::class, 'unlike'])->whereNumber('id');
         Route::post('/videos/{id}/comments', [V1\VideoController::class, 'comment'])->whereNumber('id')->middleware('throttle:writes');
+        Route::post('/videos/{id}/download', [V1\VideoController::class, 'download'])->whereNumber('id')->middleware('throttle:writes');
 
         Route::get('/notifications', [V1\NotificationController::class, 'index']);
         Route::post('/notifications/{id}/read', [V1\NotificationController::class, 'markRead'])->whereNumber('id');

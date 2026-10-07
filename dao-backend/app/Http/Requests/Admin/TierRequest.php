@@ -20,6 +20,8 @@ class TierRequest extends AdminRequest
             'free_shipping' => ['sometimes', 'boolean'],
             'early_access' => ['sometimes', 'boolean'],
             'priority_support' => ['sometimes', 'boolean'],
+            'allows_screenshots' => ['sometimes', 'boolean'],
+            'allows_video_download' => ['sometimes', 'boolean'],
             'badge_icon' => ['nullable', 'string', 'max:190'],
             'color' => ['nullable', 'regex:/^#[0-9A-Fa-f]{6}$/'],
             'is_active' => ['sometimes', 'boolean'],

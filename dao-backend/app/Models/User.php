@@ -43,6 +43,8 @@ class User extends Authenticatable
             'profile_completed' => 'boolean',
             'last_active_at' => 'datetime',
             'avatar_url' => MediaUrl::class,
+            'screenshot_override' => 'boolean',
+            'download_override' => 'boolean',
         ];
     }
 

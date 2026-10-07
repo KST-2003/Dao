@@ -60,3 +60,8 @@ export function recordView(id: number): void {
   analytics.track('video_view', { video_id: id });
   void api.post(`/videos/${id}/view`).catch(() => undefined);
 }
+
+/** Server-checked (ContentAccessService) — rejects with VIDEO_DOWNLOAD_NOT_ALLOWED for a non-privileged user. */
+export function useRequestVideoDownload(id: number) {
+  return useMutation({ mutationFn: () => api.post<{ url: string }>(`/videos/${id}/download`) });
+}

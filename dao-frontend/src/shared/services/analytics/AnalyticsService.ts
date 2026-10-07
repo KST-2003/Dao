@@ -20,7 +20,9 @@ export type AnalyticsEvent =
   | 'coupon_used'
   | 'points_earned'
   | 'points_redeemed'
-  | 'membership_upgrade';
+  | 'membership_upgrade'
+  | 'screenshot_taken'
+  | 'video_download';
 
 export type AnalyticsProps = Record<string, string | number | boolean | null | undefined>;
 

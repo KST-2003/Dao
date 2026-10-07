@@ -63,5 +63,6 @@ return [
     'STOCK_CANNOT_BE_NEGATIVE' => 'Stock can\'t go below zero.',
     'TIER_IN_USE' => 'Members are on this tier. Deactivate it instead.',
     'TOTAL_CHANGED' => 'Your total has changed. Please review before paying.',
+    'VIDEO_DOWNLOAD_NOT_ALLOWED' => "Downloading this video isn't available on your account.",
     'VIP_ONLY' => 'This piece is reserved for VIP members.',
 ];
