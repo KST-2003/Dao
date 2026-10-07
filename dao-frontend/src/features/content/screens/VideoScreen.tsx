@@ -1,6 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
+import { StatusBar } from 'expo-status-bar';
 import { FlatList, Pressable, ScrollView, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
@@ -31,6 +32,15 @@ export default function VideoScreen() {
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
+      {/*
+        This screen always has dark video content directly under the status bar (the route's
+        contentStyle is media.midnight — see _layout.tsx), unlike Shop/Vlog/Kitchen which sit
+        over the normal light app background. The global <StatusBar> in _layout.tsx follows
+        the day/night theme, not screen content, so its icon color was wrong here regardless
+        of theme — forcing light icons while this screen is mounted; expo-status-bar stacks
+        multiple <StatusBar> instances and reverts to the previous one on unmount.
+      */}
+      <StatusBar style="light" />
       <AsyncState query={vm.video}>
         {(v) => (
           <ScrollView contentContainerStyle={{ paddingBottom: spacing.huge }}>
