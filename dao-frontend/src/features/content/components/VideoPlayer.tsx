@@ -5,7 +5,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Pressable, View } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import { useTranslation } from 'react-i18next';
-import { runOnJS } from 'react-native-reanimated';
+import Animated, { runOnJS, useAnimatedStyle, useSharedValue } from 'react-native-reanimated';
 import { DAOImage, DAOText } from '@/shared/components';
 import { formatDuration } from '@/shared/utils/format';
 import { ratios, useTheme, media } from '@/shared/theme';
@@ -14,51 +14,65 @@ const AUTO_HIDE_MS = 3000;
 const clamp01 = (n: number) => Math.min(1, Math.max(0, n));
 
 /**
- * Drag-and-tap scrubber. Built on react-native-gesture-handler's Gesture API rather than core
- * React Native's PanResponder — nesting a PanResponder view inside a Pressable-based ancestor
- * (the tap-to-toggle-controls layer this sits under) made the drag simply never activate;
- * RNGH's gesture system is built specifically to arbitrate correctly against other gestures
- * (including Pressable, which itself is backed by RNGH under the hood in this app since
- * GestureHandlerRootView wraps the whole app in _layout.tsx) instead of the two independently
- * racing for the same touch. `minDistance(0)` makes a plain tap (no movement) activate it too,
- * not just a drag; `e.x` is the touch position relative to this view and — unlike
- * PanResponder's `locationX` — stays reliable throughout the whole gesture, not just at touch-
- * down. Gesture callbacks run as worklets on the UI thread, so updating React state has to go
- * through `runOnJS`.
+ * Drag-and-tap scrubber, on react-native-gesture-handler's Gesture API rather than core
+ * React Native's PanResponder (nesting a PanResponder inside the Pressable-based
+ * toggle-controls layer this sits under made the drag never activate at all — RNGH is built
+ * to arbitrate against other gestures in the same tree, including Pressable, which is
+ * RNGH-backed under the hood here since GestureHandlerRootView wraps the whole app).
+ *
+ * The fill bar is driven by a Reanimated shared value + Animated.View, updated directly in
+ * the worklet — not React state. Routing every touch-move through `runOnJS` to trigger a React
+ * re-render was the actual cause of the previous "not smooth" dragging: that's a UI-thread →
+ * JS-thread round trip (plus a full component re-render) on every single frame of movement.
+ * Reading/writing a shared value from the worklet never leaves the UI thread, so the bar can
+ * track the finger at the native frame rate. `runOnJS` is reserved for the two things that
+ * actually need the JS thread: the (lightly throttled) live time-label text, and the final
+ * seek commit on release.
  */
-function Scrubber({ duration, currentTime, onSeek }: { duration: number; currentTime: number; onSeek: (time: number) => void }) {
-  const [barWidth, setBarWidth] = useState(0);
-  const [dragRatio, setDragRatio] = useState<number | null>(null);
-  const barWidthRef = useRef(0);
+function Scrubber({
+  duration, currentTime, onSeek, onDragTimeChange,
+}: { duration: number; currentTime: number; onSeek: (time: number) => void; onDragTimeChange: (time: number | null) => void }) {
+  const barWidth = useSharedValue(0);
+  const ratio = useSharedValue(duration > 0 ? currentTime / duration : 0);
+  const dragging = useSharedValue(false);
+  const lastReported = useSharedValue(-1);
 
-  const updateFromX = (x: number) => {
-    if (barWidthRef.current > 0) setDragRatio(clamp01(x / barWidthRef.current));
-  };
-  const commitFromX = (x: number) => {
-    if (barWidthRef.current > 0 && duration > 0) onSeek(clamp01(x / barWidthRef.current) * duration);
-    setDragRatio(null);
-  };
+  useEffect(() => {
+    if (!dragging.value) {
+      ratio.value = duration > 0 ? currentTime / duration : 0;
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentTime, duration]);
 
   const pan = Gesture.Pan()
     .minDistance(0)
-    .onBegin((e) => runOnJS(updateFromX)(e.x))
-    .onUpdate((e) => runOnJS(updateFromX)(e.x))
-    .onEnd((e) => runOnJS(commitFromX)(e.x));
+    .onBegin((e) => {
+      dragging.value = true;
+      if (barWidth.value > 0) ratio.value = clamp01(e.x / barWidth.value);
+    })
+    .onUpdate((e) => {
+      if (barWidth.value <= 0) return;
+      const r = clamp01(e.x / barWidth.value);
+      ratio.value = r;
+      if (Math.abs(r - lastReported.value) > 0.004) {
+        lastReported.value = r;
+        runOnJS(onDragTimeChange)(r * duration);
+      }
+    })
+    .onEnd((e) => {
+      dragging.value = false;
+      if (barWidth.value > 0 && duration > 0) {
+        runOnJS(onSeek)(clamp01(e.x / barWidth.value) * duration);
+      }
+    });
 
-  const ratio = dragRatio ?? (duration > 0 ? currentTime / duration : 0);
+  const fillStyle = useAnimatedStyle(() => ({ width: `${ratio.value * 100}%` }));
 
   return (
     <GestureDetector gesture={pan}>
-      <View
-        onLayout={(e) => {
-          barWidthRef.current = e.nativeEvent.layout.width;
-          setBarWidth(e.nativeEvent.layout.width);
-        }}
-        style={{ justifyContent: 'center', paddingVertical: 10 }}
-      >
-        <View style={{ height: 4, borderRadius: 2, backgroundColor: media.track, overflow: 'hidden', opacity: barWidth > 0 ? 1 : 0 }}
-          accessibilityRole="adjustable" accessibilityValue={{ min: 0, max: 100, now: Math.round(ratio * 100) }}>
-          <View style={{ width: `${Math.round(ratio * 100)}%`, height: 4, backgroundColor: media.gold }} />
+      <View onLayout={(e) => { barWidth.value = e.nativeEvent.layout.width; }} style={{ justifyContent: 'center', paddingVertical: 10 }}>
+        <View style={{ height: 4, borderRadius: 2, backgroundColor: media.track, overflow: 'hidden' }} accessibilityRole="adjustable">
+          <Animated.View style={[{ height: 4, backgroundColor: media.gold }, fillStyle]} />
         </View>
       </View>
     </GestureDetector>
@@ -86,6 +100,7 @@ export function VideoPlayer({ uri, poster, onCompleted }: { uri: string; poster:
   const [controlsVisible, setControlsVisible] = useState(true);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
+  const [previewTime, setPreviewTime] = useState<number | null>(null);
   const hideTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const player = useVideoPlayer({ uri }, (p) => {
     p.loop = false;
@@ -146,6 +161,10 @@ export function VideoPlayer({ uri, poster, onCompleted }: { uri: string; poster:
     }
     setControlsVisible(true);
   };
+  const seek = (time: number) => {
+    player.currentTime = time;
+    setPreviewTime(null);
+  };
 
   return (
     <View style={{ width: '100%', aspectRatio: ratios.video, backgroundColor: media.midnight }}>
@@ -163,8 +182,8 @@ export function VideoPlayer({ uri, poster, onCompleted }: { uri: string; poster:
               <MaterialIcons name="picture-in-picture-alt" size={18} color={media.glassIcon} />
             </Pressable>
             <View style={{ position: 'absolute', left: spacing.md, right: spacing.md, bottom: spacing.sm, flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
-              <DAOText variant="caption" style={{ color: media.text }}>{formatDuration(currentTime)}</DAOText>
-              <View style={{ flex: 1 }}><Scrubber duration={duration} currentTime={currentTime} onSeek={(t2) => { player.currentTime = t2; }} /></View>
+              <DAOText variant="caption" style={{ color: media.text }}>{formatDuration(previewTime ?? currentTime)}</DAOText>
+              <View style={{ flex: 1 }}><Scrubber duration={duration} currentTime={currentTime} onSeek={seek} onDragTimeChange={setPreviewTime} /></View>
               <DAOText variant="caption" style={{ color: media.text }}>{formatDuration(duration)}</DAOText>
             </View>
           </>
