@@ -19,7 +19,7 @@ import { toast } from '@/shared/store/toastStore';
  */
 export function useContentProtection(key: string): void {
   const me = useMe();
-  const canScreenshot = me.data?.permissions.can_screenshot ?? false;
+  const canScreenshot = me.data?.permissions?.can_screenshot ?? false;
 
   useEffect(() => {
     if (canScreenshot) {

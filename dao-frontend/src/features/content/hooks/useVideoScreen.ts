@@ -49,7 +49,7 @@ export function useVideoScreen() {
     toggleSave: () => toggleSaved('video', id, saved),
     share: () => void Share.share({ message: `${video.data?.title ?? 'DAO'} ✦ dao://video/${id}` }),
     onCompleted: () => analytics.track('video_completed', { video_id: id }),
-    canDownload: me.data?.permissions.can_download_videos ?? false,
+    canDownload: me.data?.permissions?.can_download_videos ?? false,
     downloading: gallery.saving,
     downloadProgress: gallery.progress,
     downloadVideo: requireAuth(() => {
