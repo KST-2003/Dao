@@ -304,6 +304,9 @@ export const my: TranslationShape<typeof en> = {
     downloading: "ဒေါင်းလုဒ်လုပ်နေသည်… {{percent}}%",
     downloaded: "ဓာတ်ပုံအယ်လ်ဘမ်သို့ သိမ်းပြီးပါပြီ",
     downloadGalleryPermission: "ဤဗီဒီယိုကို ဓာတ်ပုံအယ်လ်ဘမ်သို့ သိမ်းရန် ဓာတ်ပုံများသို့ ဝင်ရောက်ခွင့်ပေးပါ။",
+    play: "ဖွင့်ရန်",
+    pause: "ခေတ္တရပ်ရန်",
+    toggleControls: "ထိန်းချုပ်ခလုတ်များကို ပြ/ဖျောက်ရန်",
   },
   kitchen: {
     title: "DAO မီးဖိုချောင်",
