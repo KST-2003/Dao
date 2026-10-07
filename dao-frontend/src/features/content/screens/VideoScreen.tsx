@@ -1,4 +1,5 @@
 import { Ionicons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
 import { FlatList, Pressable, ScrollView, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -43,8 +44,11 @@ export default function VideoScreen() {
                   </View>
                 </View>
               )}
-              <View style={{ position: 'absolute', top: insets.top + 8, left: spacing.gutter }}>
-                <DAOIconButton icon="chevron-left" tone="glass" accessibilityLabel={t('common.back')} onPress={() => router.back()} />
+              <View pointerEvents="box-none" style={{ position: 'absolute', top: 0, left: 0, right: 0, zIndex: 10, elevation: 10 }}>
+                <LinearGradient pointerEvents="none" colors={[media.scrim, 'transparent']} style={{ position: 'absolute', top: 0, left: 0, right: 0, height: insets.top + 56 }} />
+                <View style={{ paddingTop: insets.top + 8, paddingHorizontal: spacing.gutter }}>
+                  <DAOIconButton icon="chevron-left" tone="glass" accessibilityLabel={t('common.back')} onPress={() => router.back()} />
+                </View>
               </View>
             </View>
             <View style={{ padding: spacing.gutter, gap: spacing.md }}>
