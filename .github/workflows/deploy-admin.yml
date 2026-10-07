@@ -1,0 +1,53 @@
+name: Deploy Admin to Production
+
+on:
+  push:
+    branches: [main]
+    paths: ['dao-admin/**', '.github/workflows/deploy-admin.yml']
+  pull_request:
+    paths: ['dao-admin/**']
+
+jobs:
+  check:
+    name: Lint, build, test
+    runs-on: ubuntu-latest
+    defaults: { run: { working-directory: dao-admin } }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: npm, cache-dependency-path: dao-admin/package-lock.json }
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run build
+      - run: npm test
+
+  deploy:
+    name: SSH build + deploy → DigitalOcean
+    if: github.event_name == 'push'
+    needs: check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Setup SSH
+        env: { SSH_KEY: '${{ secrets.SSH_PRIVATE_KEY }}' }
+        run: |
+          mkdir -p ~/.ssh
+          echo "$SSH_KEY" | base64 -d > ~/.ssh/deploy_key && chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -H 157.230.34.59 >> ~/.ssh/known_hosts
+      - name: Build on server and publish static files
+        # The admin site is served as static files from /var/www/dao-admin-dist (nginx root),
+        # separate from the git checkout at /var/www/dao/dao-admin — so every deploy rebuilds
+        # there and copies dist/ across. VITE_API_BASE_URL must be the full API origin because
+        # admin-dao.bronicon.co and dao.bronicon.co are different subdomains with no reverse
+        # proxy between them (see dao-backend's ADMIN_COOKIE_DOMAIN=.bronicon.co, which is what
+        # actually lets the httpOnly cookie cross those two subdomains).
+        run: |
+          ssh -i ~/.ssh/deploy_key root@157.230.34.59 bash << 'ENDSSH'
+            set -e
+            cd /var/www/dao && git fetch origin && git reset --hard origin/main
+            cd dao-admin
+            npm ci
+            VITE_API_BASE_URL=https://dao.bronicon.co npm run build
+            rm -rf /var/www/dao-admin-dist/*
+            cp -r dist/* /var/www/dao-admin-dist/
+            echo "Dao admin deploy complete: $(date)"
+          ENDSSH
