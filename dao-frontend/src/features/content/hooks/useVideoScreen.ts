@@ -3,7 +3,6 @@ import { useEffect, useState } from 'react';
 import { Share } from 'react-native';
 import { useMe } from '@/features/auth/api';
 import { useToggleSaved } from '@/features/shop/api';
-import { useContentProtection } from '@/shared/hooks/useContentProtection';
 import { useRequireAuth } from '@/shared/hooks/useRequireAuth';
 import { useSaveVideoToGallery } from '@/shared/hooks/useSaveVideoToGallery';
 import { analytics } from '@/shared/services/analytics/AnalyticsService';
@@ -12,7 +11,6 @@ import { recordView, useComments, usePostComment, useRelatedVideos, useRequestVi
 
 export function useVideoScreen() {
   const id = Number(useLocalSearchParams<{ id: string }>().id);
-  useContentProtection(`video-${id}`);
   const video = useVideo(id);
   const related = useRelatedVideos(id);
   const comments = useComments(id);

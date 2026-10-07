@@ -1,13 +1,11 @@
 import { router, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
 import { useToggleSaved } from '@/features/shop/api';
-import { useContentProtection } from '@/shared/hooks/useContentProtection';
 import { useIsSaved } from '@/shared/store/savedStore';
 import { useRecipe } from '../api';
 
 export function useRecipeScreen() {
   const id = Number(useLocalSearchParams<{ id: string }>().id);
-  useContentProtection(`recipe-${id}`);
   const recipe = useRecipe(id);
   const toggleSaved = useToggleSaved();
   const saved = useIsSaved('recipe', id, recipe.data?.is_saved ?? false);
