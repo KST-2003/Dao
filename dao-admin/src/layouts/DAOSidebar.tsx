@@ -7,12 +7,8 @@ export function DAOSidebar({ onNavigate }: { onNavigate?: () => void }) {
   const { can } = useAuth()
   return (
     <nav aria-label="Main" className="flex h-full flex-col gap-6 overflow-y-auto bg-sidebar px-4 py-6">
-      <div className="flex items-center gap-3 px-2">
-        <img src="/dao-mark.png" alt="" className="h-9 w-12 object-contain" />
-        <div>
-          <p className="font-display text-2xl font-semibold leading-none tracking-wider">DAO</p>
-          <p className="text-[10px] uppercase tracking-[0.2em] text-ink-muted">Admin</p>
-        </div>
+      <div className="flex items-center px-2">
+        <img src="/dao-mark.png" alt="DAO Admin" className="h-16 w-full object-contain object-left" />
       </div>
       {NAV.map((group) => {
         const items = group.items.filter((i) => can(...i.perms))
