@@ -44,7 +44,8 @@ export function VideoPlayer({ uri, poster, onCompleted }: { uri: string; poster:
 
   return (
     <View style={{ width: '100%', aspectRatio: ratios.video, backgroundColor: media.midnight }}>
-      <VideoView player={player} style={{ width: '100%', height: '100%' }} contentFit="cover" nativeControls allowsFullscreen allowsPictureInPicture />
+      {/* allowsFullscreen dropped: it's deprecated in favor of fullscreenOptions, and its default (true) is already what we want. */}
+      <VideoView player={player} style={{ width: '100%', height: '100%' }} contentFit="cover" nativeControls allowsPictureInPicture />
       {!started ? (
         <>
           <DAOImage uri={poster} style={{ position: 'absolute', width: '100%', height: '100%' }} />

@@ -124,7 +124,10 @@ export default function VideoScreen() {
       */}
       <View pointerEvents="box-none" style={{ position: 'absolute', top: 0, left: 0, right: 0 }}>
         <LinearGradient pointerEvents="none" colors={[media.scrim, 'transparent']} style={{ position: 'absolute', top: 0, left: 0, right: 0, height: insets.top + 56 }} />
-        <View style={{ paddingTop: insets.top + 8, paddingHorizontal: spacing.gutter }}>
+        {/* box-none again: a plain View defaults to pointerEvents="auto" and would otherwise
+            eat every tap across this whole full-width strip — not just on the button — which
+            silently blocked taps meant for the video's native-controls toggle in that zone. */}
+        <View pointerEvents="box-none" style={{ paddingTop: insets.top + 8, paddingHorizontal: spacing.gutter }}>
           <DAOIconButton icon="chevron-left" tone="glass" accessibilityLabel={t('common.back')} onPress={() => router.back()} />
         </View>
       </View>
