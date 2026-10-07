@@ -34,6 +34,7 @@ export const my: TranslationShape<typeof en> = {
     offlineHint: "သိမ်းထားသော အကြောင်းအရာကို ပြသနေသည်။ ငွေပေးချေရန် အင်တာနက် လိုအပ်သည်။",
     notAvailable: "မရသေးပါ",
     pts: "မှတ်",
+    screenshotDetected: "DAO ၏ အကြောင်းအရာများကို screenshot ရိုက်ခွင့် မပြုပါ။",
   },
   brand: {
     name: "DAO",
@@ -299,6 +300,10 @@ export const my: TranslationShape<typeof en> = {
     videoProcessing: "ဗီဒီယို မကြာမီ",
     empty: "ဗီဒီယိုအသစ်များ လာပါမည်။",
     share: "မျှဝေမည်",
+    download: "ဒေါင်းလုဒ်",
+    downloading: "ဒေါင်းလုဒ်လုပ်နေသည်… {{percent}}%",
+    downloaded: "ဓာတ်ပုံအယ်လ်ဘမ်သို့ သိမ်းပြီးပါပြီ",
+    downloadGalleryPermission: "ဤဗီဒီယိုကို ဓာတ်ပုံအယ်လ်ဘမ်သို့ သိမ်းရန် ဓာတ်ပုံများသို့ ဝင်ရောက်ခွင့်ပေးပါ။",
   },
   kitchen: {
     title: "DAO မီးဖိုချောင်",

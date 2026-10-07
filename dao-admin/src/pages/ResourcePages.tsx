@@ -100,10 +100,12 @@ export function MembershipTiersPage() {
       { name: 'free_shipping', label: 'Free standard shipping', type: 'toggle' },
       { name: 'early_access', label: 'Early access to collections', type: 'toggle' },
       { name: 'priority_support', label: 'Priority support', type: 'toggle' },
+      { name: 'allows_screenshots', label: 'Can screenshot/record video content', type: 'toggle' },
+      { name: 'allows_video_download', label: 'Can download videos to their device', type: 'toggle' },
       { name: 'is_active', label: 'Active', type: 'toggle' },
     ],
     translations: [{ name: 'name', label: 'Name', required: true }, { name: 'description', label: 'Description', multiline: true }, { name: 'benefits', label: 'Benefits', list: true }],
-    defaults: { sort_order: 10, min_points: 0, min_spend: '', discount_percent: 0, points_multiplier: 1, is_active: true },
+    defaults: { sort_order: 10, min_points: 0, min_spend: '', discount_percent: 0, points_multiplier: 1, is_active: true, allows_screenshots: false, allows_video_download: false },
     deleteLabel: 'Delete tier',
   }
   return <ResourcePage config={config} />

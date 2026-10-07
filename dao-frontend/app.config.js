@@ -66,6 +66,10 @@ module.exports = {
       'expo-localization',
       'expo-web-browser',
       'expo-video',
+      [
+        'expo-media-library',
+        { photosPermission: 'DAO needs access to your photos to save videos you download.', savePhotosPermission: 'DAO needs permission to save downloaded videos to your gallery.', isAccessMediaLocationEnabled: false },
+      ],
       ['expo-notifications', { color: '#66745E' }],
       [
         'expo-splash-screen',

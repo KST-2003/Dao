@@ -34,6 +34,7 @@ export const th: TranslationShape<typeof en> = {
     offlineHint: "กำลังแสดงข้อมูลที่บันทึกไว้ การชำระเงินต้องเชื่อมต่ออินเทอร์เน็ต",
     notAvailable: "ยังไม่เปิดให้บริการ",
     pts: "คะแนน",
+    screenshotDetected: "ไม่อนุญาตให้แคปหน้าจอเนื้อหาของ DAO",
   },
   brand: {
     name: "DAO",
@@ -299,6 +300,10 @@ export const th: TranslationShape<typeof en> = {
     videoProcessing: "วิดีโอกำลังจะมา",
     empty: "วิดีโอใหม่กำลังมา",
     share: "แชร์",
+    download: "ดาวน์โหลด",
+    downloading: "กำลังดาวน์โหลด… {{percent}}%",
+    downloaded: "บันทึกลงอัลบั้มภาพแล้ว",
+    downloadGalleryPermission: "อนุญาตให้เข้าถึงรูปภาพเพื่อบันทึกวิดีโอนี้ลงอัลบั้มภาพ",
   },
   kitchen: {
     title: "ครัวดาว",

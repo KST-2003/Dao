@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Enums\PaymentStatus;
+use App\Http\Requests\Admin\CustomerContentAccessRequest;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -42,7 +43,32 @@ class CustomerController extends AdminController
             'referred_by' => $user->referrer?->only(['id', 'display_name', 'referral_code']),
             'recent_orders' => $user->orders()->latest('placed_at')->limit(10)->get(['id', 'order_number', 'status', 'grand_total', 'placed_at']),
             'lifetime_spend' => $user->membership?->lifetime_spend ?? 0,
+            'screenshot_override' => $user->screenshot_override,
+            'download_override' => $user->download_override,
         ])]);
+    }
+
+    /**
+     * Independent of the customer's membership tier — a per-user grant for cases a tier
+     * rule shouldn't decide (staff QA accounts, press, partners). See ContentAccessService.
+     * Not exposed through mass assignment (not in $fillable): set explicitly here only.
+     */
+    public function updateContentAccess(CustomerContentAccessRequest $request, int $id): JsonResponse
+    {
+        $user = User::query()->findOrFail($id);
+        if ($request->has('screenshot_override')) {
+            $user->screenshot_override = $request->boolean('screenshot_override');
+        }
+        if ($request->has('download_override')) {
+            $user->download_override = $request->boolean('download_override');
+        }
+        $user->save();
+        $this->audit('customer.content_access_updated', $user, $request->only(['screenshot_override', 'download_override']));
+
+        return response()->json(['data' => [
+            'screenshot_override' => $user->screenshot_override,
+            'download_override' => $user->download_override,
+        ]]);
     }
 
     private function row(User $u): array

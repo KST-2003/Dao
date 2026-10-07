@@ -11,6 +11,7 @@ enum AdminPermission: string
     case OrdersView = 'orders.view';
     case OrdersManage = 'orders.manage';
     case CustomersView = 'customers.view';
+    case CustomersManage = 'customers.manage';
     case LoyaltyManage = 'loyalty.manage';
     case MarketingManage = 'marketing.manage';
     case ContentManage = 'content.manage';

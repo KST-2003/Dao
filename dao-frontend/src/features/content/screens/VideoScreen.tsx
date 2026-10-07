@@ -62,6 +62,11 @@ export default function VideoScreen() {
                 <Action icon="chatbubble-outline" label={formatCount(v.comment_count)} onPress={vm.openComments} />
                 <Action icon={vm.saved ? 'bookmark' : 'bookmark-outline'} label={t('common.save')} onPress={vm.toggleSave} active={vm.saved} />
                 <Action icon="share-outline" label={t('vlog.share')} onPress={vm.share} />
+                {vm.canDownload ? (
+                  <Action icon="download-outline" active={vm.downloading}
+                    label={vm.downloading ? t('vlog.downloading', { percent: String(vm.downloadProgress) }) : t('vlog.download')}
+                    onPress={() => !vm.downloading && vm.downloadVideo()} />
+                ) : null}
               </View>
             </View>
             {v.shop_the_look.length > 0 ? (

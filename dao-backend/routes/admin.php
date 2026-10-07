@@ -62,6 +62,9 @@ Route::middleware(['auth:sanctum', 'admin', 'throttle:api'])->group(function () 
         Route::get('/customers', [Admin\CustomerController::class, 'index']);
         Route::get('/customers/{id}', [Admin\CustomerController::class, 'show'])->whereNumber('id');
     });
+    Route::middleware('admin.can:customers.manage')->group(function () {
+        Route::put('/customers/{id}/content-access', [Admin\CustomerController::class, 'updateContentAccess'])->whereNumber('id');
+    });
 
     Route::middleware('admin.can:loyalty.manage')->group(function () {
         Route::get('/points/ledger', [Admin\LoyaltyController::class, 'ledger']);
@@ -95,6 +98,7 @@ Route::middleware(['auth:sanctum', 'admin', 'throttle:api'])->group(function () 
             Route::put("/{$uri}/{id}", [$controller, 'update'])->whereNumber('id');
             Route::delete("/{$uri}/{id}", [$controller, 'destroy'])->whereNumber('id');
         }
+        Route::get('/videos/tags', [Admin\VideoController::class, 'tags']);
     });
 
     Route::post('/uploads', Admin\UploadController::class)->middleware('admin.can:products.manage,content.manage,marketing.manage');

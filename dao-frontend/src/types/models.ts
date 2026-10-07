@@ -40,6 +40,8 @@ export interface User {
   profile_completed: boolean;
   providers?: AuthProvider[];
   created_at: string | null;
+  /** From the user's membership tier OR an admin-granted per-user override — see ContentAccessService. */
+  permissions: { can_screenshot: boolean; can_download_videos: boolean };
 }
 
 export interface AuthPayload {

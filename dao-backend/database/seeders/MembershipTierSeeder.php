@@ -23,7 +23,7 @@ class MembershipTierSeeder extends Seeder
                     'th' => ['name' => 'VIP', 'description' => 'สิทธิพิเศษมากขึ้น', 'benefits' => ['ส่วนลดสมาชิก 5%', 'คะแนน DAO 1.5 เท่า', 'ช้อปคอลเลกชันใหม่ก่อนใคร', 'ของขวัญวันเกิด']],
                     'my' => ['name' => 'VIP', 'description' => 'အကျိုးခံစားခွင့် ပိုများ', 'benefits' => ['အဖွဲ့ဝင် လျှော့စျေး 5%', 'DAO အမှတ် 1.5 ဆ', 'စုစည်းမှုအသစ်များကို စောစီးစွာ', 'မွေးနေ့ဆု']],
                 ]],
-            ['code' => 'dao_star', 'sort_order' => 20, 'min_points' => 20000, 'min_spend' => 0, 'discount_percent' => 10, 'points_multiplier' => 2, 'early_access' => true, 'free_shipping' => true, 'priority_support' => true, 'color' => '#C9A96E', 'badge_icon' => 'star',
+            ['code' => 'dao_star', 'sort_order' => 20, 'min_points' => 20000, 'min_spend' => 0, 'discount_percent' => 10, 'points_multiplier' => 2, 'early_access' => true, 'free_shipping' => true, 'priority_support' => true, 'allows_screenshots' => true, 'allows_video_download' => true, 'color' => '#C9A96E', 'badge_icon' => 'star',
                 't' => [
                     'en' => ['name' => 'DAO STAR', 'description' => 'Our brightest stars.', 'benefits' => ['10% member discount', '2× DAO Points', 'Free standard shipping', 'VIP-only pieces', 'Priority support']],
                     'th' => ['name' => 'DAO STAR', 'description' => 'ดาวที่สว่างที่สุดของเรา', 'benefits' => ['ส่วนลดสมาชิก 10%', 'คะแนน DAO 2 เท่า', 'ส่งฟรีแบบมาตรฐาน', 'สินค้าเฉพาะ VIP', 'บริการลูกค้าแบบพิเศษ']],

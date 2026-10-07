@@ -2,10 +2,12 @@
 
 namespace App\Http\Resources\Api;
 
+use App\Models\User;
+use App\Services\Content\ContentAccessService;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
-/** @mixin \App\Models\User */
+/** @mixin User */
 class UserResource extends JsonResource
 {
     public function toArray(Request $request): array
@@ -25,6 +27,7 @@ class UserResource extends JsonResource
             'profile_completed' => $this->profile_completed,
             'providers' => $this->whenLoaded('authProviders', fn () => $this->authProviders->map(fn ($p) => $p->provider->value)->values()),
             'created_at' => $this->created_at?->toIso8601String(),
+            'permissions' => app(ContentAccessService::class)->permissions($this->resource),
         ];
     }
 }

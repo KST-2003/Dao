@@ -20,7 +20,7 @@ export interface AdminMe {
 
 export type Permission =
   | '*' | 'dashboard.view' | 'products.manage' | 'inventory.manage' | 'orders.view' | 'orders.manage'
-  | 'customers.view' | 'loyalty.manage' | 'marketing.manage' | 'content.manage' | 'reviews.moderate'
+  | 'customers.view' | 'customers.manage' | 'loyalty.manage' | 'marketing.manage' | 'content.manage' | 'reviews.moderate'
   | 'notifications.send' | 'settings.manage' | 'admins.manage' | 'audit.view'
 
 export interface DashboardMetrics {
@@ -104,6 +104,8 @@ export interface CustomerDetail extends CustomerRow {
   referred_by: { id: number; display_name: string | null; referral_code: string } | null
   recent_orders: { id: number; order_number: string; status: string; grand_total: number; placed_at: string }[]
   lifetime_spend: number
+  screenshot_override: boolean
+  download_override: boolean
 }
 
 export interface LedgerRow {

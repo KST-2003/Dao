@@ -31,6 +31,7 @@ export const en = {
     offlineHint: "Showing saved content. Checkout needs a connection.",
     notAvailable: "Not available yet",
     pts: "pts",
+    screenshotDetected: "Screenshots of DAO content aren't allowed.",
   },
   brand: {
     name: "DAO",
@@ -296,6 +297,10 @@ export const en = {
     videoProcessing: "Video coming soon",
     empty: "New videos are on the way.",
     share: "Share",
+    download: "Download",
+    downloading: "Downloading… {{percent}}%",
+    downloaded: "Saved to your gallery",
+    downloadGalleryPermission: "Allow photo access to save this video to your gallery.",
   },
   kitchen: {
     title: "DAO Kitchen",

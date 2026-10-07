@@ -20,7 +20,8 @@ class MembershipTier extends Model
 
     protected $fillable = [
         'code', 'sort_order', 'min_points', 'min_spend', 'discount_percent', 'points_multiplier',
-        'free_shipping', 'early_access', 'priority_support', 'badge_icon', 'color', 'is_active',
+        'free_shipping', 'early_access', 'priority_support', 'allows_screenshots', 'allows_video_download',
+        'badge_icon', 'color', 'is_active',
     ];
 
     protected function casts(): array
@@ -33,6 +34,8 @@ class MembershipTier extends Model
             'free_shipping' => 'boolean',
             'early_access' => 'boolean',
             'priority_support' => 'boolean',
+            'allows_screenshots' => 'boolean',
+            'allows_video_download' => 'boolean',
             'is_active' => 'boolean',
         ];
     }
