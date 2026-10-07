@@ -65,7 +65,7 @@ module.exports = {
       'expo-secure-store',
       'expo-localization',
       'expo-web-browser',
-      'expo-video',
+      ['expo-video', { supportsPictureInPicture: true }],
       [
         'expo-media-library',
         { photosPermission: 'DAO needs access to your photos to save videos you download.', savePhotosPermission: 'DAO needs permission to save downloaded videos to your gallery.', isAccessMediaLocationEnabled: false },

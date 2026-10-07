@@ -307,6 +307,7 @@ export const my: TranslationShape<typeof en> = {
     play: "ဖွင့်ရန်",
     pause: "ခေတ္တရပ်ရန်",
     toggleControls: "ထိန်းချုပ်ခလုတ်များကို ပြ/ဖျောက်ရန်",
+    pictureInPicture: "ပုံထဲပုံ မုဒ်",
   },
   kitchen: {
     title: "DAO မီးဖိုချောင်",

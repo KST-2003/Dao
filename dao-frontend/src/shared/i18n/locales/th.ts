@@ -307,6 +307,7 @@ export const th: TranslationShape<typeof en> = {
     play: "เล่น",
     pause: "หยุดชั่วคราว",
     toggleControls: "แสดงหรือซ่อนปุ่มควบคุม",
+    pictureInPicture: "ภาพซ้อนภาพ",
   },
   kitchen: {
     title: "ครัวดาว",

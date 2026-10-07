@@ -304,6 +304,7 @@ export const en = {
     play: "Play",
     pause: "Pause",
     toggleControls: "Show or hide playback controls",
+    pictureInPicture: "Picture in picture",
   },
   kitchen: {
     title: "DAO Kitchen",
