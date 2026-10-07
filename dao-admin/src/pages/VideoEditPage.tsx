@@ -2,6 +2,7 @@ import { useMutation, useQuery } from '@tanstack/react-query'
 import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { ProductPicker } from '@/components/resource/ProductPicker'
+import { TagsInput } from '@/components/resource/TagsInput'
 import {
   Button, DAOAdminCard, DAOAdminHeader, DAOConfirmDialog, DAOImageUploader, DAOVideoUploader, ErrorState, Field, Input, Select, TableSkeleton, Toggle,
   TranslationTabs, useToast,
@@ -70,7 +71,7 @@ export default function VideoEditPage() {
               <Field label="Type"><Select value={form.content_type} onChange={(e) => set('content_type', e.target.value)}>{['vlog', 'fashion', 'recipe', 'tutorial', 'short'].map((t) => <option key={t}>{t}</option>)}</Select></Field>
               <Field label="Category"><Select value={form.category ?? ''} onChange={(e) => set('category', e.target.value || null)}><option value="">—</option>{CATEGORIES.map((c) => <option key={c} value={c}>{c.replace(/_/g, ' ')}</option>)}</Select></Field>
               <Field label="Slug *" error={err('slug')}><Input required value={form.slug} onChange={(e) => set('slug', e.target.value)} /></Field>
-              <Field label="Tags" hint="comma separated"><Input value={form.tags.join(', ')} onChange={(e) => set('tags', e.target.value.split(',').map((t) => t.trim()).filter(Boolean))} /></Field>
+              <TagsInput value={form.tags} onChange={(tags) => set('tags', tags)} />
               <Field label="Status"><Select value={form.status} onChange={(e) => set('status', e.target.value)}>{['draft', 'scheduled', 'published', 'archived'].map((s) => <option key={s}>{s}</option>)}</Select></Field>
               <Field label="Publish at" hint="Required for published/scheduled"><Input type="datetime-local" value={toLocalInput(form.published_at)} onChange={(e) => set('published_at', fromLocalInput(e.target.value))} /></Field>
               <Toggle label="Members only" checked={form.is_members_only} onChange={(v) => set('is_members_only', v)} />

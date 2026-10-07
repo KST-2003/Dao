@@ -8,6 +8,24 @@ use Illuminate\Validation\Rule;
 
 class VideoRequest extends AdminRequest
 {
+    /**
+     * Tags drive filtering and "related videos" (see Api\V1\VideoController), so free-typed
+     * variants ("Egg", "egg ", "egg") must collapse to one before they ever reach the DB.
+     */
+    protected function prepareForValidation(): void
+    {
+        parent::prepareForValidation();
+        if ($this->has('tags')) {
+            $this->merge(['tags' => collect((array) $this->input('tags'))
+                ->map(fn ($tag) => trim(mb_strtolower((string) $tag)))
+                ->filter()
+                ->unique()
+                ->values()
+                ->all(),
+            ]);
+        }
+    }
+
     public function rules(): array
     {
         $id = $this->route('id');
