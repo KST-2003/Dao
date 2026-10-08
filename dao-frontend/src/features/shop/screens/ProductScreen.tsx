@@ -30,6 +30,7 @@ export default function ProductScreen() {
             <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 120 }}>
               <View style={s.gallery}>
                 <FlatList
+                  ref={vm.galleryRef} getItemLayout={(_, index) => ({ length: width, offset: width * index, index })}
                   horizontal pagingEnabled showsHorizontalScrollIndicator={false} data={vm.images} keyExtractor={(i) => String(i.id)}
                   onMomentumScrollEnd={(e) => vm.setImageIndex(Math.round(e.nativeEvent.contentOffset.x / width))}
                   renderItem={({ item, index }) => <DAOImage uri={item.url} style={{ width, aspectRatio: ratios.productHero }} priority={index === 0 ? 'high' : 'normal'} accessibilityLabel={item.alt ?? p.name ?? undefined} />}
@@ -46,7 +47,7 @@ export default function ProductScreen() {
               {vm.images.length > 1 ? (
                 <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={s.thumbs}>
                   {vm.images.map((img, i) => (
-                    <View key={img.id} style={[s.thumb, i === vm.imageIndex && s.thumbActive]}><DAOImage uri={img.thumbnail_url ?? img.url} style={{ width: '100%', height: '100%' }} /></View>
+                    <Pressable key={img.id} onPress={() => vm.selectImage(i)} accessibilityRole="button" accessibilityLabel={`${i + 1}/${vm.images.length}`} style={[s.thumb, i === vm.imageIndex && s.thumbActive]}><DAOImage uri={img.thumbnail_url ?? img.url} style={{ width: '100%', height: '100%' }} /></Pressable>
                   ))}
                 </ScrollView>
               ) : <View style={{ height: spacing.lg }} />}

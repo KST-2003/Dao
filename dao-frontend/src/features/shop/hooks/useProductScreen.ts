@@ -1,7 +1,7 @@
 import * as Haptics from 'expo-haptics';
 import { router, useLocalSearchParams } from 'expo-router';
-import { useState } from 'react';
-import { Share } from 'react-native';
+import { useRef, useState } from 'react';
+import { FlatList, Share } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useAddToCart } from '@/features/cart/api';
 import { useErrorMessage } from '@/shared/hooks/useErrorMessage';
@@ -25,6 +25,11 @@ export function useProductScreen() {
   const [size, setSize] = useState<string | null>(null);
   const [sizeGuide, setSizeGuide] = useState(false);
   const [imageIndex, setImageIndex] = useState(0);
+  const galleryRef = useRef<FlatList>(null);
+  const selectImage = (index: number) => {
+    setImageIndex(index);
+    galleryRef.current?.scrollToIndex({ index, animated: true });
+  };
 
   const p = product.data;
   const variants = p?.variants ?? [];
@@ -54,7 +59,7 @@ export function useProductScreen() {
   };
 
   return {
-    product, related, reviews, p, images, imageIndex, setImageIndex,
+    product, related, reviews, p, images, imageIndex, setImageIndex, galleryRef, selectImage,
     colors, activeColor, setColor, sizes: p?.sizes ?? [], size, setSize, sizeState, variant, needsSize,
     saved, toggleSave: () => toggleSaved('product', id, saved),
     sizeGuide, openSizeGuide: () => setSizeGuide(true), closeSizeGuide: () => setSizeGuide(false),
