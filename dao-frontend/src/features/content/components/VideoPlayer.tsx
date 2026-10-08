@@ -1,7 +1,8 @@
 import { Feather } from '@expo/vector-icons';
 import { useEvent } from 'expo';
+import { useFocusEffect } from 'expo-router';
 import { useVideoPlayer, VideoView } from 'expo-video';
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { Pressable, View } from 'react-native';
 import { DAOImage } from '@/shared/components';
 import { ratios, media } from '@/shared/theme';
@@ -24,6 +25,15 @@ import { ratios, media } from '@/shared/theme';
  * React Native 0.82+, and this app is on 0.81.5. If nativeControls is reliable without PiP,
  * that confirms the cause; PiP could then come back later as its own custom button once we're
  * not also fighting this class of bug.
+ *
+ * A likely bigger contributor to the same symptom, found separately: this screen is pushed on
+ * top of the root Stack (see _layout.tsx), not nested inside a tab's own stack — switching tabs
+ * or otherwise navigating away doesn't necessarily unmount it, so playback (and its audio) kept
+ * going in the background, and revisiting the same or another video could end up with two
+ * overlapping players both producing audio and both holding a native view with its own
+ * tap-to-toggle gesture recognizer. `useFocusEffect` pauses playback whenever this screen loses
+ * focus — on a tab switch, a back navigation, or another screen pushed on top — regardless of
+ * whether the component technically unmounts, which plain `useEffect` cleanup can't guarantee.
  */
 export function VideoPlayer({ uri, poster, onCompleted }: { uri: string; poster: string | null; onCompleted?: () => void }) {
   const done = useRef(false);
@@ -39,6 +49,10 @@ export function VideoPlayer({ uri, poster, onCompleted }: { uri: string; poster:
       setStarted(true);
     }
   }, [isPlaying]);
+
+  useFocusEffect(
+    useCallback(() => () => player.pause(), [player]),
+  );
 
   useEffect(() => {
     const sub = player.addListener('playToEnd', () => {
