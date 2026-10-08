@@ -46,6 +46,11 @@ export interface ProductRow {
   badges: string[]; updated_at: string | null
 }
 
+export interface VideoRow {
+  id: number; title: string | null; content_type: string; category: string | null; status: string
+  thumbnail_url: string | null; duration_seconds: number; view_count: number; like_count: number; published_at: string | null
+}
+
 export interface Variant {
   id: number; sku: string; size: string | null; color: string | null; color_hex: string | null; price_override: number | null
   sale_price_override: number | null; stock_quantity: number; low_stock_threshold: number; is_active: boolean; sort_order: number
@@ -61,6 +66,8 @@ export interface ProductDetail {
   published_at: string | null
   translations: Translations<'name' | 'description' | 'materials' | 'care_instructions' | 'shipping_info'>
   images: ProductImage[]; variants: Variant[]; collection_ids: number[]
+  /** "Dao's review" — videos linked to this product (same product_video pivot as a video's "Shop this look"). */
+  video_ids: number[]
 }
 
 export interface CouponRedemption {

@@ -3,6 +3,7 @@ import { ArrowDown, ArrowUp, Trash2 } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { VariantsEditor } from '@/components/product/VariantsEditor'
+import { VideoPicker } from '@/components/resource/VideoPicker'
 import {
   Button, DAOAdminCard, DAOAdminHeader, DAOConfirmDialog, DAOStatusBadge, ErrorState, Field, Input, Select, TableSkeleton, Toggle,
   TranslationTabs, useToast,
@@ -18,7 +19,7 @@ type Form = Omit<ProductDetail, 'price' | 'sale_price' | 'member_price' | 'cost'
 const blank: Form = {
   id: 0, category_id: null, slug: '', brand: 'DAO', sku: '', barcode: '', price: '', sale_price: '', member_price: '', cost: '', weight_grams: null,
   status: 'draft', badges: [], is_vip_only: false, vip_min_tier_id: null, video_url: '', external_url: '', social_platform: null, campaign_code: '',
-  published_at: null, translations: {}, images: [], variants: [], collection_ids: [],
+  published_at: null, translations: {}, images: [], variants: [], collection_ids: [], video_ids: [],
 }
 
 export default function ProductEditPage() {
@@ -48,7 +49,7 @@ export default function ProductEditPage() {
         price: toMinor(form.price), sale_price: toMinor(form.sale_price), member_price: toMinor(form.member_price), cost: toMinor(form.cost),
         weight_grams: form.weight_grams, badges: form.badges, is_vip_only: form.is_vip_only, video_url: form.video_url || null,
         external_url: form.external_url || null, social_platform: form.social_platform, campaign_code: form.campaign_code || null,
-        published_at: form.published_at, translations: form.translations, collection_ids: form.collection_ids,
+        published_at: form.published_at, translations: form.translations, collection_ids: form.collection_ids, video_ids: form.video_ids,
         ...(form.slug ? { slug: form.slug } : {}),
       }
       return isNew ? api.post<ProductDetail>('/products', body) : api.put<ProductDetail>(`/products/${id}`, body)
@@ -165,6 +166,10 @@ export default function ProductEditPage() {
               </Select></Field>
               <Field label="Campaign code"><Input value={form.campaign_code ?? ''} onChange={(e) => set('campaign_code', e.target.value)} /></Field>
             </div>
+          </DAOAdminCard>
+          <DAOAdminCard title="Dao's review">
+            <VideoPicker label="Linked videos" value={form.video_ids} onChange={(ids) => set('video_ids', ids)} />
+            <p className="mt-2 text-xs text-ink-subtle">Shows on the product page in the app. Same link as that video's own "Shop this look" — add here or there, either way links both pages.</p>
           </DAOAdminCard>
           {!isNew ? <Button type="button" variant="danger" className="w-full" onClick={() => setConfirmDelete(true)}>Archive product</Button> : null}
         </div>

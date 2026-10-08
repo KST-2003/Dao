@@ -35,6 +35,8 @@ class ProductRequest extends AdminRequest
             'published_at' => ['nullable', 'date'],
             'collection_ids' => ['sometimes', 'array'],
             'collection_ids.*' => ['integer', 'exists:collections,id'],
+            'video_ids' => ['sometimes', 'array'],
+            'video_ids.*' => ['integer', 'exists:videos,id'],
         ], $this->translationRules([
             'name' => 'string|max:190',
             'description' => 'string|max:5000',

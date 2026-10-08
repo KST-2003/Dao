@@ -2,8 +2,10 @@
 
 use App\Enums\ContentType;
 use App\Enums\PublishStatus;
+use App\Models\AdminUser;
 use App\Models\Product;
 use App\Models\Video;
+use Laravel\Sanctum\Sanctum;
 
 it('shows linked, published videos on a product and hides unpublished ones', function () {
     $product = Product::factory()->create();
@@ -40,4 +42,22 @@ it('shows linked products on a video ("shop this look", the existing direction)'
     $this->getJson("/api/v1/videos/{$video->id}")->assertOk()
         ->assertJsonCount(1, 'data.shop_the_look')
         ->assertJsonPath('data.shop_the_look.0.id', $product->id);
+});
+
+it('lets an admin link a video to a product from the product side (video_ids) and unlink it again', function () {
+    Sanctum::actingAs(AdminUser::factory()->create(), ['admin']);
+    $product = Product::factory()->create();
+    $video = Video::query()->create([
+        'content_type' => ContentType::Vlog, 'slug' => 'admin-link-'.$product->id,
+        'status' => PublishStatus::Published, 'published_at' => now()->subHour(),
+    ]);
+    $video->syncTranslations(['en' => ['title' => 'Linked from the product side']]);
+
+    $this->putJson("/api/admin/v1/products/{$product->id}", ['video_ids' => [$video->id]])
+        ->assertOk()->assertJsonPath('data.video_ids', [$video->id]);
+    expect($product->videos()->pluck('videos.id')->all())->toBe([$video->id]);
+
+    $this->putJson("/api/admin/v1/products/{$product->id}", ['video_ids' => []])
+        ->assertOk()->assertJsonPath('data.video_ids', []);
+    expect($product->videos()->pluck('videos.id')->all())->toBe([]);
 });

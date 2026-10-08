@@ -56,13 +56,14 @@ class ProductController extends AdminController
     public function store(ProductRequest $request): JsonResponse
     {
         $product = DB::transaction(function () use ($request) {
-            $data = $request->safe()->except(['translations', 'collection_ids']);
+            $data = $request->safe()->except(['translations', 'collection_ids', 'video_ids']);
             $this->assertSalePrice($data['price'] ?? null, $data['sale_price'] ?? null);
             $data['slug'] ??= Str::slug($request->input('translations.en.name', 'product')).'-'.Str::lower(Str::random(4));
             $data['status'] ??= ProductStatus::Draft->value;
             $product = Product::query()->create($data);
             $product->syncTranslations($request->input('translations', []));
             $product->collections()->sync($request->input('collection_ids', []));
+            $product->videos()->sync($request->input('video_ids', []));
 
             return $product;
         });
@@ -76,7 +77,7 @@ class ProductController extends AdminController
     {
         $product = Product::query()->findOrFail($id);
         DB::transaction(function () use ($request, $product) {
-            $data = $request->safe()->except(['translations', 'collection_ids']);
+            $data = $request->safe()->except(['translations', 'collection_ids', 'video_ids']);
             $this->assertSalePrice($data['price'] ?? $product->price, array_key_exists('sale_price', $data) ? $data['sale_price'] : $product->sale_price);
             $product->fill($data)->save();
             if ($request->has('translations')) {
@@ -84,6 +85,9 @@ class ProductController extends AdminController
             }
             if ($request->has('collection_ids')) {
                 $product->collections()->sync($request->input('collection_ids'));
+            }
+            if ($request->has('video_ids')) {
+                $product->videos()->sync($request->input('video_ids'));
             }
         });
         $this->audit('product.updated', $product, $request->safe()->except('translations'));
@@ -236,7 +240,7 @@ class ProductController extends AdminController
 
     private function present(Product $product): array
     {
-        $product->load(['translations', 'images', 'variants', 'collections:id']);
+        $product->load(['translations', 'images', 'variants', 'collections:id', 'videos:id']);
 
         return $this->withTranslations($product, [
             'cost' => $product->cost,
@@ -244,6 +248,7 @@ class ProductController extends AdminController
             'images' => $product->images,
             'variants' => $product->variants,
             'collection_ids' => $product->collections->pluck('id'),
+            'video_ids' => $product->videos->pluck('id'),
         ]);
     }
 }
