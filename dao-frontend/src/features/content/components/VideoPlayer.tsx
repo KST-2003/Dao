@@ -2,10 +2,8 @@ import { Feather, MaterialIcons } from '@expo/vector-icons';
 import { useEvent } from 'expo';
 import { useVideoPlayer, VideoView } from 'expo-video';
 import { useEffect, useRef, useState } from 'react';
-import { Pressable, View } from 'react-native';
-import { Gesture, GestureDetector } from 'react-native-gesture-handler';
+import { PanResponder, Pressable, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import Animated, { runOnJS, useAnimatedStyle, useSharedValue } from 'react-native-reanimated';
 import { DAOImage, DAOText } from '@/shared/components';
 import { formatDuration } from '@/shared/utils/format';
 import { ratios, useTheme, media } from '@/shared/theme';
@@ -14,68 +12,71 @@ const AUTO_HIDE_MS = 3000;
 const clamp01 = (n: number) => Math.min(1, Math.max(0, n));
 
 /**
- * Drag-and-tap scrubber, on react-native-gesture-handler's Gesture API rather than core
- * React Native's PanResponder (nesting a PanResponder inside the Pressable-based
- * toggle-controls layer this sits under made the drag never activate at all — RNGH is built
- * to arbitrate against other gestures in the same tree, including Pressable, which is
- * RNGH-backed under the hood here since GestureHandlerRootView wraps the whole app).
+ * Drag-and-tap scrubber on core React Native's PanResponder — not react-native-gesture-
+ * handler's Gesture API. That was tried first (it fixes the "nested inside a Pressable"
+ * conflict PanResponder has, and its worklet-driven shared value made the fill bar track the
+ * finger without React re-renders), but it caused the app to hard-crash on every drag with no
+ * JS error screen — a native-level failure in the gesture-handler/Reanimated worklets runtime
+ * that happened even on a fresh native build, so it wasn't a stale-binary issue. Without a
+ * device crash log to diagnose that further, this avoids the worklet codepath entirely.
  *
- * The fill bar is driven by a Reanimated shared value + Animated.View, updated directly in
- * the worklet — not React state. Routing every touch-move through `runOnJS` to trigger a React
- * re-render was the actual cause of the previous "not smooth" dragging: that's a UI-thread →
- * JS-thread round trip (plus a full component re-render) on every single frame of movement.
- * Reading/writing a shared value from the worklet never leaves the UI thread, so the bar can
- * track the finger at the native frame rate. `runOnJS` is reserved for the two things that
- * actually need the JS thread: the (lightly throttled) live time-label text, and the final
- * seek commit on release.
+ * The real fix for the original bug (drag not registering at all) was never actually about
+ * PanResponder vs Gesture.Pan — it was that the scrubber was nested *inside* the Pressable
+ * used for tap-to-toggle-controls, and a Pressable ancestor racing a PanResponder descendant
+ * for the same touch is a known RN conflict. This scrubber is now a sibling of that Pressable
+ * (see VideoPlayer's render), not a descendant of it, which is the part that actually matters.
+ *
+ * Using gestureState.dx (cumulative delta from the touch-down point, reliable throughout a
+ * drag) added to a one-time `locationX` read at touch-down, rather than re-reading `locationX`
+ * on every move — `locationX` during a PanResponder move can be relative to whatever subview
+ * is currently under the finger rather than this bar, which is a known RN inconsistency.
  */
-function Scrubber({
-  duration, currentTime, onSeek, onDragTimeChange,
-}: { duration: number; currentTime: number; onSeek: (time: number) => void; onDragTimeChange: (time: number | null) => void }) {
-  const barWidth = useSharedValue(0);
-  const ratio = useSharedValue(duration > 0 ? currentTime / duration : 0);
-  const dragging = useSharedValue(false);
-  const lastReported = useSharedValue(-1);
-
-  useEffect(() => {
-    if (!dragging.value) {
-      ratio.value = duration > 0 ? currentTime / duration : 0;
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentTime, duration]);
-
-  const pan = Gesture.Pan()
-    .minDistance(0)
-    .onBegin((e) => {
-      dragging.value = true;
-      if (barWidth.value > 0) ratio.value = clamp01(e.x / barWidth.value);
-    })
-    .onUpdate((e) => {
-      if (barWidth.value <= 0) return;
-      const r = clamp01(e.x / barWidth.value);
-      ratio.value = r;
-      if (Math.abs(r - lastReported.value) > 0.004) {
-        lastReported.value = r;
-        runOnJS(onDragTimeChange)(r * duration);
-      }
-    })
-    .onEnd((e) => {
-      dragging.value = false;
-      if (barWidth.value > 0 && duration > 0) {
-        runOnJS(onSeek)(clamp01(e.x / barWidth.value) * duration);
-      }
-    });
-
-  const fillStyle = useAnimatedStyle(() => ({ width: `${ratio.value * 100}%` }));
+function Scrubber({ duration, currentTime, onSeek, onDragTimeChange }: {
+  duration: number; currentTime: number; onSeek: (time: number) => void; onDragTimeChange: (time: number | null) => void;
+}) {
+  const [barWidth, setBarWidth] = useState(0);
+  const [dragRatio, setDragRatio] = useState<number | null>(null);
+  const touchStartX = useRef(0);
+  const responder = useRef(
+    PanResponder.create({
+      onStartShouldSetPanResponder: () => true,
+      onMoveShouldSetPanResponder: () => true,
+      onPanResponderGrant: (e) => {
+        touchStartX.current = e.nativeEvent.locationX;
+        if (barWidth > 0) {
+          const r = clamp01(e.nativeEvent.locationX / barWidth);
+          setDragRatio(r);
+          onDragTimeChange(r * duration);
+        }
+      },
+      onPanResponderMove: (_, g) => {
+        if (barWidth <= 0) return;
+        const r = clamp01((touchStartX.current + g.dx) / barWidth);
+        setDragRatio(r);
+        onDragTimeChange(r * duration);
+      },
+      onPanResponderRelease: (_, g) => {
+        if (barWidth > 0 && duration > 0) {
+          onSeek(clamp01((touchStartX.current + g.dx) / barWidth) * duration);
+        }
+        setDragRatio(null);
+      },
+      onPanResponderTerminate: () => setDragRatio(null),
+    }),
+  ).current;
+  const ratio = dragRatio ?? (duration > 0 ? currentTime / duration : 0);
 
   return (
-    <GestureDetector gesture={pan}>
-      <View onLayout={(e) => { barWidth.value = e.nativeEvent.layout.width; }} style={{ justifyContent: 'center', paddingVertical: 10 }}>
-        <View style={{ height: 4, borderRadius: 2, backgroundColor: media.track, overflow: 'hidden' }} accessibilityRole="adjustable">
-          <Animated.View style={[{ height: 4, backgroundColor: media.gold }, fillStyle]} />
-        </View>
+    <View
+      {...responder.panHandlers}
+      onLayout={(e) => setBarWidth(e.nativeEvent.layout.width)}
+      style={{ justifyContent: 'center', paddingVertical: 10 }}
+    >
+      <View style={{ height: 4, borderRadius: 2, backgroundColor: media.track, overflow: 'hidden' }}
+        accessibilityRole="adjustable" accessibilityValue={{ min: 0, max: 100, now: Math.round(ratio * 100) }}>
+        <View style={{ width: `${Math.round(ratio * 100)}%`, height: 4, backgroundColor: media.gold }} />
       </View>
-    </GestureDetector>
+    </View>
   );
 }
 
@@ -170,6 +171,7 @@ export function VideoPlayer({ uri, poster, onCompleted }: { uri: string; poster:
     <View style={{ width: '100%', aspectRatio: ratios.video, backgroundColor: media.midnight }}>
       {!started ? <DAOImage uri={poster} style={{ position: 'absolute', width: '100%', height: '100%' }} /> : null}
       <VideoView ref={videoViewRef} player={player} style={{ width: '100%', height: '100%' }} contentFit="cover" nativeControls={false} allowsPictureInPicture />
+      {/* Tap-to-toggle layer + play/pause + PiP. The scrubber below is a sibling, not nested in here — see Scrubber's comment. */}
       <Pressable accessibilityRole="button" accessibilityLabel={t('vlog.toggleControls')} onPress={toggleControls} style={{ position: 'absolute', width: '100%', height: '100%' }}>
         {controlsVisible ? (
           <>
@@ -181,14 +183,16 @@ export function VideoPlayer({ uri, poster, onCompleted }: { uri: string; poster:
               style={{ position: 'absolute', top: spacing.sm, right: spacing.sm, width: 36, height: 36, borderRadius: 18, backgroundColor: media.textMuted, alignItems: 'center', justifyContent: 'center' }}>
               <MaterialIcons name="picture-in-picture-alt" size={18} color={media.glassIcon} />
             </Pressable>
-            <View style={{ position: 'absolute', left: spacing.md, right: spacing.md, bottom: spacing.sm, flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
-              <DAOText variant="caption" style={{ color: media.text }}>{formatDuration(previewTime ?? currentTime)}</DAOText>
-              <View style={{ flex: 1 }}><Scrubber duration={duration} currentTime={currentTime} onSeek={seek} onDragTimeChange={setPreviewTime} /></View>
-              <DAOText variant="caption" style={{ color: media.text }}>{formatDuration(duration)}</DAOText>
-            </View>
           </>
         ) : null}
       </Pressable>
+      {controlsVisible ? (
+        <View style={{ position: 'absolute', left: spacing.md, right: spacing.md, bottom: spacing.sm, flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
+          <DAOText variant="caption" style={{ color: media.text }}>{formatDuration(previewTime ?? currentTime)}</DAOText>
+          <View style={{ flex: 1 }}><Scrubber duration={duration} currentTime={currentTime} onSeek={seek} onDragTimeChange={setPreviewTime} /></View>
+          <DAOText variant="caption" style={{ color: media.text }}>{formatDuration(duration)}</DAOText>
+        </View>
+      ) : null}
     </View>
   );
 }
