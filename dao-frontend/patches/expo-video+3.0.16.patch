@@ -1,0 +1,19 @@
+diff --git a/node_modules/expo-video/ios/VideoView.swift b/node_modules/expo-video/ios/VideoView.swift
+index 3f285fb..a9c0c32 100644
+--- a/node_modules/expo-video/ios/VideoView.swift
++++ b/node_modules/expo-video/ios/VideoView.swift
+@@ -169,6 +169,14 @@ public final class VideoView: ExpoView, AVPlayerViewControllerDelegate {
+     // this code
+     #if !os(tvOS)
+     playerViewController.beginAppearanceTransition(self.window != nil, animated: true)
++    // DAO patch (see patches/expo-video+*.patch): beginAppearanceTransition must be paired
++    // with endAppearanceTransition or the view controller's appearance state never resolves.
++    // Nothing else in this file completes this specific call, and AVKit only builds its
++    // native controls once viewDidAppear: actually fires — which needs that transition to
++    // finish. Left unpaired, each video push leaves another transition stuck pending, which
++    // is consistent with controls working on the first video of a session and not on any
++    // after it. Upstream: https://github.com/expo/expo/issues/50487
++    playerViewController.endAppearanceTransition()
+     #endif
+   }
+ 
