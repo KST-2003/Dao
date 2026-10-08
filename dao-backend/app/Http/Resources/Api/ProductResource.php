@@ -2,12 +2,13 @@
 
 namespace App\Http\Resources\Api;
 
+use App\Models\Product;
 use Illuminate\Http\Request;
 
 /**
  * Product detail. `pricing` (member price for this shopper) is attached by the controller.
  *
- * @mixin \App\Models\Product
+ * @mixin Product
  */
 class ProductResource extends ProductCardResource
 {
@@ -37,6 +38,8 @@ class ProductResource extends ProductCardResource
             ])->values(),
             'sizes' => $this->variants->where('is_active', true)->pluck('size')->filter()->unique()->values(),
             'pricing' => $request->attributes->get('product_pricing'),
+            // "Watch Dao's review" — the inverse of a video's "Shop this look" (same product_video pivot).
+            'videos' => VideoCardResource::collection($this->whenLoaded('videos')),
         ]);
     }
 }

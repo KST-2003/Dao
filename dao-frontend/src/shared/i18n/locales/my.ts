@@ -149,6 +149,7 @@ export const my: TranslationShape<typeof en> = {
     shipping: "ပို့ဆောင်ခြင်း",
     reviews: "သုံးသပ်ချက်များ",
     noReviews: "သုံးသပ်ချက် မရှိသေးပါ",
+    daoReview: "Dao ၏ သုံးသပ်ချက်",
     related: "သင်နှစ်သက်နိုင်သော",
     memberPrice: "အဖွဲ့ဝင်ဈေး",
     yourPrice: "သင့် {{tier}} ဈေး",

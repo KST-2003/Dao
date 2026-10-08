@@ -149,6 +149,7 @@ export const th: TranslationShape<typeof en> = {
     shipping: "การจัดส่ง",
     reviews: "รีวิว",
     noReviews: "ยังไม่มีรีวิว",
+    daoReview: "รีวิวจากดาว",
     related: "คุณอาจชอบ",
     memberPrice: "ราคาสมาชิก",
     yourPrice: "ราคา {{tier}} ของคุณ",

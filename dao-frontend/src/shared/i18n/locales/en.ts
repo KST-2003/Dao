@@ -146,6 +146,7 @@ export const en = {
     shipping: "Shipping",
     reviews: "Reviews",
     noReviews: "No reviews yet",
+    daoReview: "Dao's review",
     related: "You may also love",
     memberPrice: "Member price",
     yourPrice: "Your {{tier}} price",

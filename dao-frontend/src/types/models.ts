@@ -134,6 +134,8 @@ export interface ProductDetail extends ProductCard {
   variants: ProductVariant[];
   sizes: string[];
   pricing: { your_price: number; tier: string | null; is_member_price: boolean } | null;
+  /** "Watch Dao's review" — the inverse of a video's shop_the_look (same product_video link, from the video's side). */
+  videos: VideoCard[];
 }
 
 export interface Review {

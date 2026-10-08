@@ -5,7 +5,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import {
   AsyncState, DAOBadge, DAOButton, DAOChip, DAOHeartButton, DAOIconButton, DAOImage, DAOPrice, DAOProductCard,
-  DAOSectionHeader, DAOStar, DAOText, ProductGridSkeleton,
+  DAOSectionHeader, DAOStar, DAOText, DAOVideoCard, ProductGridSkeleton,
 } from '@/shared/components';
 import { formatMoney } from '@/shared/utils/format';
 import { ratios, useTheme, media } from '@/shared/theme';
@@ -123,6 +123,14 @@ export default function ProductScreen() {
                   </Pressable>
                 ) : null}
               </View>
+
+              {p.videos.length > 0 ? (
+                <View style={{ marginTop: spacing.xxxl }}>
+                  <DAOSectionHeader title={t('shop.daoReview')} />
+                  <FlatList horizontal data={p.videos} keyExtractor={(v) => String(v.id)} showsHorizontalScrollIndicator={false}
+                    contentContainerStyle={{ paddingHorizontal: spacing.gutter, gap: spacing.md }} renderItem={({ item }) => <DAOVideoCard video={item} width={170} />} />
+                </View>
+              ) : null}
 
               {(vm.related.data?.length ?? 0) > 0 ? (
                 <View style={{ marginTop: spacing.xxxl }}>

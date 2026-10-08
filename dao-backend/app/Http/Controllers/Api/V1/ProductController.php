@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api\V1;
 
+use App\Contracts\MediaStorageInterface;
 use App\Enums\ReviewStatus;
 use App\Enums\SaveableType;
 use App\Http\Controllers\Controller;
@@ -11,7 +12,6 @@ use App\Http\Resources\Api\ProductResource;
 use App\Http\Resources\Api\ReviewResource;
 use App\Models\Product;
 use App\Models\Review;
-use App\Contracts\MediaStorageInterface;
 use App\Services\Catalog\ProductQueryService;
 use App\Services\Content\EngagementService;
 use App\Services\Content\ReviewService;
@@ -50,9 +50,13 @@ class ProductController extends Controller
 
     public function show(Request $request, int $id, PricingService $pricing, MembershipService $membership): ProductResource
     {
-        $product = Product::query()->published()->with(['translations', 'images', 'variants', 'category.translations'])->findOrFail($id);
+        $product = Product::query()->published()->with([
+            'translations', 'images', 'variants', 'category.translations',
+            'videos' => fn ($q) => $q->published()->with('translations'),
+        ])->findOrFail($id);
         $user = $request->user('sanctum');
         $request->attributes->set('saved_product_ids', $this->engagement->savedIds($user, SaveableType::Product));
+        $request->attributes->set('saved_video_ids', $this->engagement->savedIds($user, SaveableType::Video));
 
         if ($user) {
             $tier = $membership->currentTier($user);
