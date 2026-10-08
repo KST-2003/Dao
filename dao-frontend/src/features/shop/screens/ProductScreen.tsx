@@ -124,7 +124,7 @@ export default function ProductScreen() {
                 ) : null}
               </View>
 
-              {p.videos.length > 0 ? (
+              {(p.videos?.length ?? 0) > 0 ? (
                 <View style={{ marginTop: spacing.xxxl }}>
                   <DAOSectionHeader title={t('shop.daoReview')} />
                   <FlatList horizontal data={p.videos} keyExtractor={(v) => String(v.id)} showsHorizontalScrollIndicator={false}

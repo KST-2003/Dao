@@ -27,7 +27,7 @@ export const queryPersister = createAsyncStoragePersister({ storage: AsyncStorag
 export const persistOptions = {
   persister: queryPersister,
   maxAge: 7 * 24 * 60 * 60 * 1000,
-  buster: 'v2', // v2: User gained a required `permissions` field (content-access) — drop old persisted shapes
+  buster: 'v3', // v3: ProductDetail gained a required `videos` field (Dao's review) — drop old persisted shapes
   dehydrateOptions: {
     shouldDehydrateQuery: (query: { queryKey: readonly unknown[]; state: { status: string } }) =>
       query.state.status === 'success' && PERSISTED_ROOTS.has(String(query.queryKey[0])),
