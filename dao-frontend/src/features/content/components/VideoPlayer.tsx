@@ -51,7 +51,17 @@ export function VideoPlayer({ uri, poster, onCompleted }: { uri: string; poster:
   }, [isPlaying]);
 
   useFocusEffect(
-    useCallback(() => () => player.pause(), [player]),
+    useCallback(() => () => {
+      // Best-effort: if this screen is losing focus because it's being popped (not just
+      // backgrounded by a tab switch), useVideoPlayer's own unmount cleanup may have already
+      // released the native player by the time this runs — the two cleanups aren't ordered
+      // against each other. Nothing to pause in that case, so just ignore it.
+      try {
+        player.pause();
+      } catch {
+        // already released
+      }
+    }, [player]),
   );
 
   useEffect(() => {
