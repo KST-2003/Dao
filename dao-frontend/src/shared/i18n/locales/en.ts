@@ -301,10 +301,6 @@ export const en = {
     downloading: "Downloading… {{percent}}%",
     downloaded: "Saved to your gallery",
     downloadGalleryPermission: "Allow photo access to save this video to your gallery.",
-    play: "Play",
-    pause: "Pause",
-    toggleControls: "Show or hide playback controls",
-    pictureInPicture: "Picture in picture",
   },
   kitchen: {
     title: "DAO Kitchen",

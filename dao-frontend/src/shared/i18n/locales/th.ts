@@ -304,10 +304,6 @@ export const th: TranslationShape<typeof en> = {
     downloading: "กำลังดาวน์โหลด… {{percent}}%",
     downloaded: "บันทึกลงอัลบั้มภาพแล้ว",
     downloadGalleryPermission: "อนุญาตให้เข้าถึงรูปภาพเพื่อบันทึกวิดีโอนี้ลงอัลบั้มภาพ",
-    play: "เล่น",
-    pause: "หยุดชั่วคราว",
-    toggleControls: "แสดงหรือซ่อนปุ่มควบคุม",
-    pictureInPicture: "ภาพซ้อนภาพ",
   },
   kitchen: {
     title: "ครัวดาว",
