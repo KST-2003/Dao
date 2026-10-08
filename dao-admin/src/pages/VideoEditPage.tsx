@@ -14,7 +14,7 @@ import type { Translations } from '@/types/api'
 interface VideoForm {
   id?: number; content_type: string; category: string | null; slug: string; thumbnail_url: string | null; video_url: string | null
   duration_seconds: number; status: string; tags: string[]; is_members_only: boolean; published_at: string | null
-  translations: Translations<'title' | 'description'>; products: { id: number; timestamp_seconds: number | null }[]
+  translations: Translations<'title' | 'description'>; products: { id: number; name?: string | null; timestamp_seconds: number | null }[]
 }
 const blank: VideoForm = { content_type: 'vlog', category: 'daos_life', slug: '', thumbnail_url: null, video_url: null, duration_seconds: 0, status: 'draft', tags: [], is_members_only: false, published_at: null, translations: {}, products: [] }
 const CATEGORIES = ['daily_life', 'fashion', 'travel', 'beauty', 'food', 'behind_the_scenes', 'daos_life']
@@ -26,7 +26,7 @@ export default function VideoEditPage() {
   const toast = useToast()
   const [form, setForm] = useState<VideoForm>(blank)
   const [confirm, setConfirm] = useState(false)
-  const q = useQuery({ queryKey: ['video', id], queryFn: () => api.get<VideoForm & { products: { id: number; timestamp_seconds: number | null }[] }>(`/videos/${id}`), enabled: !isNew })
+  const q = useQuery({ queryKey: ['video', id], queryFn: () => api.get<VideoForm & { products: { id: number; name?: string | null; timestamp_seconds: number | null }[] }>(`/videos/${id}`), enabled: !isNew })
   useEffect(() => { if (q.data) setForm({ ...blank, ...q.data, tags: q.data.tags ?? [] }) }, [q.data])
   const set = <K extends keyof VideoForm>(k: K, v: VideoForm[K]) => setForm((f) => ({ ...f, [k]: v }))
 
@@ -54,7 +54,7 @@ export default function VideoEditPage() {
             <p className="mt-2 text-xs text-ink-subtle">Vlogs & Kitchen are Thai-first — please fill ไทย.</p>
           </DAOAdminCard>
           <DAOAdminCard title="Shop this look">
-            <ProductPicker label="Featured products" value={form.products.map((p) => p.id)} onChange={(ids) => set('products', ids.map((pid) => form.products.find((p) => p.id === pid) ?? { id: pid, timestamp_seconds: null }))} />
+            <ProductPicker label="Featured products" value={form.products.map((p) => p.id)} names={Object.fromEntries(form.products.flatMap((p) => (p.name ? [[p.id, p.name]] : [])))} onChange={(ids) => set('products', ids.map((pid) => form.products.find((p) => p.id === pid) ?? { id: pid, timestamp_seconds: null }))} />
           </DAOAdminCard>
         </div>
         <div className="space-y-6">
