@@ -73,3 +73,20 @@ it('keeps the delivery point in the order snapshot', function () {
 
     expect(Order::query()->find($res->json('data.order.id'))->shipping_address['latitude'])->toBe(13.7563);
 });
+
+it('accepts a Thai address with only name, phone and the map-picked address', function () {
+    customer();
+
+    $this->postJson('/api/v1/me/addresses', [
+        'recipient_name' => 'Dao', 'phone' => '+66812345678', 'country_code' => 'TH',
+        'address_line1' => '99 Wireless Road, Bangkok', 'latitude' => 13.7, 'longitude' => 100.5, 'notes' => 'Leave at the lobby',
+    ])->assertCreated()->assertJsonPath('data.region', null)->assertJsonPath('data.postal_code', null);
+});
+
+it('still requires a state/region for Myanmar addresses', function () {
+    customer();
+
+    $this->postJson('/api/v1/me/addresses', [
+        'recipient_name' => 'Dao', 'phone' => '+959123456', 'country_code' => 'MM', 'address_line1' => 'No. 1 Street',
+    ])->assertUnprocessable()->assertJsonValidationErrors('region');
+});

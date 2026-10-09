@@ -26,7 +26,8 @@ export function useAddressEditScreen() {
 
   const set = <K extends keyof AddressInput>(key: K) => (value: AddressInput[K]) => setForm((f) => ({ ...f, [key]: value }));
   const fieldError = (key: string) => (isApiError(save.error) ? save.error.fieldError(key) : undefined);
-  const required: (keyof AddressInput)[] = ['recipient_name', 'phone', 'region', 'address_line1', ...(form.country_code === 'TH' ? (['postal_code'] as const) : [])];
+  // Thailand: name + phone + the map-picked address. Myanmar keeps the full typed address.
+  const required: (keyof AddressInput)[] = ['recipient_name', 'phone', 'address_line1', ...(form.country_code === 'MM' ? (['region'] as const) : [])];
   const hasLocation = form.latitude != null && form.longitude != null;
   // The map pick is mandatory for new addresses only; older rows without coordinates stay savable.
   const needsLocation = !existing && !hasLocation;

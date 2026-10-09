@@ -19,11 +19,11 @@ class AddressRequest extends FormRequest
             'recipient_name' => ['required', 'string', 'max:120'],
             'phone' => ['required', 'string', 'max:20'],
             'country_code' => ['required', Rule::in(['TH', 'MM'])],
-            'region' => ['required', 'string', 'max:120'],
+            'region' => ['nullable', 'string', 'max:120', Rule::requiredIf(fn () => $this->input('country_code') === 'MM')],
             'district' => ['nullable', 'string', 'max:120'],
             'subdistrict' => ['nullable', 'string', 'max:120'],
             'city' => ['nullable', 'string', 'max:120'],
-            'postal_code' => ['nullable', 'string', 'max:12', Rule::requiredIf(fn () => $this->input('country_code') === 'TH')],
+            'postal_code' => ['nullable', 'string', 'max:12'],
             'address_line1' => ['required', 'string', 'max:255'],
             'address_line2' => ['nullable', 'string', 'max:255'],
             // Map pick: both or neither (a lone coordinate is meaningless).

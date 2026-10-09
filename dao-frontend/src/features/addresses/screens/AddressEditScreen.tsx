@@ -41,13 +41,17 @@ export default function AddressEditScreen() {
         </View>
         <DAOInput label={req(t('addresses.recipientName'))} value={f.recipient_name} onChangeText={vm.set('recipient_name')} textContentType="name" error={vm.fieldError('recipient_name')} />
         <DAOInput label={req(t('addresses.phone'))} value={f.phone} onChangeText={vm.set('phone')} keyboardType="phone-pad" textContentType="telephoneNumber" error={vm.fieldError('phone')} />
-        <DAOInput label={req(t('addresses.addressLine1'))} value={f.address_line1} onChangeText={vm.set('address_line1')} textContentType="streetAddressLine1" error={vm.fieldError('address_line1')} />
-        <DAOInput label={t('addresses.addressLine2')} value={f.address_line2 ?? ''} onChangeText={vm.set('address_line2')} textContentType="streetAddressLine2" />
-        <DAOInput label={vm.labels.subdistrict} value={f.subdistrict ?? ''} onChangeText={vm.set('subdistrict')} />
-        <DAOInput label={t('addresses.district')} value={f.district ?? ''} onChangeText={vm.set('district')} />
-        <DAOInput label={req(vm.labels.region)} value={f.region ?? ''} onChangeText={vm.set('region')} error={vm.fieldError('region')} />
-        {f.country_code === 'MM' ? <DAOInput label={t('addresses.city')} value={f.city ?? ''} onChangeText={vm.set('city')} textContentType="addressCity" /> : null}
-        <DAOInput label={f.country_code === 'TH' ? req(t('addresses.postalCode')) : t('addresses.postalCode')} value={f.postal_code ?? ''} onChangeText={vm.set('postal_code')} keyboardType="number-pad" textContentType="postalCode" error={vm.fieldError('postal_code')} />
+        {f.country_code === 'MM' ? (
+          <>
+            <DAOInput label={req(t('addresses.addressLine1'))} value={f.address_line1} onChangeText={vm.set('address_line1')} textContentType="streetAddressLine1" error={vm.fieldError('address_line1')} />
+            <DAOInput label={t('addresses.addressLine2')} value={f.address_line2 ?? ''} onChangeText={vm.set('address_line2')} textContentType="streetAddressLine2" />
+            <DAOInput label={vm.labels.subdistrict} value={f.subdistrict ?? ''} onChangeText={vm.set('subdistrict')} />
+            <DAOInput label={t('addresses.district')} value={f.district ?? ''} onChangeText={vm.set('district')} />
+            <DAOInput label={req(vm.labels.region)} value={f.region ?? ''} onChangeText={vm.set('region')} error={vm.fieldError('region')} />
+            <DAOInput label={t('addresses.city')} value={f.city ?? ''} onChangeText={vm.set('city')} textContentType="addressCity" />
+            <DAOInput label={t('addresses.postalCode')} value={f.postal_code ?? ''} onChangeText={vm.set('postal_code')} keyboardType="number-pad" textContentType="postalCode" error={vm.fieldError('postal_code')} />
+          </>
+        ) : null}
         <DAOInput label={t('addresses.notes')} value={f.notes ?? ''} onChangeText={vm.set('notes')} multiline />
         <DAOChip label={t('addresses.setDefault')} selected={!!f.is_default} onPress={() => vm.set('is_default')(!f.is_default)} />
         <DAOButton label={t('common.save')} size="lg" fullWidth onPress={vm.submit} loading={vm.saving} disabled={!vm.valid} />
