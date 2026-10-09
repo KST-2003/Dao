@@ -13,6 +13,9 @@ class AddressResource extends JsonResource
         return $this->only([
             'id', 'label', 'recipient_name', 'phone', 'country_code', 'region', 'district', 'subdistrict',
             'city', 'postal_code', 'address_line1', 'address_line2', 'notes', 'is_default',
-        ]);
+        ]) + [
+            'latitude' => $this->latitude === null ? null : (float) $this->latitude,
+            'longitude' => $this->longitude === null ? null : (float) $this->longitude,
+        ];
     }
 }

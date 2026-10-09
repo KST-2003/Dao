@@ -12,12 +12,12 @@ class Address extends Model
 
     protected $fillable = [
         'label', 'recipient_name', 'phone', 'country_code', 'region', 'district', 'subdistrict',
-        'city', 'postal_code', 'address_line1', 'address_line2', 'notes', 'is_default',
+        'city', 'postal_code', 'address_line1', 'address_line2', 'latitude', 'longitude', 'notes', 'is_default',
     ];
 
     protected function casts(): array
     {
-        return ['is_default' => 'boolean'];
+        return ['is_default' => 'boolean', 'latitude' => 'float', 'longitude' => 'float'];
     }
 
     public function user(): BelongsTo
@@ -30,7 +30,7 @@ class Address extends Model
     {
         return $this->only([
             'recipient_name', 'phone', 'country_code', 'region', 'district', 'subdistrict',
-            'city', 'postal_code', 'address_line1', 'address_line2', 'notes',
+            'city', 'postal_code', 'address_line1', 'address_line2', 'latitude', 'longitude', 'notes',
         ]);
     }
 }

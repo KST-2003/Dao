@@ -14,6 +14,9 @@ const EAS_PROJECT_ID = process.env.EAS_PROJECT_ID ?? '765a5e49-b1c4-4772-8abf-0e
 const EAS_OWNER = process.env.EAS_OWNER ?? 'kaungsithu03-2';
 const BUNDLE_ID = process.env.APP_BUNDLE_ID ?? 'com.daoapp.customer';
 
+// Secret sk.… token (DOWNLOADS:READ) used only to fetch the native Mapbox SDK at build time.
+const MAPBOX_DOWNLOAD_TOKEN = process.env.RNMAPBOX_MAPS_DOWNLOAD_TOKEN;
+
 /** @type {import('expo/config').ExpoConfig} */
 module.exports = {
   expo: {
@@ -66,6 +69,8 @@ module.exports = {
       'expo-localization',
       'expo-web-browser',
       'expo-video',
+      ...(MAPBOX_DOWNLOAD_TOKEN ? [['@rnmapbox/maps', { RNMAPBOX_MAPS_DOWNLOAD_TOKEN: MAPBOX_DOWNLOAD_TOKEN }]] : ['@rnmapbox/maps']),
+      ['expo-location', { locationWhenInUsePermission: 'Allow $(PRODUCT_NAME) to use your location to set your delivery address on the map.' }],
       [
         'expo-media-library',
         { photosPermission: 'DAO needs access to your photos to save videos you download.', savePhotosPermission: 'DAO needs permission to save downloaded videos to your gallery.', isAccessMediaLocationEnabled: false },

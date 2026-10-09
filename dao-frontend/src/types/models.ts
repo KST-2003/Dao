@@ -74,6 +74,9 @@ export interface Address {
   address_line1: string;
   address_line2: string | null;
   notes: string | null;
+  /** Map-picked point; null for addresses saved before the map picker existed. */
+  latitude?: number | null;
+  longitude?: number | null;
   is_default: boolean;
 }
 

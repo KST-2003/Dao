@@ -6,10 +6,11 @@ import { useErrorMessage } from '@/shared/hooks/useErrorMessage';
 import { toast } from '@/shared/store/toastStore';
 import type { AddressInput } from '@/types/models';
 import { useAddresses, useDeleteAddress, useSaveAddress } from '../api';
+import { useAddressMapPicker } from './useAddressMapPicker';
 
 const EMPTY: AddressInput = {
   label: null, recipient_name: '', phone: '', country_code: 'TH', region: '', district: '', subdistrict: '', city: '',
-  postal_code: '', address_line1: '', address_line2: '', notes: '', is_default: false,
+  postal_code: '', address_line1: '', address_line2: '', notes: '', latitude: null, longitude: null, is_default: false,
 };
 
 /** One form for Thailand (province/district/sub-district/postcode) and Myanmar (state-region/district/township). */
@@ -26,13 +27,21 @@ export function useAddressEditScreen() {
   const set = <K extends keyof AddressInput>(key: K) => (value: AddressInput[K]) => setForm((f) => ({ ...f, [key]: value }));
   const fieldError = (key: string) => (isApiError(save.error) ? save.error.fieldError(key) : undefined);
   const required: (keyof AddressInput)[] = ['recipient_name', 'phone', 'region', 'address_line1', ...(form.country_code === 'TH' ? (['postal_code'] as const) : [])];
-  const valid = required.every((k) => String(form[k] ?? '').trim() !== '');
+  const hasLocation = form.latitude != null && form.longitude != null;
+  // The map pick is mandatory for new addresses only; older rows without coordinates stay savable.
+  const needsLocation = !existing && !hasLocation;
+  const valid = required.every((k) => String(form[k] ?? '').trim() !== '') && !needsLocation;
+  const setCoordinates = (latitude: number, longitude: number, address: string) => setForm((f) => ({ ...f, latitude, longitude, address_line1: address }));
+  const { openMap } = useAddressMapPicker(form, setCoordinates);
 
   return {
     isEdit: !!existing,
     form,
     set,
     valid,
+    hasLocation,
+    needsLocation,
+    openMap,
     fieldError,
     labels: {
       region: t(`addresses.region.${form.country_code}`),

@@ -1,12 +1,15 @@
-import { View } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+import { Pressable, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { DAOButton, DAOChip, DAOHeader, DAOInput, DAOScreen, DAOText } from '@/shared/components';
 import { useTheme } from '@/shared/theme';
 import { useAddressEditScreen } from '../hooks/useAddressEditScreen';
+import { useStyles } from './AddressEditScreen.styles';
 
 export default function AddressEditScreen() {
   const { t } = useTranslation();
-  const { spacing } = useTheme();
+  const { spacing, colors } = useTheme();
+  const s = useStyles();
   const vm = useAddressEditScreen();
   const f = vm.form;
   const req = (label: string) => `${label} *`;
@@ -14,6 +17,21 @@ export default function AddressEditScreen() {
   return (
     <DAOScreen header={<DAOHeader title={vm.isEdit ? t('addresses.edit') : t('addresses.add')} />}>
       <View style={{ gap: spacing.lg }}>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={t('addresses.map.pickOnMap')}
+          onPress={vm.openMap}
+          style={[s.mapRow, vm.needsLocation && s.mapRowError]}
+        >
+          <Ionicons name="map-outline" size={22} color={colors.primary} />
+          <View style={s.mapRowText}>
+            <DAOText variant="body">{vm.hasLocation ? t('addresses.map.locationSet') : t('addresses.map.pickOnMap')}</DAOText>
+            {vm.hasLocation ? <DAOText variant="bodySmall" tone="textMuted" numberOfLines={2}>{f.address_line1}</DAOText> : (
+              <DAOText variant="bodySmall" tone={vm.needsLocation ? 'danger' : 'textMuted'}>{vm.needsLocation ? t('addresses.map.locationRequired') : t('addresses.map.optionalHint')}</DAOText>
+            )}
+          </View>
+          <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />
+        </Pressable>
         <View style={{ gap: spacing.sm }}>
           <DAOText variant="bodySmall" tone="textMuted">{t('addresses.country')}</DAOText>
           <View style={{ flexDirection: 'row', gap: spacing.sm }}>

@@ -20,3 +20,7 @@ export const EXPO_PROJECT_ID: string | undefined =
   (Constants.expoConfig?.extra as { eas?: { projectId?: string } } | undefined)?.eas?.projectId || undefined;
 
 export const APP_VERSION = Constants.expoConfig?.version ?? '1.0.0';
+
+/** Mapbox: the public token (pk.…) is safe to ship; the secret download token is build-time only. */
+export const MAPBOX_TOKEN = trim(process.env.EXPO_PUBLIC_MAPBOX_TOKEN);
+export const MAPBOX_STYLE = trim(process.env.EXPO_PUBLIC_MAPBOX_STYLE) || 'mapbox://styles/mapbox/streets-v12';

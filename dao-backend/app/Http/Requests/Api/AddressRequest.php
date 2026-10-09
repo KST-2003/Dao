@@ -26,6 +26,9 @@ class AddressRequest extends FormRequest
             'postal_code' => ['nullable', 'string', 'max:12', Rule::requiredIf(fn () => $this->input('country_code') === 'TH')],
             'address_line1' => ['required', 'string', 'max:255'],
             'address_line2' => ['nullable', 'string', 'max:255'],
+            // Map pick: both or neither (a lone coordinate is meaningless).
+            'latitude' => ['nullable', 'numeric', 'between:-90,90', 'required_with:longitude'],
+            'longitude' => ['nullable', 'numeric', 'between:-180,180', 'required_with:latitude'],
             'notes' => ['nullable', 'string', 'max:500'],
             'is_default' => ['sometimes', 'boolean'],
         ];
