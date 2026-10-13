@@ -151,7 +151,7 @@ export const my: TranslationShape<typeof en> = {
     shipping: "ပို့ဆောင်ခြင်း",
     reviews: "သုံးသပ်ချက်များ",
     noReviews: "သုံးသပ်ချက် မရှိသေးပါ",
-    daoReview: "Dao ၏ သုံးသပ်ချက်",
+    daoReview: "Dao ၏ သုံးသပ်ချက်ကို ကြည့်ရန်",
     related: "သင်နှစ်သက်နိုင်သော",
     memberPrice: "အဖွဲ့ဝင်ဈေး",
     yourPrice: "သင့် {{tier}} ဈေး",
@@ -161,7 +161,7 @@ export const my: TranslationShape<typeof en> = {
     percentOff: "{{percent}}% လျှော့",
     verifiedPurchase: "အတည်ပြုထားသော ဝယ်ယူမှု",
     reviewCount: "သုံးသပ်ချက် {{count}} ခု",
-    shopTheLook: "ဒီစတိုင်ကို ဝယ်ရန်",
+    shopTheLook: "ဆက်စပ်ပစ္စည်းများ",
     externalLink: "{{platform}} တွင်လည်း ရှိသည်",
     badges: {
       new: "အသစ်",

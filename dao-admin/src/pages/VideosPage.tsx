@@ -27,7 +27,7 @@ export default function VideosPage() {
   ]
   return (
     <>
-      <DAOAdminHeader title="Videos & Vlogs" subtitle="Link products to a video to show “Shop this look” in the app."
+      <DAOAdminHeader title="Videos & Vlogs" subtitle="Link products to a video to show “Related products” in the app."
         actions={<Button icon={<Plus className="size-4" />} onClick={() => navigate('/videos/new')}>New video</Button>} />
       <div className="mb-4 flex flex-wrap items-center gap-2">
         {TYPES.map((t) => <button key={t || 'all'} onClick={() => { setType(t); setPage(1) }} className={`rounded-full px-3 py-1 text-sm ${type === t ? 'bg-primary text-on-primary' : 'bg-muted'}`}>{t || 'all'}</button>)}

@@ -53,7 +53,7 @@ export default function VideoEditPage() {
             <TranslationTabs<'title' | 'description'> fields={[{ name: 'title', label: 'Title', required: true }, { name: 'description', label: 'Description', multiline: true }]} value={form.translations} onChange={(t) => set('translations', t)} errors={err} />
             <p className="mt-2 text-xs text-ink-subtle">Vlogs & Kitchen are Thai-first — please fill ไทย.</p>
           </DAOAdminCard>
-          <DAOAdminCard title="Shop this look">
+          <DAOAdminCard title="Related products">
             <ProductPicker label="Featured products" value={form.products.map((p) => p.id)} names={Object.fromEntries(form.products.flatMap((p) => (p.name ? [[p.id, p.name]] : [])))} onChange={(ids) => set('products', ids.map((pid) => form.products.find((p) => p.id === pid) ?? { id: pid, timestamp_seconds: null }))} />
           </DAOAdminCard>
         </div>

@@ -151,7 +151,7 @@ export const th: TranslationShape<typeof en> = {
     shipping: "การจัดส่ง",
     reviews: "รีวิว",
     noReviews: "ยังไม่มีรีวิว",
-    daoReview: "รีวิวจากดาว",
+    daoReview: "ดูรีวิวจากดาว",
     related: "คุณอาจชอบ",
     memberPrice: "ราคาสมาชิก",
     yourPrice: "ราคา {{tier}} ของคุณ",
@@ -161,7 +161,7 @@ export const th: TranslationShape<typeof en> = {
     percentOff: "ลด {{percent}}%",
     verifiedPurchase: "ซื้อจริง",
     reviewCount: "{{count}} รีวิว",
-    shopTheLook: "ช้อปลุคนี้",
+    shopTheLook: "สินค้าที่เกี่ยวข้อง",
     externalLink: "มีขายบน {{platform}} ด้วย",
     badges: {
       new: "ใหม่",

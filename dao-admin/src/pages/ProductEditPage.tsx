@@ -193,9 +193,9 @@ export default function ProductEditPage() {
               <Field label="Campaign code"><Input value={form.campaign_code ?? ''} onChange={(e) => set('campaign_code', e.target.value)} /></Field>
             </div>
           </DAOAdminCard>
-          <DAOAdminCard title="Dao's review">
+          <DAOAdminCard title="Watch Dao's review">
             <VideoPicker label="Linked videos" value={form.video_ids} onChange={(ids) => set('video_ids', ids)} />
-            <p className="mt-2 text-xs text-ink-subtle">Shows on the product page in the app. Same link as that video's own "Shop this look" — add here or there, either way links both pages.</p>
+            <p className="mt-2 text-xs text-ink-subtle">Shows on the product page in the app. Same link as that video's own "Related products" — add here or there, either way links both pages.</p>
           </DAOAdminCard>
           {!isNew ? <Button type="button" variant="danger" className="w-full" onClick={() => setConfirmDelete(true)}>Archive product</Button> : null}
         </div>

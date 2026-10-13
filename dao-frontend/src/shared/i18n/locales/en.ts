@@ -148,7 +148,7 @@ export const en = {
     shipping: "Shipping",
     reviews: "Reviews",
     noReviews: "No reviews yet",
-    daoReview: "Dao's review",
+    daoReview: "Watch Dao's review",
     related: "You may also love",
     memberPrice: "Member price",
     yourPrice: "Your {{tier}} price",
@@ -158,7 +158,7 @@ export const en = {
     percentOff: "{{percent}}% off",
     verifiedPurchase: "Verified purchase",
     reviewCount: "{{count}} reviews",
-    shopTheLook: "Shop this look",
+    shopTheLook: "Related products",
     externalLink: "Also on {{platform}}",
     badges: {
       new: "New",
