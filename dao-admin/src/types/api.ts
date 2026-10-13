@@ -62,6 +62,10 @@ export interface ProductDetail {
   id: number; category_id: number | null; slug: string; brand: string | null; sku: string | null; barcode: string | null
   price: number; sale_price: number | null; member_price: number | null; cost: number | null; weight_grams: number | null
   status: 'draft' | 'published' | 'archived'; badges: string[] | null; is_vip_only: boolean; vip_min_tier_id: number | null
+  /** Per-order limits for normal orders; null = no limit. */
+  min_order_qty: number | null; max_order_qty: number | null
+  /** Pre-order: per-preorder limits and total capacity across customers; null = no limit. */
+  preorder_enabled: boolean; preorder_min_qty: number | null; preorder_max_qty: number | null; preorder_capacity: number | null
   video_url: string | null; external_url: string | null; social_platform: string | null; campaign_code: string | null
   published_at: string | null
   translations: Translations<'name' | 'description' | 'materials' | 'care_instructions' | 'shipping_info'>
@@ -96,6 +100,24 @@ export interface OrderDetail {
   payments: { id: number; provider: string; provider_reference: string | null; amount: number; status: string; paid_at: string | null }[]
   shipment: { carrier: string | null; tracking_number: string | null; tracking_url: string | null; status: string } | null
   allowed_next: string[]
+}
+
+export interface PreorderRow {
+  id: number; preorder_number: string; customer: string | null; status: string; destination: 'thailand' | 'myanmar'
+  grand_total: number; currency: string; items_count: number; submitted_at: string | null
+}
+
+export interface PreorderDetail {
+  id: number; preorder_number: string; status: string; destination: 'thailand' | 'myanmar'; currency: string
+  subtotal: number; member_discount: number; shipping_fee: number; grand_total: number
+  notes: string | null; reject_reason: string | null; carrier: string | null; tracking_number: string | null
+  submitted_at: string; paid_at: string | null
+  shipping_address: Record<string, string | null>
+  items: { id: number; product_name: string; variant_label: string | null; sku: string; image_url: string | null; unit_price: number; quantity: number; line_total: number }[]
+  customer: { id: number; name: string | null; display_name: string | null; phone: string | null; email: string | null } | null
+  history: { id: number; from_status: string | null; to_status: string; note: string | null; created_at: string }[]
+  order: { id: number; order_number: string; status: string; payment_status: string; payment_method: string; payments: { id: number; provider: string; provider_reference: string | null; amount: number; status: string }[] } | null
+  steps: string[]; allowed_next: string[]; can_refund: boolean; can_mark_paid: boolean
 }
 
 export interface CustomerRow {

@@ -18,6 +18,7 @@ type Form = Omit<ProductDetail, 'price' | 'sale_price' | 'member_price' | 'cost'
 
 const blank: Form = {
   id: 0, category_id: null, slug: '', brand: 'DAO', sku: '', barcode: '', price: '', sale_price: '', member_price: '', cost: '', weight_grams: null,
+  min_order_qty: null, max_order_qty: null, preorder_enabled: false, preorder_min_qty: null, preorder_max_qty: null, preorder_capacity: null,
   status: 'draft', badges: [], is_vip_only: false, vip_min_tier_id: null, video_url: '', external_url: '', social_platform: null, campaign_code: '',
   published_at: null, translations: {}, images: [], variants: [], collection_ids: [], video_ids: [],
 }
@@ -47,7 +48,10 @@ export default function ProductEditPage() {
       const body = {
         category_id: form.category_id, brand: form.brand || null, sku: form.sku || null, barcode: form.barcode || null,
         price: toMinor(form.price), sale_price: toMinor(form.sale_price), member_price: toMinor(form.member_price), cost: toMinor(form.cost),
-        weight_grams: form.weight_grams, badges: form.badges, is_vip_only: form.is_vip_only, video_url: form.video_url || null,
+        weight_grams: form.weight_grams,
+        min_order_qty: form.min_order_qty, max_order_qty: form.max_order_qty, preorder_enabled: form.preorder_enabled,
+        preorder_min_qty: form.preorder_min_qty, preorder_max_qty: form.preorder_max_qty, preorder_capacity: form.preorder_capacity,
+        badges: form.badges, is_vip_only: form.is_vip_only, video_url: form.video_url || null,
         external_url: form.external_url || null, social_platform: form.social_platform, campaign_code: form.campaign_code || null,
         published_at: form.published_at, translations: form.translations, collection_ids: form.collection_ids, video_ids: form.video_ids,
         ...(form.slug ? { slug: form.slug } : {}),
@@ -129,6 +133,28 @@ export default function ProductEditPage() {
               <Field label="Sale price" error={err('sale_price')}><Input type="number" step="0.01" value={form.sale_price} onChange={(e) => set('sale_price', e.target.value)} /></Field>
               <Field label="Member price" hint="Shown to signed-in DAO members"><Input type="number" step="0.01" value={form.member_price} onChange={(e) => set('member_price', e.target.value)} /></Field>
               <Field label="Cost" hint="Internal only — never sent to the app"><Input type="number" step="0.01" value={form.cost} onChange={(e) => set('cost', e.target.value)} /></Field>
+            </div>
+          </DAOAdminCard>
+          <DAOAdminCard title="Order limits">
+            <div className="grid gap-4">
+              <p className="text-xs text-ink-subtle">Per order, across all sizes and colors of this product. Leave empty for no limit.</p>
+              <div className="grid grid-cols-2 gap-3">
+                <Field label="Min qty" error={err('min_order_qty')}><Input type="number" min="1" value={form.min_order_qty ?? ''} onChange={(e) => set('min_order_qty', e.target.value ? Number(e.target.value) : null)} /></Field>
+                <Field label="Max qty" error={err('max_order_qty')}><Input type="number" min="1" value={form.max_order_qty ?? ''} onChange={(e) => set('max_order_qty', e.target.value ? Number(e.target.value) : null)} /></Field>
+              </div>
+            </div>
+          </DAOAdminCard>
+          <DAOAdminCard title="Pre-order">
+            <div className="grid gap-4">
+              <Toggle label="Accept pre-orders" checked={form.preorder_enabled} onChange={(v) => set('preorder_enabled', v)} />
+              {form.preorder_enabled ? <>
+                <p className="text-xs text-ink-subtle">Customers pick size and color as usual, even when out of stock. Stock is not reduced; each pre-order is reviewed by staff first.</p>
+                <div className="grid grid-cols-2 gap-3">
+                  <Field label="Min per pre-order" error={err('preorder_min_qty')}><Input type="number" min="1" value={form.preorder_min_qty ?? ''} onChange={(e) => set('preorder_min_qty', e.target.value ? Number(e.target.value) : null)} /></Field>
+                  <Field label="Max per pre-order" error={err('preorder_max_qty')}><Input type="number" min="1" value={form.preorder_max_qty ?? ''} onChange={(e) => set('preorder_max_qty', e.target.value ? Number(e.target.value) : null)} /></Field>
+                </div>
+                <Field label="Total pre-order capacity" hint="Across all customers. Rejected and cancelled pre-orders free their share." error={err('preorder_capacity')}><Input type="number" min="1" value={form.preorder_capacity ?? ''} onChange={(e) => set('preorder_capacity', e.target.value ? Number(e.target.value) : null)} /></Field>
+              </> : null}
             </div>
           </DAOAdminCard>
           <DAOAdminCard title="Organization">

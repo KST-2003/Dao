@@ -1,5 +1,5 @@
 import {
-  Award, BadgePercent, BarChart3, Bell, Boxes, ChefHat, ClipboardList, FolderTree, Gift, Image, Layers, MessageSquareQuote,
+  Award, BadgePercent, BarChart3, Bell, Boxes, CalendarClock, ChefHat, ClipboardList, FolderTree, Gift, Image, Layers, MessageSquareQuote,
   PlayCircle, Settings, ShieldCheck, ShoppingBag, Sparkles, Star, Users, type LucideIcon,
 } from 'lucide-react'
 import type { Permission } from '@/types/api'
@@ -13,6 +13,7 @@ export const NAV: NavGroup[] = [
     label: 'Commerce',
     items: [
       { to: '/orders', label: 'Orders', icon: ClipboardList, perms: ['orders.view', 'orders.manage'] },
+      { to: '/preorders', label: 'Pre-orders', icon: CalendarClock, perms: ['orders.view', 'orders.manage'] },
       { to: '/products', label: 'Products', icon: ShoppingBag, perms: ['products.manage'] },
       { to: '/inventory', label: 'Inventory', icon: Boxes, perms: ['inventory.manage'] },
       { to: '/categories', label: 'Categories', icon: FolderTree, perms: ['products.manage'] },
