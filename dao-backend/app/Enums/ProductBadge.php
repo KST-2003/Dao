@@ -10,4 +10,6 @@ enum ProductBadge: string
     case Limited = 'limited';
     case Vip = 'vip';
     case Sale = 'sale';
+    /** Automatic: shown whenever the product accepts pre-orders (never stored in `badges`). */
+    case Preorder = 'preorder';
 }

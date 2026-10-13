@@ -26,7 +26,8 @@ class Product extends Model
 
     protected $fillable = [
         'category_id', 'slug', 'brand', 'sku', 'barcode', 'currency', 'price', 'sale_price', 'member_price',
-        'cost', 'weight_grams', 'status', 'badges', 'is_vip_only', 'vip_min_tier_id', 'video_url',
+        'cost', 'weight_grams', 'min_order_qty', 'max_order_qty', 'preorder_enabled', 'preorder_min_qty',
+        'preorder_max_qty', 'preorder_capacity', 'status', 'badges', 'is_vip_only', 'vip_min_tier_id', 'video_url',
         'external_url', 'social_platform', 'campaign_code', 'published_at',
     ];
 
@@ -38,6 +39,12 @@ class Product extends Model
             'status' => ProductStatus::class,
             'badges' => 'array',
             'is_vip_only' => 'boolean',
+            'preorder_enabled' => 'boolean',
+            'min_order_qty' => 'integer',
+            'max_order_qty' => 'integer',
+            'preorder_min_qty' => 'integer',
+            'preorder_max_qty' => 'integer',
+            'preorder_capacity' => 'integer',
             'price' => 'integer',
             'sale_price' => 'integer',
             'member_price' => 'integer',

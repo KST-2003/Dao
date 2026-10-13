@@ -73,6 +73,7 @@ class AppServiceProvider extends ServiceProvider
             'user' => Models\User::class,
             'admin_user' => Models\AdminUser::class,
             'order' => Models\Order::class,
+            'preorder' => Models\Preorder::class,
             'product' => Models\Product::class,
             'product_variant' => Models\ProductVariant::class,
             'video' => Models\Video::class,

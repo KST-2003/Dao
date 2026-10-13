@@ -23,6 +23,13 @@ class ProductRequest extends AdminRequest
             'member_price' => ['nullable', 'integer', 'min:0'],
             'cost' => ['nullable', 'integer', 'min:0'],
             'weight_grams' => ['nullable', 'integer', 'min:0'],
+            // Quantity limits; null = no limit.
+            'min_order_qty' => ['nullable', 'integer', 'min:1', 'max:100000'],
+            'max_order_qty' => ['nullable', 'integer', 'min:1', 'max:100000'],
+            'preorder_enabled' => ['sometimes', 'boolean'],
+            'preorder_min_qty' => ['nullable', 'integer', 'min:1', 'max:100000'],
+            'preorder_max_qty' => ['nullable', 'integer', 'min:1', 'max:100000'],
+            'preorder_capacity' => ['nullable', 'integer', 'min:1', 'max:1000000'],
             'status' => ['sometimes', Rule::enum(ProductStatus::class)],
             'badges' => ['nullable', 'array'],
             'badges.*' => [Rule::enum(ProductBadge::class)],
@@ -44,5 +51,21 @@ class ProductRequest extends AdminRequest
             'care_instructions' => 'string|max:2000',
             'shipping_info' => 'string|max:2000',
         ], ['name']));
+    }
+
+    /** @return array<int, callable> */
+    public function after(): array
+    {
+        return [function ($validator) {
+            // min must not exceed max (only when both are given; PUT may send either alone).
+            foreach ([['min_order_qty', 'max_order_qty'], ['preorder_min_qty', 'preorder_max_qty']] as [$min, $max]) {
+                if ($this->filled($min) && $this->filled($max) && (int) $this->input($min) > (int) $this->input($max)) {
+                    $validator->errors()->add($max, __('errors.QTY_RANGE_INVALID'));
+                }
+            }
+            if ($this->filled('preorder_max_qty') && $this->filled('preorder_capacity') && (int) $this->input('preorder_max_qty') > (int) $this->input('preorder_capacity')) {
+                $validator->errors()->add('preorder_capacity', __('errors.QTY_RANGE_INVALID'));
+            }
+        }];
     }
 }

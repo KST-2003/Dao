@@ -1,0 +1,30 @@
+<?php
+
+namespace App\Models;
+
+use App\Casts\MediaUrl;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+
+class PreorderItem extends Model
+{
+    protected $guarded = ['id'];
+
+    protected function casts(): array
+    {
+        return [
+            'unit_price' => 'integer', 'original_unit_price' => 'integer', 'quantity' => 'integer', 'line_total' => 'integer',
+            'image_url' => MediaUrl::class,
+        ];
+    }
+
+    public function preorder(): BelongsTo
+    {
+        return $this->belongsTo(Preorder::class);
+    }
+
+    public function product(): BelongsTo
+    {
+        return $this->belongsTo(Product::class)->withTrashed();
+    }
+}

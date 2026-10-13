@@ -36,33 +36,48 @@ class OrderService
 
     public function transition(Order $order, OrderStatus $to, ?Model $actor, ?string $note = null): Order
     {
+        if ($order->preorder_id !== null) {
+            throw DomainException::of('ORDER_MANAGED_BY_PREORDER', 409);
+        }
+
         return match ($to) {
             OrderStatus::Paid => $this->markPaid($order, $actor),
             OrderStatus::Cancelled => $this->cancel($order, $actor, $note),
             OrderStatus::Refunded => $this->refund($order, $actor, false, $note),
-            default => DB::transaction(function () use ($order, $to, $actor, $note) {
-                $locked = $this->lock($order);
-                $this->assertTransition($locked, $to);
-                $from = $locked->status;
-                $locked->status = $to;
-                $locked->save();
-                if ($to === OrderStatus::Shipped) {
-                    $this->shipment($locked)->fill(['status' => ShipmentStatus::InTransit, 'shipped_at' => now()])->save();
-                }
-                if ($to === OrderStatus::Delivered) {
-                    $this->shipment($locked)->fill(['status' => ShipmentStatus::Delivered, 'delivered_at' => now()])->save();
-                }
-                $this->history($locked, $from, $to, $actor, $note);
-                OrderStatusChanged::dispatch($locked, $from, $to);
-
-                // Cash on delivery is paid when delivered.
-                if ($to === OrderStatus::Delivered && $locked->payment_method === PaymentMethod::Cod) {
-                    $this->confirmPayment($locked, null, $actor);
-                }
-
-                return $locked;
-            }),
+            default => $this->move($order, $to, $actor, $note),
         };
+    }
+
+    /** Fulfilment steps of a pre-order's payable order are driven by the pre-order, never by hand. */
+    public function advanceForPreorder(Order $order, OrderStatus $to, ?Model $actor): Order
+    {
+        return $this->move($order, $to, $actor, null);
+    }
+
+    private function move(Order $order, OrderStatus $to, ?Model $actor, ?string $note): Order
+    {
+        return DB::transaction(function () use ($order, $to, $actor, $note) {
+            $locked = $this->lock($order);
+            $this->assertTransition($locked, $to);
+            $from = $locked->status;
+            $locked->status = $to;
+            $locked->save();
+            if ($to === OrderStatus::Shipped) {
+                $this->shipment($locked)->fill(['status' => ShipmentStatus::InTransit, 'shipped_at' => now()])->save();
+            }
+            if ($to === OrderStatus::Delivered) {
+                $this->shipment($locked)->fill(['status' => ShipmentStatus::Delivered, 'delivered_at' => now()])->save();
+            }
+            $this->history($locked, $from, $to, $actor, $note);
+            OrderStatusChanged::dispatch($locked, $from, $to);
+
+            // Cash on delivery is paid when delivered.
+            if ($to === OrderStatus::Delivered && $locked->payment_method === PaymentMethod::Cod) {
+                $this->confirmPayment($locked, null, $actor);
+            }
+
+            return $locked;
+        });
     }
 
     /** Payment confirmed by a trusted source (signed webhook, or admin for bank transfer / COD). Idempotent. */
@@ -102,7 +117,9 @@ class OrderService
             $locked->payments()->whereIn('status', [PaymentStatus::Pending->value, PaymentStatus::RequiresAction->value])
                 ->update(['status' => PaymentStatus::Cancelled->value]);
 
-            $this->inventory->restoreForOrder($locked->load('items'), InventoryReason::OrderCancelled);
+            if ($locked->preorder_id === null) { // pre-orders never took stock
+                $this->inventory->restoreForOrder($locked->load('items'), InventoryReason::OrderCancelled);
+            }
             $this->coupons->release($locked);
             $this->history($locked, $from, OrderStatus::Cancelled, $actor, $reason);
 
@@ -118,6 +135,9 @@ class OrderService
     {
         if ($order->user_id !== $user->id) {
             throw DomainException::of('NOT_FOUND', 404);
+        }
+        if ($order->preorder_id !== null) {
+            throw DomainException::of('ORDER_MANAGED_BY_PREORDER', 409);
         }
         $cancellable = $order->status === OrderStatus::PendingPayment
             || ($order->status === OrderStatus::Processing && $order->payment_status !== PaymentStatus::Succeeded);
@@ -146,7 +166,7 @@ class OrderService
 
             $from = $locked->status;
             $locked->forceFill(['status' => OrderStatus::Refunded, 'payment_status' => PaymentStatus::Refunded, 'refunded_at' => now()])->save();
-            if ($restock) {
+            if ($restock && $locked->preorder_id === null) {
                 $this->inventory->restoreForOrder($locked->load('items'), InventoryReason::OrderRefunded);
             }
             $this->history($locked, $from, OrderStatus::Refunded, $actor, trim(($note ?? '').($automatic ? '' : ' [manual refund required]')));

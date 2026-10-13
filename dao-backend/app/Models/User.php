@@ -85,6 +85,11 @@ class User extends Authenticatable
         return $this->hasMany(Order::class);
     }
 
+    public function preorders(): HasMany
+    {
+        return $this->hasMany(Preorder::class);
+    }
+
     public function loyaltyAccount(): HasOne
     {
         return $this->hasOne(LoyaltyAccount::class);

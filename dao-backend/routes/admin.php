@@ -51,7 +51,14 @@ Route::middleware(['auth:sanctum', 'admin', 'throttle:api'])->group(function () 
         Route::get('/orders', [Admin\OrderController::class, 'index']);
         Route::get('/orders/{id}', [Admin\OrderController::class, 'show'])->whereNumber('id');
     });
+    Route::middleware('admin.can:orders.view,orders.manage')->group(function () {
+        Route::get('/preorders', [Admin\PreorderController::class, 'index']);
+        Route::get('/preorders/{id}', [Admin\PreorderController::class, 'show'])->whereNumber('id');
+    });
     Route::middleware('admin.can:orders.manage')->group(function () {
+        Route::post('/preorders/{id}/status', [Admin\PreorderController::class, 'transition'])->whereNumber('id');
+        Route::post('/preorders/{id}/mark-paid', [Admin\PreorderController::class, 'markPaid'])->whereNumber('id');
+        Route::post('/preorders/{id}/refund', [Admin\PreorderController::class, 'refund'])->whereNumber('id');
         Route::post('/orders/{id}/status', [Admin\OrderController::class, 'transition'])->whereNumber('id');
         Route::post('/orders/{id}/mark-paid', [Admin\OrderController::class, 'markPaid'])->whereNumber('id');
         Route::post('/orders/{id}/refund', [Admin\OrderController::class, 'refund'])->whereNumber('id');

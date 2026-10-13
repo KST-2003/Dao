@@ -13,6 +13,9 @@ class NotifyOrderStatusChanged
     public function handle(OrderStatusChanged $event): void
     {
         $order = $event->order;
+        if ($order->preorder_id !== null) {
+            return; // the pre-order's own notifications cover it
+        }
         $this->notifications->notify(
             $order->user,
             NotificationType::OrderUpdate,

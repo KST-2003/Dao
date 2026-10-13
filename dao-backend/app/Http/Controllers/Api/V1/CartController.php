@@ -131,7 +131,7 @@ class CartController extends Controller
             'unit_price' => $line?->listUnitPrice,
             'member_unit_price' => $line?->memberUnitPrice,
             'line_total' => $line?->netTotal(),
-            'max_quantity' => min(CartService::MAX_QTY_PER_LINE, max(0, (int) $variant?->stock_quantity)),
+            'max_quantity' => min($product?->max_order_qty ?? CartService::MAX_QTY_PER_LINE, max(0, (int) $variant?->stock_quantity)),
             'saved_for_later' => $item->saved_for_later,
         ];
     }

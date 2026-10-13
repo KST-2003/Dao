@@ -94,6 +94,13 @@ Route::prefix('v1')->middleware('throttle:api')->name('v1.')->group(function () 
         Route::post('/orders/{id}/cancel', [V1\OrderController::class, 'cancel'])->whereNumber('id');
         Route::post('/orders/{id}/pay', [V1\OrderController::class, 'pay'])->whereNumber('id');
 
+        Route::get('/preorders', [V1\PreorderController::class, 'index']);
+        Route::post('/preorders/quote', [V1\PreorderController::class, 'quote']);
+        Route::post('/preorders', [V1\PreorderController::class, 'store'])->middleware('throttle:writes');
+        Route::get('/preorders/{id}', [V1\PreorderController::class, 'show'])->whereNumber('id');
+        Route::post('/preorders/{id}/cancel', [V1\PreorderController::class, 'cancel'])->whereNumber('id');
+        Route::post('/preorders/{id}/pay', [V1\PreorderController::class, 'pay'])->whereNumber('id');
+
         Route::post('/videos/{id}/like', [V1\VideoController::class, 'like'])->whereNumber('id');
         Route::delete('/videos/{id}/like', [V1\VideoController::class, 'unlike'])->whereNumber('id');
         Route::post('/videos/{id}/comments', [V1\VideoController::class, 'comment'])->whereNumber('id')->middleware('throttle:writes');

@@ -3,6 +3,7 @@
 namespace App\Http\Resources\Api;
 
 use App\Models\Product;
+use App\Services\Orders\PreorderService;
 use Illuminate\Http\Request;
 
 /**
@@ -38,6 +39,17 @@ class ProductResource extends ProductCardResource
             ])->values(),
             'sizes' => $this->variants->where('is_active', true)->pluck('size')->filter()->unique()->values(),
             'pricing' => $request->attributes->get('product_pricing'),
+            // Admin-set limits; null = unlimited.
+            'min_order_qty' => $this->min_order_qty,
+            'max_order_qty' => $this->max_order_qty,
+            'preorder' => [
+                'enabled' => (bool) $this->preorder_enabled,
+                'min_qty' => $this->preorder_min_qty,
+                'max_qty' => $this->preorder_max_qty,
+                'remaining' => $this->preorder_enabled && $this->preorder_capacity !== null
+                    ? max(0, $this->preorder_capacity - app(PreorderService::class)->committedQuantity($this->id))
+                    : null,
+            ],
             // "Watch Dao's review" — the inverse of a video's "Shop this look" (same product_video pivot).
             'videos' => VideoCardResource::collection($this->whenLoaded('videos')),
         ]);
