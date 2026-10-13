@@ -20,6 +20,8 @@ export function CartLine({ item, issue, disabled, onQuantity, onRemove, onSaveFo
   const { colors, spacing, radius } = useTheme();
   const issueText = issue
     ? issue.code === 'insufficient_stock' ? t('cart.issues.insufficient_stock', { available: String(issue.available ?? 0) })
+      : issue.code === 'below_min_quantity' ? t('cart.issues.below_min_quantity', { min: String(issue.min ?? 1) })
+      : issue.code === 'above_max_quantity' ? t('cart.issues.above_max_quantity', { max: String(issue.max ?? 1) })
       : issue.code === 'price_changed' ? t('cart.issues.price_changed', { old: formatMoney(issue.old_price), new: formatMoney(issue.new_price) })
       : t(`cart.issues.${issue.code}`)
     : null;

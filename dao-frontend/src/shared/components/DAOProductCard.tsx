@@ -12,7 +12,7 @@ import { DAOPrice } from './DAOPrice';
 import { DAOText } from './DAOText';
 
 const BADGE_TONES: Record<ProductBadge, BadgeTone> = {
-  new: 'neutral', bestseller: 'sage', dao_pick: 'gold', limited: 'rose', vip: 'midnight', sale: 'rose',
+  new: 'neutral', bestseller: 'sage', dao_pick: 'gold', limited: 'rose', vip: 'midnight', sale: 'rose', preorder: 'gold',
 };
 
 interface Props {

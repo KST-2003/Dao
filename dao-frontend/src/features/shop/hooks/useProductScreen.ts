@@ -58,7 +58,19 @@ export function useProductScreen() {
     );
   };
 
+  const preorderOn = !!p?.preorder.enabled;
+  // Sold-out selection (or nothing in stock) with pre-order open → pre-order replaces the cart buttons.
+  const preorderOnly = preorderOn && (variant ? variant.stock_status === 'out_of_stock' : !p?.in_stock);
+  const preorder = () => {
+    if (!variant) {
+      toast.show(needsSize && !size ? t('shop.selectSize') : t('shop.selectColor'));
+      return;
+    }
+    router.push({ pathname: '/preorders/new', params: { productId: String(id), variantId: String(variant.id) } });
+  };
+
   return {
+    preorderOn, preorderOnly, preorder: requireAuth(preorder),
     product, related, reviews, p, images, imageIndex, setImageIndex, galleryRef, selectImage,
     colors, activeColor, setColor, sizes: p?.sizes ?? [], size, setSize, sizeState, variant, needsSize,
     saved, toggleSave: () => toggleSaved('product', id, saved),

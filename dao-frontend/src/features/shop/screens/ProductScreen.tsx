@@ -54,7 +54,7 @@ export default function ProductScreen() {
 
               <View style={s.body}>
                 <View style={{ gap: spacing.xs }}>
-                  {p.badges.length ? <View style={{ flexDirection: 'row', gap: 6 }}>{p.badges.map((b) => <DAOBadge key={b} label={t(`shop.badges.${b}`)} tone={b === 'vip' ? 'midnight' : b === 'dao_pick' ? 'gold' : 'sage'} star={b === 'dao_pick'} />)}</View> : null}
+                  {p.badges.length ? <View style={{ flexDirection: 'row', gap: 6 }}>{p.badges.map((b) => <DAOBadge key={b} label={t(`shop.badges.${b}`)} tone={b === 'vip' ? 'midnight' : b === 'dao_pick' || b === 'preorder' ? 'gold' : 'sage'} star={b === 'dao_pick'} />)}</View> : null}
                   <View style={s.titleRow}>
                     <DAOText variant="title" style={{ flex: 1 }}>{p.name}</DAOText>
                     {p.rating_count > 0 ? (
@@ -94,13 +94,16 @@ export default function ProductScreen() {
                       <Pressable accessibilityRole="button" onPress={vm.openSizeGuide}><DAOText variant="bodySmall" tone="primary">{t('shop.sizeGuide')}</DAOText></Pressable>
                     </View>
                     <View style={s.sizes}>
-                      {vm.sizes.map((size) => <DAOChip key={size} label={size} selected={vm.size === size} disabled={vm.sizeState(size) === 'out_of_stock'} onPress={() => vm.setSize(size)} />)}
+                      {vm.sizes.map((size) => <DAOChip key={size} label={size} selected={vm.size === size} disabled={vm.sizeState(size) === 'out_of_stock' && !vm.preorderOn} onPress={() => vm.setSize(size)} />)}
                     </View>
                   </View>
                 ) : null}
 
                 {vm.variant?.stock_status === 'low_stock' && vm.variant.stock_left ? <DAOText variant="bodySmall" tone="danger">{t('shop.lowStock', { count: vm.variant.stock_left })}</DAOText> : null}
-                {vm.variant?.stock_status === 'out_of_stock' ? <DAOText variant="bodySmall" tone="danger">{t('shop.outOfStock')}</DAOText> : null}
+                {vm.variant?.stock_status === 'out_of_stock' ? <DAOText variant="bodySmall" tone="danger">{vm.preorderOn ? t('preorders.availableForPreorder') : t('shop.outOfStock')}</DAOText> : null}
+                {p.min_order_qty ? <DAOText variant="caption" tone="textMuted">{t('shop.minOrder', { min: String(p.min_order_qty) })}</DAOText> : null}
+                {p.max_order_qty ? <DAOText variant="caption" tone="textMuted">{t('shop.maxOrder', { max: String(p.max_order_qty) })}</DAOText> : null}
+                {vm.preorderOn && !vm.preorderOnly ? <DAOText variant="caption" tone="gold">{t('preorders.alsoPreorder')}</DAOText> : null}
 
                 <View>
                   {p.description ? <ProductSection title={t('shop.description')} initiallyOpen><DAOText tone="textMuted">{p.description}</DAOText></ProductSection> : null}
@@ -142,8 +145,14 @@ export default function ProductScreen() {
               ) : null}
             </ScrollView>
             <View style={[s.bar, { paddingBottom: insets.bottom + spacing.md }]}>
-              <DAOButton label={t('shop.buyNow')} variant="secondary" style={{ flex: 1 }} onPress={vm.buyNow} disabled={vm.adding} />
-              <DAOButton label={p.in_stock ? t('shop.addToCart') : t('shop.outOfStock')} icon="shopping-bag" style={{ flex: 1.4 }} onPress={vm.addToCart} loading={vm.adding} disabled={!p.in_stock} />
+              {vm.preorderOnly ? (
+                <DAOButton label={t('preorders.preorderNow')} variant="gold" icon="clock" style={{ flex: 1 }} onPress={vm.preorder} />
+              ) : (
+                <>
+                  <DAOButton label={vm.preorderOn ? t('preorders.preorder') : t('shop.buyNow')} variant="secondary" style={{ flex: 1 }} onPress={vm.preorderOn ? vm.preorder : vm.buyNow} disabled={vm.adding} />
+                  <DAOButton label={p.in_stock ? t('shop.addToCart') : t('shop.outOfStock')} icon="shopping-bag" style={{ flex: 1.4 }} onPress={vm.addToCart} loading={vm.adding} disabled={!p.in_stock} />
+                </>
+              )}
             </View>
             <SizeGuideSheet visible={vm.sizeGuide} onClose={vm.closeSizeGuide} />
           </>

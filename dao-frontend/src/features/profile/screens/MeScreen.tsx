@@ -56,6 +56,8 @@ export default function MeScreen() {
       <DAOCard style={{ marginTop: spacing.md }}>
         <DAOListItem icon="package" label={t('profile.menu.orders')} onPress={() => vm.go('/orders')} />
         <DAODivider />
+        <DAOListItem icon="clock" label={t('profile.menu.preorders')} onPress={() => vm.go('/preorders')} />
+        <DAODivider />
         <DAOListItem icon="heart" label={t('profile.menu.wishlist')} onPress={() => vm.goSaved('product')} />
         <DAODivider />
         <DAOListItem icon="play-circle" label={t('profile.menu.savedVideos')} onPress={() => vm.goSaved('video')} />

@@ -1,7 +1,7 @@
 /** Mirrors app/Enums/*.php in dao-backend. Keep in sync. */
 export type AuthProvider = 'google' | 'line' | 'sms';
 export type Gender = 'female' | 'male' | 'other' | 'prefer_not_to_say';
-export type ProductBadge = 'new' | 'bestseller' | 'dao_pick' | 'limited' | 'vip' | 'sale';
+export type ProductBadge = 'new' | 'bestseller' | 'dao_pick' | 'limited' | 'vip' | 'sale' | 'preorder';
 export type OrderStatus =
   | 'pending_payment'
   | 'paid'
@@ -43,6 +43,22 @@ export type NotificationType =
   | 'new_recipe'
   | 'promotion'
   | 'vip_event';
-export type CartIssueCode = 'unavailable' | 'out_of_stock' | 'insufficient_stock' | 'price_changed';
+export type CartIssueCode = 'unavailable' | 'out_of_stock' | 'insufficient_stock' | 'below_min_quantity' | 'above_max_quantity' | 'price_changed';
+export type PreorderDestination = 'thailand' | 'myanmar';
+export type PreorderStatus =
+  | 'submitted'
+  | 'in_review'
+  | 'approved'
+  | 'rejected'
+  | 'waiting_payment'
+  | 'in_process'
+  | 'waiting_courier'
+  | 'in_transit'
+  | 'landed_myanmar'
+  | 'packaging'
+  | 'on_delivery'
+  | 'completed'
+  | 'cancelled'
+  | 'refunded';
 export type ProductSort = 'newest' | 'price_asc' | 'price_desc' | 'popular' | 'rating';
 export type PaymentAction = 'none' | 'redirect' | 'bank_transfer' | 'collect_on_delivery';

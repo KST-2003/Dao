@@ -3,7 +3,7 @@
  * All money values are integers in minor units (satang).
  */
 import type {
-  AuthProvider, CartIssueCode, ContentType, CouponType, DeliveryMethod, Difficulty, Gender,
+  AuthProvider, CartIssueCode, PreorderDestination, PreorderStatus, ContentType, CouponType, DeliveryMethod, Difficulty, Gender,
   LoyaltyTransactionType, NotificationType, OrderStatus, PaymentAction, PaymentMethod, PaymentStatus,
   ProductBadge, RewardType, ShipmentStatus,
 } from './enums';
@@ -108,6 +108,7 @@ export interface ProductCard {
   rating_avg: number;
   rating_count: number;
   in_stock: boolean;
+  preorder_enabled: boolean;
   colors: { name: string; hex: string | null }[];
   is_saved: boolean;
 }
@@ -137,6 +138,10 @@ export interface ProductDetail extends ProductCard {
   variants: ProductVariant[];
   sizes: string[];
   pricing: { your_price: number; tier: string | null; is_member_price: boolean } | null;
+  /** Admin-set per-order limits; null = unlimited. */
+  min_order_qty: number | null;
+  max_order_qty: number | null;
+  preorder: { enabled: boolean; min_qty: number | null; max_qty: number | null; remaining: number | null };
   /** "Watch Dao's review" — the inverse of a video's shop_the_look (same product_video link, from the video's side). */
   videos: VideoCard[];
 }
@@ -246,6 +251,8 @@ export interface CartIssue {
   item_id: number;
   code: CartIssueCode;
   available?: number;
+  min?: number;
+  max?: number;
   old_price?: number;
   new_price?: number;
 }
@@ -483,4 +490,43 @@ export interface SearchResults {
   collections: Collection[];
   videos: VideoCard[];
   recipes: RecipeCard[];
+}
+
+export interface PreorderQuote {
+  currency: string;
+  subtotal: number;
+  member_discount: number;
+  shipping_fee: number;
+  total: number;
+  lines: { variant_id: number; quantity: number; unit_price: number; original_unit_price: number; line_total: number }[];
+}
+
+export interface Preorder {
+  id: number;
+  preorder_number: string;
+  status: PreorderStatus;
+  destination: PreorderDestination;
+  /** Happy-path statuses for this destination, from the server. */
+  steps: PreorderStatus[];
+  currency: string;
+  subtotal: number;
+  member_discount: number;
+  shipping_fee: number;
+  grand_total: number;
+  /** True until staff confirm shipping and a payable order exists. */
+  is_estimate: boolean;
+  item_count?: number;
+  items?: OrderItem[];
+  shipping_address: Omit<Address, 'id' | 'is_default' | 'label'>;
+  timeline?: { status: PreorderStatus; at: string | null }[];
+  reject_reason: string | null;
+  carrier: string | null;
+  tracking_number: string | null;
+  notes: string | null;
+  can_cancel: boolean;
+  can_pay: boolean;
+  order_id: number | null;
+  submitted_at: string;
+  paid_at: string | null;
+  completed_at: string | null;
 }
