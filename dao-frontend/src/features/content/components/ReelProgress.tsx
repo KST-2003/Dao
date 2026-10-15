@@ -14,7 +14,7 @@ const clock = (s: number) => `${Math.floor(s / 60)}:${String(Math.floor(s % 60))
  * Touches are claimed outright (and not handed back to the vertical feed) so scrubbing never
  * flips to the next reel. Children ignore touches so locationX is always relative to the bar.
  */
-export function ReelProgress({ player, bottom = 0 }: { player: VideoPlayer; bottom?: number }) {
+export function ReelProgress({ player, bottom = 0, marks }: { player: VideoPlayer; bottom?: number; marks?: number[] }) {
   const [pos, setPos] = useState(0);
   const [duration, setDuration] = useState(0);
   const [drag, setDrag] = useState<number | null>(null); // 0..1 while a finger is down
@@ -75,6 +75,9 @@ export function ReelProgress({ player, bottom = 0 }: { player: VideoPlayer; bott
       ) : null}
       <View pointerEvents="none" style={{ height: dragging ? 10 : 5, backgroundColor: media.track }}>
         <View style={{ width: `${shown * 100}%`, height: '100%', backgroundColor: media.text }} />
+        {duration > 0 ? marks?.map((m) => (
+          <View key={m} style={{ position: 'absolute', left: `${Math.min(100, (m / duration) * 100)}%`, top: -3, bottom: -3, width: 2, backgroundColor: media.gold }} />
+        )) : null}
       </View>
     </View>
   );

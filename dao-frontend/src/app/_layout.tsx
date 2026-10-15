@@ -23,6 +23,7 @@ function ThemedStack() {
         <Stack.Screen name="(tabs)" options={{ animation: 'fade' }} />
         <Stack.Screen name="(auth)" options={{ presentation: 'modal', animation: 'slide_from_bottom' }} />
         <Stack.Screen name="product/[id]" options={{ animation: 'slide_from_right' }} />
+        <Stack.Screen name="recipe-video/[id]" options={{ animation: 'fade' }} />
         <Stack.Screen name="video/[id]" options={{ animation: 'fade', contentStyle: { backgroundColor: media.midnight } }} />
       </Stack>
       <DAOToastHost />

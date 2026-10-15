@@ -29,8 +29,8 @@ export function useSettingsScreen() {
     themeMode,
     setTheme: (m: ThemeMode) => setThemeMode(m),
     currency,
-    currencies: config.data?.currencies.options ?? (['THB', 'MMK'] as Currency[]),
-    mmkPerThb: config.data?.currencies.mmk_per_thb ?? null,
+    currencies: config.data?.currencies?.options ?? (['THB', 'MMK'] as Currency[]),
+    mmkPerThb: config.data?.currencies?.mmk_per_thb ?? null,
     // Every cached price is in the old currency, so drop them all; screens refetch in the new one.
     chooseCurrency: (c: Currency) => {
       if (c === currency) return;

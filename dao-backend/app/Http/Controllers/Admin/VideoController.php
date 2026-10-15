@@ -17,7 +17,12 @@ class VideoController extends AdminController
         $query = Video::query()->with('translations')
             ->when($request->filled('content_type'), fn ($q) => $q->where('content_type', (string) $request->input('content_type')))
             ->when($request->filled('status'), fn ($q) => $q->where('status', (string) $request->input('status')))
-            ->when($request->filled('q'), fn ($q) => $q->whereHas('translations', fn ($t) => $t->where('title', 'like', $this->like((string) $request->input('q')))))
+            ->when($request->filled('q'), function ($q) use ($request) {
+                $term = (string) $request->input('q');
+                $q->where(fn ($w) => $w->whereHas('translations', fn ($t) => $t->where('title', 'like', $this->like($term))->orWhere('description', 'like', $this->like($term)))
+                    ->orWhere('slug', 'like', $this->like($term))
+                    ->when(ctype_digit($term), fn ($x) => $x->orWhere('id', (int) $term)));
+            })
             ->latest('id');
 
         return $this->paginated($query->paginate($this->perPage()), fn (Video $v) => [

@@ -391,6 +391,8 @@ export const my: TranslationShape<typeof en> = {
     watchDaoCook: "Dao ချက်တာ ကြည့်မည်",
     shopIngredient: "ဝယ်မည်",
     step: "အဆင့် {{number}}",
+    cookAlong: "အတူချက်ကြမယ်",
+    jumpToStep: "ဤအဆင့်သို့ ကူးမည်",
     empty: "Dao အသစ်တစ်ခု ချက်နေပါသည်။",
   },
   profile: {

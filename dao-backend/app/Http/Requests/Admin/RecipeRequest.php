@@ -38,6 +38,7 @@ class RecipeRequest extends AdminRequest
             'steps.*.instruction.*' => ['nullable', 'string', 'max:2000'],
             'steps.*.image_url' => ['nullable', 'string', 'max:500'],
             'steps.*.timer_seconds' => ['nullable', 'integer', 'min:0'],
+            'steps.*.video_seconds' => ['nullable', 'integer', 'min:0', 'max:86400'],
         ], $this->translationRules(['title' => 'string|max:190', 'description' => 'string|max:5000', 'tips' => 'string|max:2000'], ['title']));
     }
 }

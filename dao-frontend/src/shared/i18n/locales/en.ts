@@ -388,6 +388,8 @@ export const en = {
     watchDaoCook: "Watch Dao cook",
     shopIngredient: "Shop",
     step: "Step {{number}}",
+    cookAlong: "Cook along",
+    jumpToStep: "Jump to this step",
     empty: "Dao is cooking something new.",
   },
   profile: {

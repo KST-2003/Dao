@@ -20,7 +20,7 @@ export function useRecipeScreen() {
     toggleSave: () => toggleSaved('recipe', id, saved),
     stepDone: (n: number) => done.includes(n),
     toggleStep: (n: number) => setDone((d) => (d.includes(n) ? d.filter((x) => x !== n) : [...d, n])),
-    watch: () => recipe.data?.video && router.push({ pathname: '/video/[id]', params: { id: String(recipe.data.video.id) } }),
+    watch: (seconds?: number) => recipe.data?.video && router.push({ pathname: '/recipe-video/[id]', params: seconds ? { id: String(id), t: String(seconds) } : { id: String(id) } }),
     shopIngredient: (productId: number) => router.push({ pathname: '/product/[id]', params: { id: String(productId) } }),
   };
 }

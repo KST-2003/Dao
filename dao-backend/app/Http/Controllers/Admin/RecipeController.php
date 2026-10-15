@@ -48,7 +48,7 @@ class RecipeController extends AdminController
         $this->audit('recipe.created', $recipe);
         HomeService::flushCache(); // could land in kitchen
 
-        return response()->json(['data' => $this->present($recipe)], 201);
+        return response()->json(['data' => $this->present($recipe->fresh())], 201);
     }
 
     public function update(RecipeRequest $request, int $id): JsonResponse
@@ -94,6 +94,7 @@ class RecipeController extends AdminController
                 $recipe->steps()->create([
                     'step_number' => $i + 1, 'instruction' => array_filter($row['instruction']),
                     'image_url' => $row['image_url'] ?? null, 'timer_seconds' => $row['timer_seconds'] ?? null,
+                    'video_seconds' => $row['video_seconds'] ?? null,
                 ]);
             }
         }

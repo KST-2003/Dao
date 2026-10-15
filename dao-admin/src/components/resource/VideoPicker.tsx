@@ -11,7 +11,7 @@ export function VideoPicker({ value, onChange, label = 'Videos' }: { value: numb
   const search = useQuery({ queryKey: ['video-search', q], queryFn: () => api.page<Paged<VideoRow>>('/videos', { q, per_page: 8 }), enabled: q.length >= 2 })
   const selected = useQuery({
     queryKey: ['video-titles', value],
-    queryFn: async () => Promise.all(value.map((id) => api.get<{ id: number; title: string | null }>(`/videos/${id}`).catch(() => ({ id, title: `#${id}` })))),
+    queryFn: async () => Promise.all(value.map((id) => api.get<{ id: number; display_name: string | null }>(`/videos/${id}`).then((v) => ({ id, title: v.display_name })).catch(() => ({ id, title: `#${id}` })))),
     enabled: value.length > 0,
   })
   const title = (id: number) => selected.data?.find((v) => v.id === id)?.title ?? `#${id}`

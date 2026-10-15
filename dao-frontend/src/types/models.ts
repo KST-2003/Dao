@@ -54,7 +54,7 @@ export interface AppConfig {
   locales: string[];
   fallback_locale: string;
   currency: string;
-  currencies: { options: Currency[]; default: Currency; mmk_per_thb: number };
+  currencies?: { options: Currency[]; default: Currency; mmk_per_thb: number };
   auth: { google: boolean; line: boolean; sms: boolean };
   payment_methods: PaymentMethod[];
   loyalty: { redeem_points_unit: number; redeem_value_per_unit: number; redeem_min_points: number; redeem_max_percent: number };
@@ -472,7 +472,7 @@ export interface RecipeDetail extends RecipeCard {
   video?: VideoCard | null;
   video_url?: string | null;
   ingredients: { id: number; name: string | null; quantity: string | null; unit: string | null; product_id: number | null }[];
-  steps: { number: number; instruction: string | null; image_url: string | null; timer_seconds: number | null }[];
+  steps: { number: number; instruction: string | null; image_url: string | null; timer_seconds: number | null; video_seconds?: number | null }[];
 }
 
 export interface KitchenFeed {

@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next';
 import { AsyncState, DAOButton, DAOChip, DAOHeartButton, DAOIconButton, DAOImage, DAOScreen, DAOText } from '@/shared/components';
 import { useLocale } from '@/shared/hooks/useLocale';
 import { ratios, useTheme } from '@/shared/theme';
+import { formatDuration } from '@/shared/utils/format';
 import { useRecipeScreen } from '../hooks/useRecipeScreen';
 
 export default function RecipeScreen() {
@@ -39,7 +40,7 @@ export default function RecipeScreen() {
                 <DAOText variant="bodySmall" tone="accent">{t(`kitchen.spice.${String(Math.min(3, r.spice_level)) as '0' | '1' | '2' | '3'}`)}</DAOText>
               </View>
               {r.description ? <DAOText tone="textMuted">{r.description}</DAOText> : null}
-              {r.video ? <DAOButton label={t('kitchen.watchDaoCook')} icon="play" variant="secondary" fullWidth onPress={vm.watch} /> : null}
+              {r.video ? <DAOButton label={t('kitchen.watchDaoCook')} icon="play" variant="secondary" fullWidth onPress={() => vm.watch()} /> : null}
 
               <View style={{ flexDirection: 'row', gap: spacing.sm }}>
                 <DAOChip label={t('kitchen.ingredients')} selected={vm.tab === 'ingredients'} onPress={() => vm.setTab('ingredients')} />
@@ -65,7 +66,15 @@ export default function RecipeScreen() {
                         {vm.stepDone(s.number) ? <Feather name="check" size={14} color={colors.onPrimary} /> : <DAOText variant="caption" tone="primary">{s.number}</DAOText>}
                       </View>
                       <View style={{ flex: 1, gap: spacing.sm }}>
-                        <DAOText variant="overline" tone="textMuted">{t('kitchen.step', { number: String(s.number) })}</DAOText>
+                        <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
+                          <DAOText variant="overline" tone="textMuted">{t('kitchen.step', { number: String(s.number) })}</DAOText>
+                          {r.video && s.video_seconds != null ? (
+                            <Pressable accessibilityRole="button" accessibilityLabel={t('kitchen.jumpToStep')} onPress={() => vm.watch(s.video_seconds ?? 0)} hitSlop={8} style={{ flexDirection: 'row', alignItems: 'center', gap: 4, backgroundColor: colors.primarySoft, borderRadius: radius.pill, paddingHorizontal: spacing.sm, paddingVertical: 2 }}>
+                              <Feather name="play" size={10} color={colors.primary} />
+                              <DAOText variant="caption" tone="primary">{formatDuration(s.video_seconds)}</DAOText>
+                            </Pressable>
+                          ) : null}
+                        </View>
                         <DAOText>{s.instruction}</DAOText>
                         {s.image_url ? <DAOImage uri={s.image_url} ratio={ratios.recipe} style={{ borderRadius: radius.md }} /> : null}
                       </View>

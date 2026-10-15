@@ -6,12 +6,13 @@ import {
   Button, DAOAdminCard, DAOAdminHeader, DAOConfirmDialog, DAOImageUploader, ErrorState, Field, Input, Select, TableSkeleton, Toggle, TranslationTabs, useToast,
 } from '@/components/ui'
 import { api, ApiError, errorMessage } from '@/lib/api'
+import { LinkedVideoPicker } from '@/components/resource/LinkedVideoPicker'
 import { fromLocalInput, toLocalInput } from '@/lib/format'
 import { LOCALES, type Locale, type Translations } from '@/types/api'
 
 type L = Partial<Record<Locale, string>>
 interface Ingredient { name: L; quantity: string | null; unit: string | null; product_id: number | null }
-interface Step { instruction: L; image_url: string | null; timer_seconds: number | null }
+interface Step { instruction: L; image_url: string | null; timer_seconds: number | null; video_seconds: number | null }
 interface RecipeForm {
   video_id: number | null; slug: string; category: string | null; cover_image_url: string | null; prep_minutes: number; cook_minutes: number; servings: number
   difficulty: string; spice_level: number; is_featured: boolean; status: string; published_at: string | null
@@ -21,6 +22,13 @@ const blank: RecipeForm = { video_id: null, slug: '', category: 'curry', cover_i
 
 function LocalizedInputs({ value, onChange, placeholder }: { value: L; onChange: (v: L) => void; placeholder: string }) {
   return <div className="grid flex-1 gap-2 sm:grid-cols-3">{LOCALES.map((l) => <Input key={l} lang={l} placeholder={`${placeholder} (${l.toUpperCase()})${l === 'en' ? ' *' : ''}`} value={value[l] ?? ''} onChange={(e) => onChange({ ...value, [l]: e.target.value })} />)}</div>
+}
+
+/** Edits one half (minutes or seconds) of a step's video time; clearing the box clears the time. */
+function timeValue(raw: string, current: number, part: 'min' | 'sec'): number | null {
+  if (raw === '') return part === 'min' ? (current % 60 ? current % 60 : null) : (current >= 60 ? Math.floor(current / 60) * 60 : null)
+  const n = Math.max(0, Math.floor(Number(raw)))
+  return part === 'min' ? n * 60 + (current % 60) : Math.floor(current / 60) * 60 + Math.min(59, n)
 }
 
 export default function RecipeEditPage() {
@@ -39,7 +47,7 @@ export default function RecipeEditPage() {
       const body = {
         ...form,
         ingredients: form.ingredients.map(({ name, quantity, unit, product_id }) => ({ name, quantity, unit, product_id })),
-        steps: form.steps.map(({ instruction, image_url, timer_seconds }) => ({ instruction, image_url, timer_seconds })),
+        steps: form.steps.map(({ instruction, image_url, timer_seconds, video_seconds }) => ({ instruction, image_url, timer_seconds, video_seconds })),
       }
       return isNew ? api.post<{ id: number }>('/recipes', body) : api.put<{ id: number }>(`/recipes/${id}`, body)
     },
@@ -73,12 +81,17 @@ export default function RecipeEditPage() {
               ))}
             </div>
           </DAOAdminCard>
-          <DAOAdminCard title="Steps" actions={<Button type="button" size="sm" variant="secondary" icon={<Plus className="size-4" />} onClick={() => set('steps', [...form.steps, { instruction: {}, image_url: null, timer_seconds: null }])}>Add step</Button>}>
+          <DAOAdminCard title="Steps" actions={<Button type="button" size="sm" variant="secondary" icon={<Plus className="size-4" />} onClick={() => set('steps', [...form.steps, { instruction: {}, image_url: null, timer_seconds: null, video_seconds: null }])}>Add step</Button>}>
             <ol className="space-y-3">
               {form.steps.map((st, i) => (
                 <li key={i} className="flex items-start gap-3 rounded-xl bg-muted p-3">
                   <span className="mt-2 grid size-7 shrink-0 place-items-center rounded-full bg-primary-soft text-sm text-primary">{i + 1}</span>
                   <LocalizedInputs placeholder="Instruction" value={st.instruction} onChange={(instruction) => set('steps', form.steps.map((x, j) => (j === i ? { ...x, instruction } : x)))} />
+                  <div className="flex shrink-0 items-center gap-1" title="When this step starts in the video">
+                    <Input className="w-16" type="number" min={0} placeholder="Min" aria-label="Minutes" value={st.video_seconds == null ? '' : Math.floor(st.video_seconds / 60)} onChange={(e) => set('steps', form.steps.map((x, j) => (j === i ? { ...x, video_seconds: timeValue(e.target.value, x.video_seconds ?? 0, 'min') } : x)))} />
+                    <span className="text-ink-subtle">:</span>
+                    <Input className="w-16" type="number" min={0} max={59} placeholder="Sec" aria-label="Seconds" value={st.video_seconds == null ? '' : st.video_seconds % 60} onChange={(e) => set('steps', form.steps.map((x, j) => (j === i ? { ...x, video_seconds: timeValue(e.target.value, x.video_seconds ?? 0, 'sec') } : x)))} />
+                  </div>
                   <button type="button" aria-label="Remove step" onClick={() => set('steps', form.steps.filter((_, j) => j !== i))}><Trash2 className="mt-2 size-4 text-danger" /></button>
                 </li>
               ))}
@@ -98,7 +111,7 @@ export default function RecipeEditPage() {
               </div>
               <Field label="Difficulty"><Select value={form.difficulty} onChange={(e) => set('difficulty', e.target.value)}>{['easy', 'medium', 'hard'].map((d) => <option key={d}>{d}</option>)}</Select></Field>
               <Field label="Spice level (0–3)"><Input type="number" min={0} max={3} value={form.spice_level} onChange={(e) => set('spice_level', Number(e.target.value))} /></Field>
-              <Field label="Linked video ID" hint="Shows “Watch Dao cook”"><Input type="number" value={form.video_id ?? ''} onChange={(e) => set('video_id', e.target.value ? Number(e.target.value) : null)} /></Field>
+              <LinkedVideoPicker label="Linked video (shows “Watch Dao cook”)" value={form.video_id} onChange={(v) => set('video_id', v)} />
               <Field label="Status"><Select value={form.status} onChange={(e) => set('status', e.target.value)}>{['draft', 'scheduled', 'published', 'archived'].map((s) => <option key={s}>{s}</option>)}</Select></Field>
               <Field label="Publish at"><Input type="datetime-local" value={toLocalInput(form.published_at)} onChange={(e) => set('published_at', fromLocalInput(e.target.value))} /></Field>
               <Toggle label="Feature in Today's Kitchen" checked={form.is_featured} onChange={(v) => set('is_featured', v)} />

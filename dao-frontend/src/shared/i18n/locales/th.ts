@@ -391,6 +391,8 @@ export const th: TranslationShape<typeof en> = {
     watchDaoCook: "ดูดาวทำอาหาร",
     shopIngredient: "ซื้อ",
     step: "ขั้นตอนที่ {{number}}",
+    cookAlong: "ทำอาหารไปพร้อมกัน",
+    jumpToStep: "ข้ามไปขั้นตอนนี้",
     empty: "ดาวกำลังคิดเมนูใหม่",
   },
   profile: {

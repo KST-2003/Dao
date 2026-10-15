@@ -16,7 +16,8 @@ class RecipeResource extends RecipeCardResource
             'prep_minutes' => $this->prep_minutes,
             'cook_minutes' => $this->cook_minutes,
             'video' => $this->whenLoaded('video', fn () => $this->video ? new VideoCardResource($this->video) : null),
-            'video_url' => $this->whenLoaded('video', fn () => $this->video?->video_url),
+            // Members-only videos: withheld from guests, like VideoResource.
+            'video_url' => $this->whenLoaded('video', fn () => $this->video?->is_members_only && ! $request->user('sanctum') ? null : $this->video?->video_url),
             'ingredients' => $this->ingredients->map(fn ($i) => [
                 'id' => $i->id,
                 'name' => Localized::pick($i->name),
@@ -29,6 +30,7 @@ class RecipeResource extends RecipeCardResource
                 'instruction' => Localized::pick($s->instruction),
                 'image_url' => $s->image_url,
                 'timer_seconds' => $s->timer_seconds,
+                'video_seconds' => $s->video_seconds,
             ])->values(),
         ]);
     }
