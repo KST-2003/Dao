@@ -17,7 +17,7 @@ export function VideoPicker({ value, onChange, label = 'Videos' }: { value: numb
   const title = (id: number) => selected.data?.find((v) => v.id === id)?.title ?? `#${id}`
 
   return (
-    <Field label={label}>
+    <Field label={label} group>
       <div className="flex flex-wrap gap-2">
         {value.map((id) => (
           <span key={id} className="inline-flex items-center gap-1 rounded-full bg-primary-soft px-3 py-1 text-xs text-primary">

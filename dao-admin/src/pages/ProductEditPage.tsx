@@ -171,14 +171,14 @@ export default function ProductEditPage() {
               <Field label="Category"><Select value={form.category_id ?? ''} onChange={(e) => set('category_id', e.target.value ? Number(e.target.value) : null)}>
                 <option value="">—</option>{categories.data?.data.map((c) => <option key={c.id} value={c.id}>{c.display_name ?? c.slug}</option>)}
               </Select></Field>
-              <Field label="Collections">
+              <Field label="Collections" group>
                 <div className="flex flex-wrap gap-2">{collections.data?.data.map((c) => {
                   const on = form.collection_ids.includes(c.id)
                   return <button key={c.id} type="button" aria-pressed={on} onClick={() => set('collection_ids', on ? form.collection_ids.filter((x) => x !== c.id) : [...form.collection_ids, c.id])}
                     className={`rounded-full px-3 py-1 text-xs ${on ? 'bg-primary text-on-primary' : 'bg-muted'}`}>{c.display_name ?? c.slug}</button>
                 })}</div>
               </Field>
-              <Field label="Badges"><div className="flex flex-wrap gap-2">{BADGES.map((b) => {
+              <Field label="Badges" group><div className="flex flex-wrap gap-2">{BADGES.map((b) => {
                 const on = (form.badges ?? []).includes(b)
                 return <button key={b} type="button" aria-pressed={on} onClick={() => set('badges', on ? (form.badges ?? []).filter((x) => x !== b) : [...(form.badges ?? []), b])}
                   className={`rounded-full px-3 py-1 text-xs uppercase tracking-wide ${on ? 'bg-gold text-white' : 'bg-muted'}`}>{b.replace('_', ' ')}</button>

@@ -3,13 +3,18 @@ import type { InputHTMLAttributes, PropsWithChildren, SelectHTMLAttributes, Text
 
 const control = 'w-full rounded-xl border border-line bg-surface px-3 py-2 text-sm text-ink placeholder:text-ink-subtle focus:border-primary focus:outline-none'
 
-export function Field({ label, error, hint, children, className }: PropsWithChildren<{ label?: string; error?: string; hint?: string; className?: string }>) {
+/**
+ * A <label> forwards clicks on its text to the first control inside it, so a field holding several
+ * buttons (chips, pickers) must pass `group` — otherwise clicking a chip would press the first "×".
+ */
+export function Field({ label, error, hint, children, className, group }: PropsWithChildren<{ label?: string; error?: string; hint?: string; className?: string; group?: boolean }>) {
+  const Wrapper = group ? 'div' : 'label'
   return (
-    <label className={clsx('flex flex-col gap-1', className)}>
+    <Wrapper {...(group ? { role: 'group', 'aria-label': label } : {})} className={clsx('flex flex-col gap-1', className)}>
       {label ? <span className="text-xs font-medium text-ink-muted">{label}</span> : null}
       {children}
       {error ? <span className="text-xs text-danger">{error}</span> : hint ? <span className="text-xs text-ink-subtle">{hint}</span> : null}
-    </label>
+    </Wrapper>
   )
 }
 
