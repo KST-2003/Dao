@@ -23,6 +23,7 @@ use App\Models\Product;
 use App\Models\ProductVariant;
 use App\Models\User;
 use App\Services\Cart\CartService;
+use App\Services\Currency\CurrencyService;
 use App\Services\Loyalty\MembershipService;
 use App\Services\Payments\PaymentManager;
 use App\Services\Pricing\PricingService;
@@ -46,6 +47,7 @@ class PreorderService
         private readonly CheckoutService $checkout,
         private readonly PaymentManager $payments,
         private readonly OrderNumberGenerator $numbers,
+        private readonly CurrencyService $currency,
     ) {}
 
     // ---------- Customer ----------
@@ -61,7 +63,7 @@ class PreorderService
         $priced = $this->priceLines($user, $lines, false);
 
         return $this->totals($priced) + [
-            'currency' => config('dao.default_currency'),
+            'currency' => $this->currency->current()->value,
             'lines' => array_map(fn (PricedLine $l) => [
                 'variant_id' => $l->variant->id, 'quantity' => $l->quantity,
                 'unit_price' => $l->memberUnitPrice, 'original_unit_price' => $l->listUnitPrice, 'line_total' => $l->netTotal(),
@@ -97,7 +99,8 @@ class PreorderService
                 'user_id' => $user->id,
                 'status' => PreorderStatus::Submitted,
                 'destination' => $destination,
-                'currency' => config('dao.default_currency'),
+                'currency' => $this->currency->current()->value,
+                'exchange_rate' => $this->currency->rateFor($this->currency->current()),
                 'subtotal' => $totals['subtotal'],
                 'member_discount' => $totals['member_discount'],
                 'shipping_fee' => 0,
@@ -155,7 +158,7 @@ class PreorderService
         }
 
         $order = Order::query()->findOrFail($preorder->order_id);
-        $gateway = $this->payments->gateway($method ?? $order->payment_method);
+        $gateway = $this->payments->gateway($method ?? $order->payment_method, $order->currency);
 
         if ($method !== null && $method !== $order->payment_method) {
             DB::transaction(function () use ($order, $method) {
@@ -321,6 +324,7 @@ class PreorderService
             'payment_method' => PaymentMethod::BankTransfer,
             'delivery_method' => DeliveryMethod::Standard,
             'currency' => $preorder->currency,
+            'exchange_rate' => $preorder->exchange_rate,
             'subtotal' => $preorder->subtotal,
             'member_discount' => $preorder->member_discount,
             'shipping_fee' => $preorder->shipping_fee,

@@ -13,7 +13,7 @@ export function usePreorderDetailScreen() {
   const preorder = usePreorder(id);
   const cancel = useCancelPreorder();
   const pay = usePayPreorder();
-  const options = useCheckoutOptions();
+  const options = useCheckoutOptions(null);
   const message = useErrorMessage();
   const [confirming, setConfirming] = useState(false);
   const [picked, setPicked] = useState<PaymentMethod | null>(null);

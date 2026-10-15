@@ -78,13 +78,13 @@ export default function PreorderDetailPage() {
                 <li key={i.id} className="flex items-center gap-4 py-3 text-sm">
                   {i.image_url ? <img src={i.image_url} alt="" className="h-14 w-11 rounded-md object-cover" /> : <div className="h-14 w-11 rounded-md bg-muted" />}
                   <div className="flex-1"><p className="font-medium">{i.product_name}</p><p className="text-xs text-ink-subtle">{i.variant_label} · {i.sku}</p></div>
-                  <span className="text-ink-muted">{money(i.unit_price)} × {i.quantity}</span>
-                  <span className="w-24 text-right font-medium">{money(i.line_total)}</span>
+                  <span className="text-ink-muted">{money(i.unit_price, p.currency)} × {i.quantity}</span>
+                  <span className="w-24 text-right font-medium">{money(i.line_total, p.currency)}</span>
                 </li>
               ))}
             </ul>
             <dl className="mt-4 space-y-1 border-t border-line pt-4 text-sm">
-              {[['Subtotal', money(p.subtotal)], ['Member discount', `−${money(p.member_discount)}`], ['Shipping', p.order ? money(p.shipping_fee) : 'Set when moving to waiting payment']].map(([k, v]) => (
+              {[['Subtotal', money(p.subtotal, p.currency)], ['Member discount', `−${money(p.member_discount, p.currency)}`], ['Shipping', p.order ? money(p.shipping_fee, p.currency) : 'Set when moving to waiting payment']].map(([k, v]) => (
                 <div key={k} className="flex justify-between text-ink-muted"><dt>{k}</dt><dd>{v}</dd></div>
               ))}
               <div className="flex justify-between pt-2 text-base font-semibold"><dt>{p.order ? 'Total' : 'Estimated total'}</dt><dd>{money(p.grand_total, p.currency)}</dd></div>
@@ -122,7 +122,7 @@ export default function PreorderDetailPage() {
 
       <DAOConfirmDialog open={dialog === 'status'} title="Update status" loading={transition.isPending} onClose={() => setDialog(null)} onConfirm={() => transition.mutate()}>
         <Field label="New status"><Select value={next} onChange={(e) => setNext(e.target.value)}>{moves.map((s) => <option key={s} value={s}>{s.replace(/_/g, ' ')}</option>)}</Select></Field>
-        {next === 'waiting_payment' ? <Field label="Shipping fee (฿)" hint="Added to the total the customer pays. Leave empty for free shipping."><Input type="number" step="0.01" min="0" value={fee} onChange={(e) => setFee(e.target.value)} /></Field> : null}
+        {next === 'waiting_payment' ? <Field label={`Shipping fee (${p.currency === 'MMK' ? 'K' : '฿'})`} hint={`Added to the total the customer pays, in ${p.currency}. Leave empty for free shipping.`}><Input type="number" step="0.01" min="0" value={fee} onChange={(e) => setFee(e.target.value)} /></Field> : null}
         {TRACKING.includes(next) ? <>
           <Field label="Carrier (optional)"><Input value={carrier} onChange={(e) => setCarrier(e.target.value)} placeholder="Courier, Flash, Thailand Post…" /></Field>
           <Field label="Tracking number (optional)"><Input value={tracking} onChange={(e) => setTracking(e.target.value)} /></Field>

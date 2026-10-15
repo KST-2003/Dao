@@ -22,7 +22,8 @@ class DashboardService
 
         return [
             'range' => ['from' => $from->toIso8601String(), 'to' => $to->toIso8601String()],
-            'revenue' => (int) (clone $paid)->sum('grand_total'),
+            // Orders can be in THB or MMK; revenue is always reported in THB (each order converted at its own rate).
+            'revenue' => (int) round((float) (clone $paid)->sum(DB::raw('grand_total / exchange_rate'))),
             'orders' => Order::query()->whereBetween('placed_at', [$from, $to])->count(),
             'paid_orders' => (clone $paid)->count(),
             'customers' => User::query()->count(),
@@ -31,12 +32,14 @@ class DashboardService
             'points_issued' => (int) LoyaltyTransaction::query()->where('points', '>', 0)->whereBetween('created_at', [$from, $to])->sum('points'),
             'points_redeemed' => (int) -LoyaltyTransaction::query()->where('type', 'redeemed')->whereBetween('created_at', [$from, $to])->sum('points'),
             'video_views' => (int) Video::query()->sum('view_count'),
-            'revenue_by_day' => (clone $paid)->selectRaw('DATE(paid_at) as day, SUM(grand_total) as revenue, COUNT(*) as orders')
-                ->groupBy('day')->orderBy('day')->get()->map(fn ($r) => ['day' => $r->day, 'revenue' => (int) $r->revenue, 'orders' => (int) $r->orders]),
+            'revenue_by_day' => (clone $paid)->selectRaw('DATE(paid_at) as day, SUM(grand_total / exchange_rate) as revenue, COUNT(*) as orders')
+                ->groupBy('day')->orderBy('day')->get()->map(fn ($r) => ['day' => $r->day, 'revenue' => (int) round((float) $r->revenue), 'orders' => (int) $r->orders]),
             'top_products' => OrderItem::query()
-                ->whereHas('order', fn ($q) => $q->where('payment_status', PaymentStatus::Succeeded->value)->whereBetween('paid_at', [$from, $to]))
-                ->selectRaw('product_id, MAX(product_name) as name, SUM(quantity) as units, SUM(line_total) as revenue')
-                ->groupBy('product_id')->orderByDesc('units')->limit(5)->get(),
+                ->join('orders', 'orders.id', '=', 'order_items.order_id')
+                ->where('orders.payment_status', PaymentStatus::Succeeded->value)->whereBetween('orders.paid_at', [$from, $to])
+                ->selectRaw('order_items.product_id, MAX(order_items.product_name) as name, SUM(order_items.quantity) as units, SUM(order_items.line_total / orders.exchange_rate) as revenue')
+                ->groupBy('order_items.product_id')->orderByDesc('units')->limit(5)->get()
+                ->map(fn ($r) => ['product_id' => $r->product_id, 'name' => $r->name, 'units' => (int) $r->units, 'revenue' => (int) round((float) $r->revenue)]),
             'low_stock' => ProductVariant::query()->with('product.translations')->where('is_active', true)
                 ->whereColumn('stock_quantity', '<=', 'low_stock_threshold')->orderBy('stock_quantity')->limit(10)->get()
                 ->map(fn (ProductVariant $v) => ['variant_id' => $v->id, 'product_id' => $v->product_id, 'name' => $v->product?->translated('name'), 'label' => $v->label(), 'sku' => $v->sku, 'stock' => $v->stock_quantity]),

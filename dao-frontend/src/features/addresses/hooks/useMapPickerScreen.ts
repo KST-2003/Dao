@@ -2,7 +2,7 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { MAPBOX_TOKEN } from '@/shared/constants/config';
 import { usePickedLocationStore } from '@/shared/store/pickedLocationStore';
 import type { GeocodingResult } from '@/shared/api/mapbox';
-import type { MapCoords } from '../constants/map';
+import { isSupportedCountry, type MapCoords } from '../constants/map';
 import { useMapPickerCamera } from './useMapPickerCamera';
 import { useMapPickerLocation } from './useMapPickerLocation';
 import { useMapPickerSearch } from './useMapPickerSearch';
@@ -21,6 +21,8 @@ export interface MapPickerScreenVm {
   searching: boolean;
   isLocating: boolean;
   canConfirm: boolean;
+  /** The pin is in a country we don't deliver to — show the warning and block confirming. */
+  outsideArea: boolean;
   handleCurrentLocation: () => void;
   handleSelectSuggestion: (s: GeocodingResult) => void;
   handleConfirm: () => void;
@@ -35,11 +37,13 @@ export function useMapPickerScreen(start: MapCoords): MapPickerScreenVm {
   const { isLocating, handleCurrentLocation } = useMapPickerLocation(camera.moveTo);
   const handleSelectSuggestion = useMapPickerSuggestionSelect(camera.moveTo, search.clearSearch);
 
-  const canConfirm = !camera.geocoding && camera.resolvedAddress.trim() !== '';
+  // Only Thailand and Myanmar. A pin whose country is still unknown can't be confirmed either.
+  const outsideArea = !camera.geocoding && camera.country !== null && !isSupportedCountry(camera.country);
+  const canConfirm = !camera.geocoding && camera.resolvedAddress.trim() !== '' && isSupportedCountry(camera.country);
   const handleBack = () => router.back();
   const handleConfirm = () => {
-    if (!canConfirm) return;
-    usePickedLocationStore.getState().set({ lat: camera.center[1], lng: camera.center[0], address: camera.resolvedAddress });
+    if (!canConfirm || !isSupportedCountry(camera.country)) return;
+    usePickedLocationStore.getState().set({ lat: camera.center[1], lng: camera.center[0], address: camera.resolvedAddress, country: camera.country });
     router.back();
   };
 
@@ -55,6 +59,7 @@ export function useMapPickerScreen(start: MapCoords): MapPickerScreenVm {
     searching: search.searching,
     isLocating,
     canConfirm,
+    outsideArea,
     handleCurrentLocation: () => void handleCurrentLocation(),
     handleSelectSuggestion,
     handleConfirm,

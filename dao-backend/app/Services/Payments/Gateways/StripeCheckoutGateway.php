@@ -34,6 +34,12 @@ class StripeCheckoutGateway implements PaymentGatewayInterface
         return (bool) $this->secret && (bool) $this->webhookSecret;
     }
 
+    /** Stripe doesn't support Myanmar kyat. */
+    public function isAvailableFor(string $currency): bool
+    {
+        return $this->isConfigured() && strtoupper($currency) !== 'MMK';
+    }
+
     public function initiate(Order $order, Payment $payment): PaymentInitiation
     {
         $response = Http::asForm()->withToken((string) $this->secret)->timeout(15)

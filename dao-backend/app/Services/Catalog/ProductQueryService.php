@@ -2,6 +2,7 @@
 
 namespace App\Services\Catalog;
 
+use App\Services\Currency\CurrencyService;
 use App\Models\Product;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
@@ -39,10 +40,10 @@ class ProductQueryService
             $query->whereHas('variants', fn (Builder $q) => $q->where('is_active', true)->where('stock_quantity', '>', 0));
         }
         if (isset($filters['min_price'])) {
-            $query->whereRaw('COALESCE(sale_price, price) >= ?', [(int) $filters['min_price']]);
+            $query->whereRaw('COALESCE(sale_price, price) >= ?', [app(CurrencyService::class)->toBase((int) $filters['min_price'])]);
         }
         if (isset($filters['max_price'])) {
-            $query->whereRaw('COALESCE(sale_price, price) <= ?', [(int) $filters['max_price']]);
+            $query->whereRaw('COALESCE(sale_price, price) <= ?', [app(CurrencyService::class)->toBase((int) $filters['max_price'])]);
         }
         if (! empty($filters['on_sale'])) {
             $query->whereNotNull('sale_price')->whereColumn('sale_price', '<', 'price');

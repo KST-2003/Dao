@@ -21,6 +21,11 @@ class CashOnDeliveryGateway implements PaymentGatewayInterface
         return true;
     }
 
+    public function isAvailableFor(string $currency): bool
+    {
+        return true;
+    }
+
     public function initiate(Order $order, Payment $payment): PaymentInitiation
     {
         return new PaymentInitiation('collect_on_delivery', instructions: ['amount' => $order->grand_total, 'currency' => $order->currency]);

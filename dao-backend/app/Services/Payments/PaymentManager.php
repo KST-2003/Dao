@@ -20,20 +20,21 @@ class PaymentManager
         }
     }
 
-    /** Methods that are both enabled (PAYMENT_METHODS) and configured. */
-    public function available(): array
+    /** Methods that are both enabled (PAYMENT_METHODS) and configured — for $currency when given. */
+    public function available(?string $currency = null): array
     {
         $enabled = config('dao.payments.methods', []);
 
         return array_values(array_filter(
             $this->gateways,
-            fn (PaymentGatewayInterface $g) => in_array($g->method()->value, $enabled, true) && $g->isConfigured(),
+            fn (PaymentGatewayInterface $g) => in_array($g->method()->value, $enabled, true)
+                && ($currency === null ? $g->isConfigured() : $g->isAvailableFor($currency)),
         ));
     }
 
-    public function gateway(PaymentMethod $method): PaymentGatewayInterface
+    public function gateway(PaymentMethod $method, ?string $currency = null): PaymentGatewayInterface
     {
-        foreach ($this->available() as $gateway) {
+        foreach ($this->available($currency) as $gateway) {
             if ($gateway->method() === $method) {
                 return $gateway;
             }

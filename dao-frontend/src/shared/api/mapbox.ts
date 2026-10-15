@@ -9,12 +9,19 @@ export interface GeocodingResult {
   fullAddress: string;
   /** [lng, lat] */
   coordinates: [number, number];
+  /** ISO 3166-1 alpha-2, upper case (e.g. TH); null when Mapbox doesn't say. */
+  country: string | null;
+}
+
+export interface ReverseGeocodingResult {
+  address: string;
+  country: string | null;
 }
 
 interface GeocodeFeature {
   id?: string;
   geometry?: { coordinates?: number[] };
-  properties?: { name?: string; full_address?: string; place_formatted?: string };
+  properties?: { name?: string; full_address?: string; place_formatted?: string; context?: { country?: { country_code?: string } } };
 }
 interface GeocodeResponse { features?: GeocodeFeature[] }
 
@@ -24,8 +31,10 @@ async function getJson(url: URL): Promise<GeocodeResponse | null> {
   return res.ok ? ((await res.json()) as GeocodeResponse) : null;
 }
 
-/** Pin → street address. Returns null when nothing resolves, the request fails, or there is no token. */
-export async function reverseGeocodeApi(lng: number, lat: number, language: string): Promise<string | null> {
+const countryOf = (f: GeocodeFeature): string | null => f.properties?.context?.country?.country_code?.toUpperCase() ?? null;
+
+/** Pin → street address and its country. Returns null when nothing resolves, the request fails, or there is no token. */
+export async function reverseGeocodeApi(lng: number, lat: number, language: string): Promise<ReverseGeocodingResult | null> {
   if (!MAPBOX_TOKEN) return null;
   try {
     const url = new URL(`${GEOCODE_BASE}/reverse`);
@@ -33,7 +42,9 @@ export async function reverseGeocodeApi(lng: number, lat: number, language: stri
     url.searchParams.set('latitude', String(lat));
     url.searchParams.set('language', language);
     const data = await getJson(url);
-    return data?.features?.[0]?.properties?.full_address ?? null;
+    const feature = data?.features?.[0];
+    const address = feature?.properties?.full_address;
+    return feature && address ? { address, country: countryOf(feature) } : null;
   } catch {
     return null;
   }
@@ -56,7 +67,7 @@ export async function geocodeQueryApi(query: string, countries: readonly string[
       const [lng, lat] = f.geometry?.coordinates ?? [];
       const name = f.properties?.name;
       if (!f.id || name === undefined || lng === undefined || lat === undefined) return [];
-      return [{ id: f.id, name, fullAddress: f.properties?.full_address ?? [name, f.properties?.place_formatted].filter(Boolean).join(', '), coordinates: [lng, lat] }];
+      return [{ id: f.id, name, fullAddress: f.properties?.full_address ?? [name, f.properties?.place_formatted].filter(Boolean).join(', '), coordinates: [lng, lat], country: countryOf(f) }];
     });
   } catch {
     return [];

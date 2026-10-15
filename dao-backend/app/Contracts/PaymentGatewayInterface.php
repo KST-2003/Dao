@@ -18,6 +18,9 @@ interface PaymentGatewayInterface
     /** False when credentials/settings are missing — the method is then hidden, never faked. */
     public function isConfigured(): bool;
 
+    /** Whether orders in this currency can be paid with this method (e.g. cards can't take MMK). Implies isConfigured for that currency. */
+    public function isAvailableFor(string $currency): bool;
+
     /** Start payment for a pending order (redirect URL, transfer instructions, …). */
     public function initiate(Order $order, Payment $payment): PaymentInitiation;
 

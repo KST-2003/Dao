@@ -5,8 +5,13 @@ import { analytics } from '@/shared/services/analytics/AnalyticsService';
 import type { DeliveryMethod, PaymentMethod } from '@/types/enums';
 import type { CheckoutOptions, PlaceOrderResult, Quote } from '@/types/models';
 
-export function useCheckoutOptions() {
-  return useQuery({ queryKey: qk.checkoutOptions, queryFn: () => api.get<CheckoutOptions>('/checkout/options'), networkMode: 'online' });
+/** Delivery methods for the chosen address's country (Thailand / Myanmar) and payment methods that can take the currency. */
+export function useCheckoutOptions(addressId: number | null = null) {
+  return useQuery({
+    queryKey: qk.checkoutOptions(addressId),
+    queryFn: () => api.get<CheckoutOptions>('/checkout/options', { params: addressId ? { address_id: addressId } : undefined }),
+    networkMode: 'online',
+  });
 }
 
 export interface QuoteParams {

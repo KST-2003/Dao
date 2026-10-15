@@ -31,6 +31,7 @@ class AppServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->app->singleton(SettingsService::class);
+        $this->app->singleton(\App\Services\Currency\CurrencyService::class);
 
         // --- OTP: never pretend. "log" only in local; "fake" only in tests; otherwise a real provider or 503. ---
         $this->app->singleton(OtpProviderInterface::class, function ($app) {

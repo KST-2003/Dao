@@ -5,6 +5,7 @@ use App\Http\Middleware\AdminTokenFromCookie;
 use App\Http\Middleware\EnsureAdmin;
 use App\Http\Middleware\EnsureAdminPermission;
 use App\Http\Middleware\EnsureCustomer;
+use App\Http\Middleware\ResolveCurrency;
 use App\Http\Middleware\SetLocale;
 use App\Http\Middleware\TouchLastActive;
 use Illuminate\Auth\Access\AuthorizationException;
@@ -37,7 +38,7 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->trustProxies(at: '*');
-        $middleware->api(append: [SetLocale::class]);
+        $middleware->api(append: [SetLocale::class, ResolveCurrency::class]);
         // Laravel's $middlewarePriority pulls Authenticate (via the AuthenticatesRequests
         // interface it implements) ahead of the 'api' group's SubstituteBindings, and since
         // AdminTokenFromCookie isn't in that priority list, it got left behind — auth:sanctum

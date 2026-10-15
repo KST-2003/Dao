@@ -212,10 +212,13 @@ export const th: TranslationShape<typeof en> = {
     address: "ที่อยู่จัดส่ง",
     addAddress: "เพิ่มที่อยู่",
     change: "เปลี่ยน",
+    unsupportedAddress: "เราจัดส่งเฉพาะประเทศไทยและเมียนมา โปรดเลือกที่อยู่ในประเทศใดประเทศหนึ่ง",
     delivery: "วิธีจัดส่ง",
     deliveryMethods: {
       standard: "มาตรฐาน (2–4 วัน)",
       express: "ด่วน (1–2 วัน)",
+      air_cargo: "ขนส่งทางอากาศ",
+      land_cargo: "ขนส่งทางบก",
     },
     payment: "การชำระเงิน",
     paymentMethods: {
@@ -476,6 +479,14 @@ export const th: TranslationShape<typeof en> = {
     empty: "แตะ ♡ เพื่อบันทึกสิ่งที่ชอบ",
   },
   settings: {
+    currency: "สกุลเงิน",
+    currencyHint: "ราคาและการชำระเงินใช้สกุลเงินนี้",
+    currencyRate: "1 บาท = {{rate}} จ๊าต",
+    currencyChanged: "แสดงราคาเป็น {{currency}} แล้ว",
+    currencies: {
+      THB: "บาทไทย (THB)",
+      MMK: "จ๊าตเมียนมา (MMK)",
+    },
     title: "ตั้งค่า",
     language: "ภาษา",
     theme: "รูปแบบการแสดงผล",
@@ -523,6 +534,8 @@ export const th: TranslationShape<typeof en> = {
     default: "หลัก",
     required: "จำเป็น",
     map: {
+      outsideArea: "เราจัดส่งเฉพาะประเทศไทยและเมียนมา โปรดเลื่อนหมุดไปยังตำแหน่งในประเทศใดประเทศหนึ่ง",
+      countryChanged: "ตั้งประเทศเป็น {{country}} ให้ตรงกับแผนที่",
       pickOnMap: "เลือกบนแผนที่",
       locationSet: "ตั้งตำแหน่งบนแผนที่แล้ว",
       locationRequired: "กรุณาเลือกตำแหน่งบนแผนที่",

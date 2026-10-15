@@ -64,7 +64,7 @@ export function useCheckoutScreen() {
     quote,
     quoteError: quote.error ? message(quote.error) : null,
     placing: place.isPending,
-    canPlace: online && !!form.address && !!form.payment && !!quote.data && !quote.isFetching && !quote.error,
+    canPlace: online && !!form.address && form.deliveryMethods.length > 0 && !!form.payment && !!quote.data && !quote.isFetching && !quote.error,
     online,
     submit,
     addAddress: () => router.push({ pathname: '/addresses/edit', params: {} }),

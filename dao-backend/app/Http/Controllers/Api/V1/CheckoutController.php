@@ -11,6 +11,7 @@ use App\Http\Requests\Api\QuoteRequest;
 use App\Http\Resources\Api\OrderResource;
 use App\Services\Cart\CartService;
 use App\Services\Orders\CheckoutService;
+use App\Services\Currency\CurrencyService;
 use App\Services\Payments\PaymentManager;
 use App\Services\Settings\SettingsService;
 use App\Services\Pricing\PricingService;
@@ -19,13 +20,25 @@ use Illuminate\Http\Request;
 
 class CheckoutController extends Controller
 {
-    public function options(PaymentManager $payments, SettingsService $settings): JsonResponse
+    /**
+     * Payment methods that can take the customer's currency, and the delivery methods for the chosen address's country
+     * (Thailand: standard/express; Myanmar: air/land cargo) with their fees in that currency.
+     */
+    public function options(Request $request, PaymentManager $payments, PricingService $pricing, CurrencyService $currencies): JsonResponse
     {
+        $user = $request->user();
+        $address = $request->filled('address_id')
+            ? $user->addresses()->find((int) $request->input('address_id'))
+            : $user->addresses()->orderByDesc('is_default')->first();
+        $country = $address?->country_code ?? 'TH';
+        $currency = $currencies->current();
+
         return $this->ok([
-            'payment_methods' => array_map(fn ($g) => $g->method()->value, $payments->available()),
-            'delivery_methods' => collect(DeliveryMethod::cases())->map(fn (DeliveryMethod $d) => [
-                'code' => $d->value, 'fee' => $settings->int($d->feeSettingKey()),
-            ]),
+            'payment_methods' => array_map(fn ($g) => $g->method()->value, $payments->available($currency->value)),
+            'country' => $country,
+            'delivery_methods' => collect(DeliveryMethod::forCountry($country))->map(fn (DeliveryMethod $d) => [
+                'code' => $d->value, 'fee' => $pricing->shippingFee($d, $currency),
+            ])->values(),
         ]);
     }
 

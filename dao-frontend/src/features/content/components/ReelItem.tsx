@@ -27,10 +27,12 @@ interface Props {
   height: number;
   /** The reel on screen (and the tab focused): only this one decodes video. */
   playing: boolean;
+  /** Space the floating tab bar takes at the bottom — the video runs underneath it, controls stay above it. */
+  bottomInset: number;
 }
 
 /** A full-screen reel: poster until it's the active one, then the live video, with the TikTok-style action rail. */
-export function ReelItem({ video, height, playing }: Props) {
+export function ReelItem({ video, height, playing, bottomInset }: Props) {
   const { t } = useTranslation();
   const { spacing } = useTheme();
   const vm = useReelItem(video, playing);
@@ -39,13 +41,13 @@ export function ReelItem({ video, height, playing }: Props) {
   return (
     <View style={{ height, backgroundColor: media.midnight }}>
       <DAOImage uri={video.thumbnail_url} style={{ position: 'absolute', width: '100%', height: '100%' }} />
-      {playing && video.video_url ? <ReelPlayer uri={video.video_url} paused={vm.paused} /> : null}
+      {playing && video.video_url ? <ReelPlayer uri={video.video_url} paused={vm.paused} barBottom={bottomInset} /> : null}
       {/* Stops short of the seek bar's touch zone so the two never compete for the same finger. */}
-      <Pressable accessibilityRole="button" accessibilityLabel={vm.paused ? 'play' : 'pause'} onPress={(e) => vm.onTap(e.nativeEvent.locationX, e.nativeEvent.locationY)} style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: REEL_BAR_ZONE, alignItems: 'center', justifyContent: 'center' }}>
+      <Pressable accessibilityRole="button" accessibilityLabel={vm.paused ? 'play' : 'pause'} onPress={(e) => vm.onTap(e.nativeEvent.locationX, e.nativeEvent.locationY)} style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: bottomInset + REEL_BAR_ZONE, alignItems: 'center', justifyContent: 'center' }}>
         {vm.paused ? <View pointerEvents="none"><Ionicons name="play" size={72} color={media.textMuted} /></View> : null}
       </Pressable>
       {vm.burst ? <HeartBurst key={vm.burst.key} x={vm.burst.x} y={vm.burst.y} onDone={vm.clearBurst} /> : null}
-      <LinearGradient pointerEvents="none" colors={['transparent', media.scrim]} style={{ position: 'absolute', left: 0, right: 0, bottom: 0, height: 260 }} />
+      <LinearGradient pointerEvents="none" colors={['transparent', media.scrim]} style={{ position: 'absolute', left: 0, right: 0, bottom: 0, height: 260 + bottomInset }} />
 
       {locked ? (
         <View pointerEvents="box-none" style={{ position: 'absolute', left: 0, right: 0, top: '42%', alignItems: 'center', gap: spacing.sm }}>
@@ -54,7 +56,7 @@ export function ReelItem({ video, height, playing }: Props) {
         </View>
       ) : null}
 
-      <View pointerEvents="box-none" style={{ position: 'absolute', right: spacing.md, bottom: spacing.xl + REEL_BAR_ZONE, gap: spacing.xl, alignItems: 'center' }}>
+      <View pointerEvents="box-none" style={{ position: 'absolute', right: spacing.md, bottom: spacing.md + bottomInset + REEL_BAR_ZONE, gap: spacing.xl, alignItems: 'center' }}>
         <View accessibilityLabel={video.author.name} style={{ borderWidth: 2, borderColor: media.text, borderRadius: 28, padding: 0 }}>
           <DAOAvatar uri={video.author.avatar_url} name={video.author.name} size={48} />
         </View>
@@ -65,7 +67,7 @@ export function ReelItem({ video, height, playing }: Props) {
         <Rail name={t('vlog.share')} icon="arrow-redo-outline" onPress={vm.share} />
       </View>
 
-      <View pointerEvents="none" style={{ position: 'absolute', left: spacing.gutter, right: 88, bottom: spacing.xl + REEL_BAR_ZONE, gap: 4 }}>
+      <View pointerEvents="none" style={{ position: 'absolute', left: spacing.gutter, right: 88, bottom: spacing.md + bottomInset + REEL_BAR_ZONE, gap: 4 }}>
         <DAOText variant="bodyMedium" numberOfLines={1} style={{ color: media.text, fontWeight: '700' }}>{video.author.name}</DAOText>
         {video.title ? <DAOText variant="bodyMedium" numberOfLines={2} style={{ color: media.text }}>{video.title}</DAOText> : null}
         {video.description ? <DAOText variant="bodySmall" numberOfLines={2} style={{ color: media.textMuted }}>{video.description}</DAOText> : null}

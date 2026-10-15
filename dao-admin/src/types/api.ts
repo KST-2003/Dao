@@ -62,6 +62,8 @@ export interface ProductImage { id: number; url: string; thumbnail_url: string |
 export interface ProductDetail {
   id: number; category_id: number | null; slug: string; brand: string | null; sku: string | null; barcode: string | null
   price: number; sale_price: number | null; member_price: number | null; cost: number | null; weight_grams: number | null
+  /** Own MMK prices (minor units). null price_mmk = MMK is the THB price × the exchange rate. */
+  price_mmk: number | null; sale_price_mmk: number | null; member_price_mmk: number | null
   status: 'draft' | 'published' | 'archived'; badges: string[] | null; is_vip_only: boolean; vip_min_tier_id: number | null
   /** Per-order limits for normal orders; null = no limit. */
   min_order_qty: number | null; max_order_qty: number | null
@@ -132,7 +134,7 @@ export interface CustomerDetail extends CustomerRow {
   providers: { provider: string; linked_at: string | null }[]
   addresses: Record<string, unknown>[]
   referred_by: { id: number; display_name: string | null; referral_code: string } | null
-  recent_orders: { id: number; order_number: string; status: string; grand_total: number; placed_at: string }[]
+  recent_orders: { id: number; order_number: string; status: string; grand_total: number; currency: string; placed_at: string }[]
   lifetime_spend: number
   screenshot_override: boolean
   download_override: boolean

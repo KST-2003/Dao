@@ -35,6 +35,7 @@ class Order extends Model
             'payment_status' => PaymentStatus::class,
             'payment_method' => PaymentMethod::class,
             'delivery_method' => DeliveryMethod::class,
+            'exchange_rate' => 'float',
             'subtotal' => 'integer',
             'member_discount' => 'integer',
             'coupon_discount' => 'integer',
@@ -86,9 +87,14 @@ class Order extends Model
         return $this->belongsTo(Coupon::class);
     }
 
-    /** Amount eligible for points and tier spend: what the customer paid for goods (excl. shipping). */
+    /**
+     * What the customer paid for goods (excl. shipping), in THB minor units — the basis for points, tier spend and
+     * referral minimums, whatever currency the order was placed in (converted at the order's own rate).
+     */
     public function eligibleSpend(): int
     {
-        return max(0, $this->grand_total - $this->shipping_fee);
+        $amount = max(0, $this->grand_total - $this->shipping_fee);
+
+        return $this->currency === 'THB' ? $amount : (int) round($amount / max(0.0001, (float) $this->exchange_rate));
     }
 }

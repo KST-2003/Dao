@@ -209,10 +209,13 @@ export const en = {
     address: "Delivery address",
     addAddress: "Add address",
     change: "Change",
+    unsupportedAddress: "We only deliver to Thailand and Myanmar. Choose an address in one of them.",
     delivery: "Delivery method",
     deliveryMethods: {
       standard: "Standard (2–4 days)",
       express: "Express (1–2 days)",
+      air_cargo: "Air cargo",
+      land_cargo: "Land cargo",
     },
     payment: "Payment",
     paymentMethods: {
@@ -473,6 +476,14 @@ export const en = {
     empty: "Tap ♡ to save something you love.",
   },
   settings: {
+    currency: "Currency",
+    currencyHint: "Prices and payment use this currency.",
+    currencyRate: "1 THB = {{rate}} MMK",
+    currencyChanged: "Prices now shown in {{currency}}",
+    currencies: {
+      THB: "Thai Baht (THB)",
+      MMK: "Myanmar Kyat (MMK)",
+    },
     title: "Settings",
     language: "Language",
     theme: "Appearance",
@@ -520,6 +531,8 @@ export const en = {
     default: "Default",
     required: "Required",
     map: {
+      outsideArea: "We only deliver to Thailand and Myanmar. Move the pin to a location in one of them.",
+      countryChanged: "Country set to {{country}} to match the map.",
       pickOnMap: "Pick on map",
       locationSet: "Location set on map",
       locationRequired: "Please choose a location on the map",

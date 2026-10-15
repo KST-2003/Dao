@@ -1,9 +1,10 @@
 import type { AppLocale } from '@/shared/i18n';
+import { usePrefsStore } from '@/shared/store/prefsStore';
 
 const SYMBOLS: Record<string, string> = { THB: '฿', MMK: 'K ' };
 
-/** Money arrives in minor units (satang). ฿590 / ฿1,160 / ฿12.50 */
-export function formatMoney(minor: number | null | undefined, currency = 'THB'): string {
+/** Money arrives in minor units (satang / pya). ฿590 / ฿1,160 / K 100,000. Defaults to the currency the customer chose. */
+export function formatMoney(minor: number | null | undefined, currency: string = usePrefsStore.getState().currency): string {
   const value = (minor ?? 0) / 100;
   const whole = Number.isInteger(value);
   const formatted = value.toLocaleString('en-US', {

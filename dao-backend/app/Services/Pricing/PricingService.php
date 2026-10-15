@@ -4,12 +4,14 @@ namespace App\Services\Pricing;
 
 use App\DTOs\PricedLine;
 use App\DTOs\Quote;
+use App\Enums\Currency;
 use App\Enums\DeliveryMethod;
 use App\Models\CartItem;
 use App\Models\MembershipTier;
 use App\Models\ProductVariant;
 use App\Models\User;
 use App\Services\Coupons\CouponService;
+use App\Services\Currency\CurrencyService;
 use App\Services\Loyalty\LoyaltyService;
 use App\Services\Loyalty\MembershipService;
 use App\Services\Settings\SettingsService;
@@ -32,6 +34,7 @@ class PricingService
         private readonly CouponService $coupons,
         private readonly LoyaltyService $loyalty,
         private readonly SettingsService $settings,
+        private readonly CurrencyService $currency,
     ) {}
 
     /**
@@ -40,10 +43,11 @@ class PricingService
     public function quote(User $user, iterable $items, ?string $couponCode, int $points, DeliveryMethod $delivery): Quote
     {
         $tier = $this->membership->currentTier($user);
+        $currency = $this->currency->current();
 
         $lines = [];
         foreach ($items as $item) {
-            $lines[] = $this->priceLine($item->variant, $item->quantity, $tier, $item);
+            $lines[] = $this->priceLine($item->variant, $item->quantity, $tier, $item, $currency);
         }
 
         $subtotal = array_sum(array_map(fn (PricedLine $l) => $l->listTotal(), $lines));
@@ -54,17 +58,19 @@ class PricingService
         $couponDiscount = 0;
         $freeShippingCoupon = false;
         if ($couponCode && $lines !== []) {
-            $evaluation = $this->coupons->evaluate($couponCode, $user, $lines, $tier);
+            $evaluation = $this->coupons->evaluate($couponCode, $user, $lines, $tier, $currency);
             $coupon = $evaluation->coupon;
             $couponDiscount = min($evaluation->discount, $afterMember);
             $freeShippingCoupon = $evaluation->freeShipping;
         }
         $afterCoupon = $afterMember - $couponDiscount;
 
-        $pointsDiscount = min($afterCoupon, $this->loyalty->discountForPoints($user, $points, $afterCoupon));
+        // Points are worth a fixed THB amount, so they are valued (and capped) in THB, then converted to the order currency.
+        $pointsDiscountBase = $this->loyalty->discountForPoints($user, $points, $this->currency->toBase($afterCoupon, $currency));
+        $pointsDiscount = min($afterCoupon, $this->currency->fromBase($pointsDiscountBase, $currency));
 
-        $threshold = $this->settings->int('shipping.free_threshold');
-        $shipping = $lines === [] ? 0 : $this->settings->int($delivery->feeSettingKey());
+        $threshold = $this->currency->fromBase($this->settings->int('shipping.free_threshold'), $currency);
+        $shipping = $lines === [] ? 0 : $this->shippingFee($delivery, $currency);
         if ($delivery === DeliveryMethod::Standard && ($freeShippingCoupon || ($tier?->free_shipping ?? false) || ($threshold > 0 && $afterCoupon >= $threshold))) {
             $shipping = 0;
         }
@@ -80,27 +86,51 @@ class PricingService
             pointsRedeemed: $pointsDiscount > 0 ? $points : 0,
             shippingFee: $shipping,
             total: $goodsTotal + $shipping,
-            pointsToEarn: $this->loyalty->purchasePoints($goodsTotal, $tier),
+            pointsToEarn: $this->loyalty->purchasePoints($this->currency->toBase($goodsTotal, $currency), $tier),
             deliveryMethod: $delivery,
             coupon: $coupon,
-            currency: config('dao.default_currency'),
+            currency: $currency->value,
             freeShippingThreshold: $threshold,
         );
     }
 
-    public function priceLine(ProductVariant $variant, int $quantity, ?MembershipTier $tier, ?CartItem $item = null): PricedLine
+    /** Delivery fee in $currency: an admin-set MMK fee if there is one, otherwise the THB fee converted at the rate. */
+    public function shippingFee(DeliveryMethod $delivery, Currency $currency): int
     {
-        $list = $variant->listPrice();
+        if ($currency === Currency::MMK) {
+            $own = $this->settings->get($delivery->mmkFeeSettingKey());
+            if ($own !== null && $own !== '') {
+                return (int) $own;
+            }
+        }
+
+        return $this->currency->fromBase($this->settings->int($delivery->feeSettingKey()), $currency);
+    }
+
+    public function priceLine(ProductVariant $variant, int $quantity, ?MembershipTier $tier, ?CartItem $item = null, ?Currency $currency = null): PricedLine
+    {
+        $currency ??= $this->currency->current();
+        $list = $variant->listPriceIn($currency);
         $member = $list;
         if ($tier !== null) {
-            $memberPrice = $variant->product->member_price;
+            $memberPrice = $this->memberPrice($variant, $currency);
             if ($memberPrice !== null && $memberPrice < $list) {
                 $member = $memberPrice;
-            } elseif ((float) $tier->discount_percent > 0 && ! $variant->isOnSale()) {
+            } elseif ((float) $tier->discount_percent > 0 && ! $variant->isOnSaleIn($currency)) {
                 $member = $list - Money::percentOf($list, $tier->discount_percent);
             }
         }
 
         return new PricedLine($variant, $quantity, $list, $member, $item);
+    }
+
+    /** The product's member price in $currency — but a variant with its own THB override never gets the product's. */
+    private function memberPrice(ProductVariant $variant, Currency $currency): ?int
+    {
+        if ($currency === Currency::MMK && ! $variant->usesProductMmkPrice() && $variant->product->hasOwnMmkPrice()) {
+            return $this->currency->fromBase((int) $variant->product->member_price, $currency) ?: null;
+        }
+
+        return $variant->product->memberPriceIn($currency);
     }
 }

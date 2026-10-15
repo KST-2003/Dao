@@ -21,6 +21,10 @@ class ProductRequest extends AdminRequest
             'price' => [$id ? 'sometimes' : 'required', 'integer', 'min:0'],
             'sale_price' => ['nullable', 'integer', 'min:0'],
             'member_price' => ['nullable', 'integer', 'min:0'],
+            // Optional MMK prices (minor units). Leave price_mmk empty and MMK is the THB price converted at the exchange rate.
+            'price_mmk' => ['nullable', 'integer', 'min:0'],
+            'sale_price_mmk' => ['nullable', 'integer', 'min:0'],
+            'member_price_mmk' => ['nullable', 'integer', 'min:0'],
             'cost' => ['nullable', 'integer', 'min:0'],
             'weight_grams' => ['nullable', 'integer', 'min:0'],
             // Quantity limits; null = no limit.

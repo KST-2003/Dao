@@ -1,6 +1,7 @@
 import axios, { type AxiosRequestConfig } from 'axios';
 import { API_BASE } from '@/shared/constants/config';
 import { i18n } from '@/shared/i18n';
+import { usePrefsStore } from '@/shared/store/prefsStore';
 import { toApiError } from './errors';
 
 /**
@@ -29,6 +30,7 @@ http.interceptors.request.use((config) => {
     config.headers.set('Authorization', `Bearer ${tokenRef}`);
   }
   config.headers.set('X-Locale', i18n.language || 'en');
+  config.headers.set('X-Currency', usePrefsStore.getState().currency);
   return config;
 });
 

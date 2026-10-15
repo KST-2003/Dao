@@ -74,10 +74,16 @@ class CartController extends Controller
         $points = (int) $request->input('points', 0);
 
         // Throws a DomainException with a precise code if the coupon/points are not valid.
-        $this->pricing->quote($user, $active, $code, $points, DeliveryMethod::tryFrom((string) $request->input('delivery_method')) ?? DeliveryMethod::Standard);
+        $this->pricing->quote($user, $active, $code, $points, DeliveryMethod::tryFrom((string) $request->input('delivery_method')) ?? $this->defaultDelivery($user));
         $cart->update(['coupon_code' => $code, 'points_to_redeem' => $points]);
 
         return $this->ok($this->payload($user));
+    }
+
+    /** The cart's shipping estimate uses the first method for the default address's country (Thailand: standard). */
+    private function defaultDelivery(User $user): DeliveryMethod
+    {
+        return DeliveryMethod::defaultFor($user->addresses()->orderByDesc('is_default')->value('country_code'));
     }
 
     private function payload(User $user): array
@@ -92,11 +98,11 @@ class CartController extends Controller
         $quote = null;
         $optionError = null;
         try {
-            $quote = $this->pricing->quote($user, $valid, $cart->coupon_code, $cart->points_to_redeem, DeliveryMethod::Standard)->toArray();
+            $quote = $this->pricing->quote($user, $valid, $cart->coupon_code, $cart->points_to_redeem, $this->defaultDelivery($user))->toArray();
         } catch (DomainException $e) {
             // A saved coupon/points choice became invalid (expired coupon, balance changed…). Report it; don't drop it.
             $optionError = ['code' => $e->errorCode, 'message' => $e->getMessage()];
-            $quote = $this->pricing->quote($user, $valid, null, 0, DeliveryMethod::Standard)->toArray();
+            $quote = $this->pricing->quote($user, $valid, null, 0, $this->defaultDelivery($user))->toArray();
         }
 
         return [

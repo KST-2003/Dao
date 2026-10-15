@@ -3,7 +3,7 @@
  * All money values are integers in minor units (satang).
  */
 import type {
-  AuthProvider, CartIssueCode, PreorderDestination, PreorderStatus, ContentType, CouponType, DeliveryMethod, Difficulty, Gender,
+  AuthProvider, CartIssueCode, Currency, PreorderDestination, PreorderStatus, ContentType, CouponType, DeliveryMethod, Difficulty, Gender,
   LoyaltyTransactionType, NotificationType, OrderStatus, PaymentAction, PaymentMethod, PaymentStatus,
   ProductBadge, RewardType, ShipmentStatus,
 } from './enums';
@@ -54,6 +54,7 @@ export interface AppConfig {
   locales: string[];
   fallback_locale: string;
   currency: string;
+  currencies: { options: Currency[]; default: Currency; mmk_per_thb: number };
   auth: { google: boolean; line: boolean; sms: boolean };
   payment_methods: PaymentMethod[];
   loyalty: { redeem_points_unit: number; redeem_value_per_unit: number; redeem_min_points: number; redeem_max_percent: number };
@@ -270,6 +271,8 @@ export interface Cart {
 
 export interface CheckoutOptions {
   payment_methods: PaymentMethod[];
+  /** Country of the address the delivery methods are for. */
+  country: 'TH' | 'MM';
   delivery_methods: { code: DeliveryMethod; fee: number }[];
 }
 

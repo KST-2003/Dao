@@ -10,12 +10,12 @@ import { useCheckoutOptions } from '../api';
 export function useCheckoutForm() {
   const cart = useCart();
   const addresses = useAddresses();
-  const options = useCheckoutOptions();
   const membership = useMembership();
   const config = useAppConfig();
   const [addressId, setAddressId] = useState<number | null>(null);
-  const [delivery, setDelivery] = useState<DeliveryMethod>('standard');
-  const [payment, setPayment] = useState<PaymentMethod | null>(null);
+  const [deliveryChoice, setDeliveryChoice] = useState<DeliveryMethod | null>(null);
+  const [paymentChoice, setPaymentChoice] = useState<PaymentMethod | null>(null);
+  const options = useCheckoutOptions(addressId);
   const [coupon, setCoupon] = useState<string | null>(null);
   const [couponInput, setCouponInput] = useState('');
   const [points, setPoints] = useState(0);
@@ -27,11 +27,12 @@ export function useCheckoutForm() {
     }
   }, [addresses.data, addressId]);
 
-  useEffect(() => {
-    if (payment === null && options.data?.payment_methods.length) {
-      setPayment(options.data.payment_methods[0]!);
-    }
-  }, [options.data, payment]);
+  // The address's country decides the delivery methods and the currency decides the payment methods, so a past choice
+  // that no longer applies quietly falls back to the first one on offer.
+  const deliveryMethods = options.data?.delivery_methods ?? [];
+  const delivery: DeliveryMethod = deliveryMethods.find((m) => m.code === deliveryChoice)?.code ?? deliveryMethods[0]?.code ?? 'standard';
+  const paymentMethods = options.data?.payment_methods ?? [];
+  const payment: PaymentMethod | null = paymentMethods.find((m) => m === paymentChoice) ?? paymentMethods[0] ?? null;
 
   useEffect(() => {
     if (cart.data) {
@@ -47,7 +48,7 @@ export function useCheckoutForm() {
   return {
     cart, addresses, options, config,
     addressId, setAddressId, address: addresses.data?.find((a) => a.id === addressId) ?? null,
-    delivery, setDelivery, payment, setPayment,
+    delivery, setDelivery: setDeliveryChoice, deliveryMethods, payment, setPayment: setPaymentChoice,
     coupon, couponInput, setCouponInput, applyCoupon: () => setCoupon(couponInput.trim().toUpperCase() || null), clearCoupon: () => setCoupon(null),
     points, setPoints, unit, balance, maxPoints,
     notes, setNotes,

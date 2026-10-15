@@ -5,6 +5,7 @@ namespace App\Services\Orders;
 use App\DTOs\PaymentInitiation;
 use App\DTOs\PlaceOrderData;
 use App\DTOs\PricedLine;
+use App\Enums\DeliveryMethod;
 use App\Enums\OrderStatus;
 use App\Enums\PaymentMethod;
 use App\Enums\PaymentStatus;
@@ -19,6 +20,7 @@ use App\Models\User;
 use App\Services\Cart\CartService;
 use App\Services\Catalog\InventoryService;
 use App\Services\Coupons\CouponService;
+use App\Services\Currency\CurrencyService;
 use App\Services\Loyalty\LoyaltyService;
 use App\Services\Loyalty\MembershipService;
 use App\Services\Payments\PaymentManager;
@@ -41,6 +43,7 @@ class CheckoutService
         private readonly MembershipService $membership,
         private readonly PaymentManager $payments,
         private readonly OrderNumberGenerator $numbers,
+        private readonly CurrencyService $currency,
     ) {}
 
     /** @return array{order: Order, payment: PaymentInitiation} */
@@ -53,7 +56,7 @@ class CheckoutService
             }
         }
 
-        $gateway = $this->payments->gateway($data->paymentMethod); // fail fast on a disabled method
+        $gateway = $this->payments->gateway($data->paymentMethod, $this->currency->current()->value); // fail fast on a method that's off or can't take this currency
 
         $order = DB::transaction(function () use ($user, $data) {
             $cart = Cart::query()->where('user_id', $user->id)->lockForUpdate()->first();
@@ -76,6 +79,10 @@ class CheckoutService
             if (! $address) {
                 throw DomainException::of('ADDRESS_NOT_FOUND', 422);
             }
+            // We only deliver to Thailand and Myanmar, and each has its own delivery methods.
+            if (! in_array($data->deliveryMethod, DeliveryMethod::forCountry($address->country_code), true)) {
+                throw DomainException::of('DELIVERY_METHOD_INVALID', 422);
+            }
 
             $quote = $this->pricing->quote($user, $items, $data->couponCode, $data->pointsToRedeem, $data->deliveryMethod);
             if ($data->expectedTotal !== null && $data->expectedTotal !== $quote->total) {
@@ -91,6 +98,7 @@ class CheckoutService
                 'payment_method' => $data->paymentMethod,
                 'delivery_method' => $data->deliveryMethod,
                 'currency' => $quote->currency,
+                'exchange_rate' => $this->currency->rateFor($quote->currency),
                 'subtotal' => $quote->subtotal,
                 'member_discount' => $quote->memberDiscount,
                 'coupon_discount' => $quote->couponDiscount,
@@ -150,7 +158,7 @@ class CheckoutService
         if ($order->payment_status === PaymentStatus::Succeeded || $order->status->isFinal()) {
             return new PaymentInitiation('none');
         }
-        $gateway ??= $this->payments->gateway($order->payment_method);
+        $gateway ??= $this->payments->gateway($order->payment_method, $order->currency);
         $payment = $order->payments()->latest('id')->firstOrFail();
         $initiation = $gateway->initiate($order, $payment);
 

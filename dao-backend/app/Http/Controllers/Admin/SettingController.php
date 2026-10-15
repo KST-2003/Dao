@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Services\Settings\SettingsService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Arr;
 
 /** Business rules: point earning/redemption, referral rewards, shipping fees, bank details. */
 class SettingController extends AdminController
@@ -32,20 +33,33 @@ class SettingController extends AdminController
             'referral.referrer_bonus' => $int,
             'referral.referee_bonus' => $int,
             'referral.min_order_total' => $int,
+            'currency.mmk_per_thb' => ['nullable', 'numeric', 'min:0.01', 'max:1000000'],
             'shipping.standard_fee' => $int,
             'shipping.express_fee' => $int,
+            'shipping.air_cargo_fee' => $int,
+            'shipping.land_cargo_fee' => $int,
+            'shipping.standard_fee_mmk' => $int,
+            'shipping.express_fee_mmk' => $int,
+            'shipping.air_cargo_fee_mmk' => $int,
+            'shipping.land_cargo_fee_mmk' => $int,
             'shipping.free_threshold' => $int,
             'payments.bank_transfer' => ['nullable', 'array'],
             'payments.bank_transfer.bank_name' => ['nullable', 'string', 'max:100'],
             'payments.bank_transfer.account_name' => ['nullable', 'string', 'max:120'],
             'payments.bank_transfer.account_number' => ['nullable', 'string', 'max:40'],
             'payments.bank_transfer.promptpay_id' => ['nullable', 'string', 'max:40'],
+            'payments.bank_transfer_mmk' => ['nullable', 'array'],
+            'payments.bank_transfer_mmk.bank_name' => ['nullable', 'string', 'max:100'],
+            'payments.bank_transfer_mmk.account_name' => ['nullable', 'string', 'max:120'],
+            'payments.bank_transfer_mmk.account_number' => ['nullable', 'string', 'max:40'],
         ]);
         // Dotted keys arrive nested; flatten back to the settings key format.
         $flat = [];
         foreach (array_keys(config('dao.default_settings')) as $key) {
             if (data_get($data, $key) !== null) {
                 $flat[$key] = data_get($data, $key);
+            } elseif (str_ends_with($key, '_fee_mmk') && Arr::has($request->all(), $key)) {
+                $flat[$key] = ''; // an emptied MMK fee goes back to "convert the THB fee"
             }
         }
         $before = array_intersect_key($settings->all(), $flat);

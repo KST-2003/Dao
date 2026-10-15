@@ -32,6 +32,14 @@ export default function SettingsScreen() {
             {(['system', 'botanical', 'midnight'] as const).map((m) => <DAOChip key={m} label={t(`settings.themes.${m}`)} selected={vm.themeMode === m} onPress={() => vm.setTheme(m)} />)}
           </View>
         </View>
+        <View style={{ gap: spacing.sm }}>
+          <DAOText variant="subheading">{t('settings.currency')}</DAOText>
+          <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm }}>
+            {vm.currencies.map((c) => <DAOChip key={c} label={t(`settings.currencies.${c}`)} selected={vm.currency === c} onPress={() => vm.chooseCurrency(c)} />)}
+          </View>
+          <DAOText variant="caption" tone="textMuted">{t('settings.currencyHint')}</DAOText>
+          {vm.mmkPerThb ? <DAOText variant="caption" tone="textMuted">{t('settings.currencyRate', { rate: String(vm.mmkPerThb) })}</DAOText> : null}
+        </View>
         {vm.signedIn ? (
           <>
             <DAOCard>

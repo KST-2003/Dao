@@ -2,6 +2,7 @@ import { View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { formatMoney } from '@/shared/utils/format';
 import { useTheme } from '@/shared/theme';
+import { usePrefsStore } from '@/shared/store/prefsStore';
 import { DAOText } from './DAOText';
 
 interface DAOPriceProps {
@@ -14,7 +15,7 @@ interface DAOPriceProps {
 }
 
 /** Regular / sale / member price, always from server values (minor units). */
-export function DAOPrice({ price, salePrice, memberPrice, currency = 'THB', size = 'md', showMemberLine }: DAOPriceProps) {
+export function DAOPrice({ price, salePrice, memberPrice, currency = usePrefsStore.getState().currency, size = 'md', showMemberLine }: DAOPriceProps) {
   const { t } = useTranslation();
   const { spacing } = useTheme();
   const current = salePrice ?? price;

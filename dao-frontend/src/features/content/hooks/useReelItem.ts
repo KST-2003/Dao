@@ -6,6 +6,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useToggleSaved } from '@/features/shop/api';
 import { useRequireAuth } from '@/shared/hooks/useRequireAuth';
 import { analytics } from '@/shared/services/analytics/AnalyticsService';
+import { useReelsUiStore } from '@/shared/store/reelsUiStore';
 import { useIsSaved } from '@/shared/store/savedStore';
 import { toast } from '@/shared/store/toastStore';
 import type { VideoDetail } from '@/types/models';
@@ -25,6 +26,14 @@ export function useReelItem(video: VideoDetail, playing: boolean) {
   const lastTap = useRef(0);
   const tapTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   useEffect(() => () => { if (tapTimer.current) clearTimeout(tapTimer.current); }, []);
+  // While this reel is actually playing, tell the tab bar to fade; the cleanup restores it on pause, scroll or tab change.
+  const setBarFaded = useReelsUiStore((s) => s.setPlaying);
+  const live = playing && !!video.video_url && !paused;
+  useEffect(() => {
+    if (!live) return;
+    setBarFaded(true);
+    return () => setBarFaded(false);
+  }, [live, setBarFaded]);
   // Scrolling back to a reel you paused starts it playing again.
   useEffect(() => { if (playing) setPaused(false); }, [playing]);
 

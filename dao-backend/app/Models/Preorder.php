@@ -31,6 +31,7 @@ class Preorder extends Model
         return [
             'status' => PreorderStatus::class,
             'destination' => PreorderDestination::class,
+            'exchange_rate' => 'float',
             'subtotal' => 'integer',
             'member_discount' => 'integer',
             'shipping_fee' => 'integer',

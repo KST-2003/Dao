@@ -24,14 +24,26 @@ class BankTransferGateway implements PaymentGatewayInterface
 
     public function isConfigured(): bool
     {
-        $bank = (array) $this->settings->get('payments.bank_transfer', []);
+        return $this->isAvailableFor('THB') || $this->isAvailableFor('MMK');
+    }
+
+    /** MMK orders are paid into the Myanmar account; everything else into the Thai one. */
+    public function isAvailableFor(string $currency): bool
+    {
+        $bank = $this->bankFor($currency);
 
         return ! empty($bank['account_number']) || ! empty($bank['promptpay_id']);
     }
 
+    /** @return array<string, mixed> */
+    private function bankFor(string $currency): array
+    {
+        return (array) $this->settings->get(strtoupper($currency) === 'MMK' ? 'payments.bank_transfer_mmk' : 'payments.bank_transfer', []);
+    }
+
     public function initiate(Order $order, Payment $payment): PaymentInitiation
     {
-        $bank = (array) $this->settings->get('payments.bank_transfer', []);
+        $bank = $this->bankFor($order->currency);
 
         return new PaymentInitiation('bank_transfer', instructions: [
             'bank_name' => $bank['bank_name'] ?? null,

@@ -2,6 +2,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 import { detectDeviceLocale, type AppLocale } from '@/shared/i18n';
+import type { Currency } from '@/types/enums';
 
 export type ThemeMode = 'system' | 'botanical' | 'midnight';
 
@@ -11,9 +12,12 @@ interface PrefsState {
   hasChosenLanguage: boolean;
   hasOnboarded: boolean;
   themeMode: ThemeMode;
+  /** Which currency prices are shown and paid in (sent to the API as X-Currency). */
+  currency: Currency;
   recentSearches: string[];
   setLocale: (locale: AppLocale) => void;
   setThemeMode: (mode: ThemeMode) => void;
+  setCurrency: (currency: Currency) => void;
   completeOnboarding: () => void;
   addRecentSearch: (q: string) => void;
   clearRecentSearches: () => void;
@@ -28,9 +32,11 @@ export const usePrefsStore = create<PrefsState>()(
       hasChosenLanguage: false,
       hasOnboarded: false,
       themeMode: 'system',
+      currency: 'THB',
       recentSearches: [],
       setLocale: (locale) => set({ locale, hasChosenLanguage: true }),
       setThemeMode: (themeMode) => set({ themeMode }),
+      setCurrency: (currency) => set({ currency }),
       completeOnboarding: () => set({ hasOnboarded: true }),
       addRecentSearch: (q) =>
         set((s) => ({ recentSearches: [q, ...s.recentSearches.filter((x) => x !== q)].slice(0, 8) })),

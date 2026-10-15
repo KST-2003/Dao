@@ -5,7 +5,9 @@ import { api, errorMessage } from '@/lib/api'
 import { toMajor, toMinor } from '@/lib/format'
 
 type Settings = Record<string, unknown> & { 'payments.bank_transfer'?: Record<string, string> }
-type Def = { key: string; label: string; kind: 'int' | 'money'; hint?: string }
+/** money = THB, mmk = MMK (blank allowed: convert the THB value), rate = decimal number. */
+type Def = { key: string; label: string; kind: 'int' | 'money' | 'mmk' | 'rate'; hint?: string }
+const SYMBOL: Partial<Record<Def['kind'], string>> = { money: ' (฿)', mmk: ' (K)' }
 
 const GROUPS: { title: string; items: Def[] }[] = [
   { title: 'Earning DAO Points', items: [
@@ -28,10 +30,21 @@ const GROUPS: { title: string; items: Def[] }[] = [
     { key: 'referral.referee_bonus', label: 'New member bonus (points)', kind: 'int' },
     { key: 'referral.min_order_total', label: 'Qualifying first order', kind: 'money', hint: 'Rewards are only issued after this paid order' },
   ] },
-  { title: 'Shipping', items: [
+  { title: 'Currency', items: [
+    { key: 'currency.mmk_per_thb', label: 'Exchange rate: 1 THB = ? MMK', kind: 'rate', hint: 'Converts every THB price, fee and coupon that has no MMK price of its own' },
+  ] },
+  { title: 'Delivery to Thailand', items: [
     { key: 'shipping.standard_fee', label: 'Standard delivery fee', kind: 'money' },
+    { key: 'shipping.standard_fee_mmk', label: 'Standard delivery fee', kind: 'mmk', hint: 'Blank = THB fee × rate' },
     { key: 'shipping.express_fee', label: 'Express delivery fee', kind: 'money' },
-    { key: 'shipping.free_threshold', label: 'Free standard delivery from', kind: 'money' },
+    { key: 'shipping.express_fee_mmk', label: 'Express delivery fee', kind: 'mmk', hint: 'Blank = THB fee × rate' },
+    { key: 'shipping.free_threshold', label: 'Free standard delivery from', kind: 'money', hint: 'Standard delivery only; in MMK this is converted at the rate' },
+  ] },
+  { title: 'Delivery to Myanmar', items: [
+    { key: 'shipping.air_cargo_fee', label: 'Air cargo fee', kind: 'money' },
+    { key: 'shipping.air_cargo_fee_mmk', label: 'Air cargo fee', kind: 'mmk', hint: 'Blank = THB fee × rate' },
+    { key: 'shipping.land_cargo_fee', label: 'Land cargo fee', kind: 'money' },
+    { key: 'shipping.land_cargo_fee_mmk', label: 'Land cargo fee', kind: 'mmk', hint: 'Blank = THB fee × rate' },
   ] },
 ]
 
@@ -40,13 +53,15 @@ export default function SettingsPage() {
   const q = useQuery({ queryKey: ['settings'], queryFn: () => api.get<Settings>('/settings') })
   const [form, setForm] = useState<Record<string, string>>({})
   const [bank, setBank] = useState<Record<string, string>>({})
+  const [bankMmk, setBankMmk] = useState<Record<string, string>>({})
 
   useEffect(() => {
     if (!q.data) return
     const f: Record<string, string> = {}
-    GROUPS.flatMap((g) => g.items).forEach((d) => { const v = q.data[d.key] as number; f[d.key] = d.kind === 'money' ? toMajor(v) : String(v ?? '') })
+    GROUPS.flatMap((g) => g.items).forEach((d) => { const v = q.data[d.key] as number | '' | null; f[d.key] = d.kind === 'money' || d.kind === 'mmk' ? (v === '' || v == null ? '' : toMajor(v)) : String(v ?? '') })
     setForm(f)
     setBank({ bank_name: '', account_name: '', account_number: '', promptpay_id: '', ...(q.data['payments.bank_transfer'] ?? {}) })
+    setBankMmk({ bank_name: '', account_name: '', account_number: '', ...((q.data['payments.bank_transfer_mmk'] as Record<string, string> | undefined) ?? {}) })
   }, [q.data])
 
   const save = useMutation({
@@ -54,10 +69,10 @@ export default function SettingsPage() {
       const body: Record<string, unknown> = {}
       GROUPS.flatMap((g) => g.items).forEach((d) => {
         const [group, key] = d.key.split('.') as [string, string]
-        const value = d.kind === 'money' ? toMinor(form[d.key]) : form[d.key] === '' ? null : Number(form[d.key])
+        const value = d.kind === 'money' || d.kind === 'mmk' ? toMinor(form[d.key]) : form[d.key] === '' ? null : Number(form[d.key])
         body[group] = { ...(body[group] as object), [key]: value }
       })
-      body.payments = { bank_transfer: bank }
+      body.payments = { bank_transfer: bank, bank_transfer_mmk: bankMmk }
       return api.put('/settings', body)
     },
     onSuccess: () => { toast('Settings saved'); void q.refetch() },
@@ -75,8 +90,8 @@ export default function SettingsPage() {
           <DAOAdminCard key={g.title} title={g.title}>
             <div className="grid gap-4 sm:grid-cols-2">
               {g.items.map((d) => (
-                <Field key={d.key} label={`${d.label}${d.kind === 'money' ? ' (฿)' : ''}`} hint={d.hint}>
-                  <Input type="number" step={d.kind === 'money' ? '0.01' : '1'} min={0} value={form[d.key] ?? ''} onChange={(e) => setForm({ ...form, [d.key]: e.target.value })} />
+                <Field key={d.key} label={`${d.label}${SYMBOL[d.kind] ?? ''}`} hint={d.hint}>
+                  <Input type="number" step={d.kind === 'int' ? '1' : '0.01'} min={0} value={form[d.key] ?? ''} onChange={(e) => setForm({ ...form, [d.key]: e.target.value })} />
                 </Field>
               ))}
             </div>
@@ -87,6 +102,14 @@ export default function SettingsPage() {
           <div className="grid gap-4 sm:grid-cols-2">
             {[['bank_name', 'Bank'], ['account_name', 'Account name'], ['account_number', 'Account number'], ['promptpay_id', 'PromptPay ID']].map(([k, l]) => (
               <Field key={k} label={l}><Input value={bank[k!] ?? ''} onChange={(e) => setBank({ ...bank, [k!]: e.target.value })} /></Field>
+            ))}
+          </div>
+        </DAOAdminCard>
+        <DAOAdminCard title="Myanmar bank transfer (MMK)">
+          <p className="mb-3 text-sm text-ink-muted">Where customers pay MMK orders (a Myanmar bank or mobile-wallet account). Bank transfer appears for MMK only when an account number is set.</p>
+          <div className="grid gap-4 sm:grid-cols-2">
+            {[['bank_name', 'Bank / wallet'], ['account_name', 'Account name'], ['account_number', 'Account number']].map(([k, l]) => (
+              <Field key={k} label={l}><Input value={bankMmk[k!] ?? ''} onChange={(e) => setBankMmk({ ...bankMmk, [k!]: e.target.value })} /></Field>
             ))}
           </div>
         </DAOAdminCard>

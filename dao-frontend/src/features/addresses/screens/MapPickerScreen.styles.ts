@@ -16,5 +16,6 @@ export const useStyles = makeStyles(({ colors, spacing, radius, shadows }) => ({
   bottom: { position: 'absolute', bottom: 0, left: 0, right: 0, paddingHorizontal: spacing.gutter, paddingTop: spacing.lg, gap: spacing.md, backgroundColor: colors.background, borderTopLeftRadius: radius.xl, borderTopRightRadius: radius.xl, ...shadows.soft },
   addressCard: { flexDirection: 'row', alignItems: 'center', gap: spacing.md, backgroundColor: colors.surface, borderRadius: radius.md, padding: spacing.lg, minHeight: 64, borderWidth: 1, borderColor: colors.border },
   addressText: { flex: 1 },
+  warning: { flexDirection: 'row', alignItems: 'center', gap: spacing.md, backgroundColor: colors.dangerSoft, borderRadius: radius.md, padding: spacing.md, borderWidth: 1, borderColor: colors.danger },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: spacing.xxl, gap: spacing.md },
 }));

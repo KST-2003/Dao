@@ -13,7 +13,9 @@ export type OrderStatus =
   | 'refunded';
 export type PaymentStatus = 'pending' | 'requires_action' | 'succeeded' | 'failed' | 'cancelled' | 'refunded';
 export type PaymentMethod = 'cod' | 'bank_transfer' | 'stripe';
-export type DeliveryMethod = 'standard' | 'express';
+/** Thailand: standard / express. Myanmar: air cargo / land cargo. */
+export type DeliveryMethod = 'standard' | 'express' | 'air_cargo' | 'land_cargo';
+export type Currency = 'THB' | 'MMK';
 export type ShipmentStatus = 'pending' | 'in_transit' | 'delivered' | 'returned';
 export type LoyaltyTransactionType =
   | 'purchase_earned'

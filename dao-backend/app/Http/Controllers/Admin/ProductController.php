@@ -60,6 +60,7 @@ class ProductController extends AdminController
         $product = DB::transaction(function () use ($request) {
             $data = $request->safe()->except(['translations', 'collection_ids', 'video_ids']);
             $this->assertSalePrice($data['price'] ?? null, $data['sale_price'] ?? null);
+            $this->assertMmkPrices($data['price_mmk'] ?? null, $data['sale_price_mmk'] ?? null, $data['member_price_mmk'] ?? null);
             $data['slug'] ??= Str::slug($request->input('translations.en.name', 'product')).'-'.Str::lower(Str::random(4));
             $data['status'] ??= ProductStatus::Draft->value;
             $product = Product::query()->create($data);
@@ -81,6 +82,11 @@ class ProductController extends AdminController
         DB::transaction(function () use ($request, $product) {
             $data = $request->safe()->except(['translations', 'collection_ids', 'video_ids']);
             $this->assertSalePrice($data['price'] ?? $product->price, array_key_exists('sale_price', $data) ? $data['sale_price'] : $product->sale_price);
+            $this->assertMmkPrices(
+                array_key_exists('price_mmk', $data) ? $data['price_mmk'] : $product->price_mmk,
+                array_key_exists('sale_price_mmk', $data) ? $data['sale_price_mmk'] : $product->sale_price_mmk,
+                array_key_exists('member_price_mmk', $data) ? $data['member_price_mmk'] : $product->member_price_mmk,
+            );
             $product->fill($data)->save();
             if ($request->has('translations')) {
                 $product->syncTranslations($request->input('translations'));
@@ -243,6 +249,15 @@ class ProductController extends AdminController
         $this->audit('product.image_removed', Product::query()->find($id), ['image_id' => $imageId]);
 
         return response()->json(['data' => ['deleted' => true]]);
+    }
+
+    /** MMK sale/member prices only make sense next to an MMK price, and a sale must be below it. */
+    private function assertMmkPrices(?int $price, ?int $sale, ?int $member): void
+    {
+        if ($price === null && ($sale !== null || $member !== null)) {
+            throw DomainException::of('MMK_PRICE_REQUIRED', 422);
+        }
+        $this->assertSalePrice($price, $sale);
     }
 
     private function assertSalePrice(?int $price, ?int $sale): void

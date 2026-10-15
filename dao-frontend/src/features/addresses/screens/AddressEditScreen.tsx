@@ -35,8 +35,8 @@ export default function AddressEditScreen() {
         <View style={{ gap: spacing.sm }}>
           <DAOText variant="bodySmall" tone="textMuted">{t('addresses.country')}</DAOText>
           <View style={{ flexDirection: 'row', gap: spacing.sm }}>
-            <DAOChip label={t('addresses.countries.TH')} selected={f.country_code === 'TH'} onPress={() => vm.set('country_code')('TH')} />
-            <DAOChip label={t('addresses.countries.MM')} selected={f.country_code === 'MM'} onPress={() => vm.set('country_code')('MM')} />
+            <DAOChip label={t('addresses.countries.TH')} selected={f.country_code === 'TH'} onPress={() => vm.setCountry('TH')} />
+            <DAOChip label={t('addresses.countries.MM')} selected={f.country_code === 'MM'} onPress={() => vm.setCountry('MM')} />
           </View>
         </View>
         <DAOInput label={req(t('addresses.recipientName'))} value={f.recipient_name} onChangeText={vm.set('recipient_name')} textContentType="name" error={vm.fieldError('recipient_name')} />

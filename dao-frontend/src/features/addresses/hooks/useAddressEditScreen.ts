@@ -32,13 +32,21 @@ export function useAddressEditScreen() {
   // The map pick is mandatory for new addresses only; older rows without coordinates stay savable.
   const needsLocation = !existing && !hasLocation;
   const valid = required.every((k) => String(form[k] ?? '').trim() !== '') && !needsLocation;
-  const setCoordinates = (latitude: number, longitude: number, address: string) => setForm((f) => ({ ...f, latitude, longitude, address_line1: address }));
+  // Switching country by hand invalidates a map pin made in the other one, so the pin has to be picked again.
+  const setCountry = (country: 'TH' | 'MM') =>
+    setForm((f) => (f.country_code === country ? f : { ...f, country_code: country, ...(f.latitude != null ? { latitude: null, longitude: null, address_line1: '' } : {}) }));
+  // The map is the source of truth for where the address is: a pin in the other supported country switches the form to it.
+  const setCoordinates = (latitude: number, longitude: number, address: string, country: 'TH' | 'MM') => {
+    if (country !== form.country_code) toast.show(t('addresses.map.countryChanged', { country: t(`addresses.countries.${country}`) }));
+    setForm((f) => ({ ...f, latitude, longitude, address_line1: address, country_code: country }));
+  };
   const { openMap } = useAddressMapPicker(form, setCoordinates);
 
   return {
     isEdit: !!existing,
     form,
     set,
+    setCountry,
     valid,
     hasLocation,
     needsLocation,

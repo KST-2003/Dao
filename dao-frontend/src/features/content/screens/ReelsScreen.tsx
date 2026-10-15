@@ -34,7 +34,7 @@ export default function ReelsScreen() {
           onMomentumScrollEnd={vm.onSettle}
           onEndReached={vm.loadMore}
           onEndReachedThreshold={1.5}
-          renderItem={({ item, index }) => <ReelItem video={item} height={vm.height} playing={vm.focused && index === vm.index} />}
+          renderItem={({ item, index }) => <ReelItem video={item} height={vm.height} playing={vm.focused && index === vm.index} bottomInset={vm.bottomInset} />}
         />
       ) : vm.feed.isError ? (
         <View style={{ flex: 1, justifyContent: 'center' }}><DAOErrorState error={vm.feed.error} onRetry={() => void vm.feed.refetch()} /></View>

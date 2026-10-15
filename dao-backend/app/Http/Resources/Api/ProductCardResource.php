@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources\Api;
 
+use App\Services\Currency\CurrencyService;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -16,7 +17,10 @@ class ProductCardResource extends JsonResource
     public function toArray(Request $request): array
     {
         $variants = $this->relationLoaded('variants') ? $this->variants->where('is_active', true) : collect();
-        $onSale = $this->sale_price !== null && $this->sale_price < $this->price;
+        $currency = app(CurrencyService::class)->current();
+        $price = $this->priceIn($currency);
+        $salePrice = $this->salePriceIn($currency);
+        $onSale = $salePrice !== null;
         $image = $this->relationLoaded('images') ? $this->images->first() : null;
 
         return [
@@ -26,11 +30,11 @@ class ProductCardResource extends JsonResource
             'brand' => $this->brand,
             'image_url' => $image?->url,
             'thumbnail_url' => $image?->thumbnail_url ?? $image?->url,
-            'currency' => $this->currency,
-            'price' => $this->price,
-            'sale_price' => $onSale ? $this->sale_price : null,
-            'discount_percent' => $onSale ? (int) round((1 - $this->sale_price / max(1, $this->price)) * 100) : null,
-            'member_price' => $this->member_price,
+            'currency' => $currency->value,
+            'price' => $price,
+            'sale_price' => $salePrice,
+            'discount_percent' => $onSale ? (int) round((1 - $salePrice / max(1, $price)) * 100) : null,
+            'member_price' => $this->memberPriceIn($currency),
             'badges' => array_values(array_unique(array_merge($this->badges ?? [], $this->preorder_enabled ? ['preorder'] : []))),
             'is_vip_only' => $this->is_vip_only,
             'rating_avg' => $this->rating_avg,

@@ -77,4 +77,6 @@ return [
     'PREORDER_QTY_BELOW_MIN' => "Pre-order at least :min of this item.",
     'QTY_RANGE_INVALID' => "The minimum can't be higher than the maximum.",
     'VIDEO_CATEGORY_IN_USE' => "This category still has videos. Move them or deactivate the category instead.",
+    'DELIVERY_METHOD_INVALID' => "That delivery method isn't available for this address.",
+    'MMK_PRICE_REQUIRED' => "Set the MMK price first — sale and member prices need it.",
 ];

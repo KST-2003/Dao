@@ -4,6 +4,7 @@ namespace App\Services\Coupons;
 
 use App\DTOs\CouponEvaluation;
 use App\DTOs\PricedLine;
+use App\Enums\Currency;
 use App\Enums\CouponScope;
 use App\Enums\CouponType;
 use App\Exceptions\DomainException;
@@ -12,16 +13,22 @@ use App\Models\CouponRedemption;
 use App\Models\MembershipTier;
 use App\Models\Order;
 use App\Models\User;
+use App\Services\Currency\CurrencyService;
 use App\Support\Money;
 use Illuminate\Support\Facades\DB;
 
 class CouponService
 {
+    public function __construct(private readonly CurrencyService $currency) {}
+
     /**
+     * Coupon amounts are defined in THB; in another currency they are converted at the exchange rate.
+     *
      * @param  list<PricedLine>  $lines
      */
-    public function evaluate(string $code, User $user, array $lines, ?MembershipTier $tier): CouponEvaluation
+    public function evaluate(string $code, User $user, array $lines, ?MembershipTier $tier, ?Currency $currency = null): CouponEvaluation
     {
+        $currency ??= $this->currency->current();
         $coupon = Coupon::query()->with(['products:id', 'categories:id', 'minTier'])->where('code', strtoupper(trim($code)))->first();
 
         if (! $coupon || ! $coupon->is_active || ($coupon->user_id && $coupon->user_id !== $user->id)) {
@@ -48,17 +55,18 @@ class CouponService
             throw DomainException::of('COUPON_NOT_APPLICABLE', 422);
         }
         $base = array_sum(array_map(fn (PricedLine $l) => $l->netTotal(), $eligible));
-        if ($base < $coupon->min_subtotal) {
-            throw DomainException::of('COUPON_MIN_SUBTOTAL', 422, [], ['min_subtotal' => $coupon->min_subtotal]);
+        $minSubtotal = $this->currency->fromBase($coupon->min_subtotal, $currency);
+        if ($base < $minSubtotal) {
+            throw DomainException::of('COUPON_MIN_SUBTOTAL', 422, [], ['min_subtotal' => $minSubtotal]);
         }
 
         $discount = match ($coupon->type) {
             CouponType::Percentage => Money::percentOf($base, min(100, $coupon->value)),
-            CouponType::Fixed => min($coupon->value, $base),
+            CouponType::Fixed => min($this->currency->fromBase($coupon->value, $currency), $base),
             CouponType::FreeShipping => 0,
         };
         if ($coupon->max_discount !== null) {
-            $discount = min($discount, $coupon->max_discount);
+            $discount = min($discount, $this->currency->fromBase($coupon->max_discount, $currency));
         }
 
         return new CouponEvaluation($coupon, $discount, $coupon->type === CouponType::FreeShipping);

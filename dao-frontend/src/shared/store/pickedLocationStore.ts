@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 
-export interface PickedLocation { lat: number; lng: number; address: string }
+export interface PickedLocation { lat: number; lng: number; address: string; /** Country the pin is in (TH or MM). */ country: 'TH' | 'MM' }
 
 /** One-shot hand-off from the map picker back to the address form (Expo Router has no return params). */
 interface PickedLocationState {

@@ -212,10 +212,13 @@ export const my: TranslationShape<typeof en> = {
     address: "ပို့ဆောင်ရမည့် လိပ်စာ",
     addAddress: "လိပ်စာ ထည့်မည်",
     change: "ပြောင်းမည်",
+    unsupportedAddress: "ထိုင်းနိုင်ငံနှင့် မြန်မာနိုင်ငံသို့သာ ပို့ဆောင်ပါသည်။ နှစ်နိုင်ငံအနက် တစ်ခု၏ လိပ်စာကို ရွေးပါ။",
     delivery: "ပို့ဆောင်နည်း",
     deliveryMethods: {
       standard: "ပုံမှန် (၂–၄ ရက်)",
       express: "အမြန် (၁–၂ ရက်)",
+      air_cargo: "လေကြောင်းကားဂို",
+      land_cargo: "ကုန်းလမ်းကားဂို",
     },
     payment: "ငွေပေးချေမှု",
     paymentMethods: {
@@ -476,6 +479,14 @@ export const my: TranslationShape<typeof en> = {
     empty: "နှစ်သက်တာကို သိမ်းရန် ♡ ကို နှိပ်ပါ။",
   },
   settings: {
+    currency: "ငွေကြေး",
+    currencyHint: "ဈေးနှုန်းများနှင့် ငွေပေးချေမှုတွင် ဤငွေကြေးကို သုံးပါသည်။",
+    currencyRate: "၁ ဘတ် = {{rate}} ကျပ်",
+    currencyChanged: "ဈေးနှုန်းများကို {{currency}} ဖြင့် ပြသနေပါသည်",
+    currencies: {
+      THB: "ထိုင်းဘတ် (THB)",
+      MMK: "မြန်မာကျပ် (MMK)",
+    },
     title: "ဆက်တင်များ",
     language: "ဘာသာစကား",
     theme: "အသွင်အပြင်",
@@ -523,6 +534,8 @@ export const my: TranslationShape<typeof en> = {
     default: "ပုံသေ",
     required: "လိုအပ်သည်",
     map: {
+      outsideArea: "ထိုင်းနိုင်ငံနှင့် မြန်မာနိုင်ငံသို့သာ ပို့ဆောင်ပါသည်။ မြေပုံတွင် နှစ်နိုင်ငံအနက် တစ်ခုအတွင်း တည်နေရာကို ရွှေ့ပါ။",
+      countryChanged: "မြေပုံနှင့် ကိုက်ညီစေရန် နိုင်ငံကို {{country}} သို့ သတ်မှတ်လိုက်ပါသည်။",
       pickOnMap: "မြေပုံပေါ်တွင် ရွေးမည်",
       locationSet: "မြေပုံပေါ်တွင် တည်နေရာသတ်မှတ်ပြီး",
       locationRequired: "မြေပုံပေါ်တွင် တည်နေရာကို ရွေးပါ",

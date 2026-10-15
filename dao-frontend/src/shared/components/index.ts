@@ -30,7 +30,7 @@ export { DAOScreen } from './DAOScreen';
 export { DAOSectionHeader } from './DAOSectionHeader';
 export { DAOSelect, type SelectOption } from './DAOSelect';
 export { DAOStar } from './DAOStar';
-export { DAOTabBar } from './DAOTabBar';
+export { DAOTabBar, useTabBarOverlayInset } from './DAOTabBar';
 export { DAOText } from './DAOText';
 export { DAOToastHost } from './DAOToastHost';
 export { DAOVideoCard } from './DAOVideoCard';

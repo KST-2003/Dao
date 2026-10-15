@@ -51,13 +51,13 @@ export default function OrderDetailPage() {
                 <li key={i.id} className="flex items-center gap-4 py-3 text-sm">
                   {i.image_url ? <img src={i.image_url} alt="" className="h-14 w-11 rounded-md object-cover" /> : <div className="h-14 w-11 rounded-md bg-muted" />}
                   <div className="flex-1"><p className="font-medium">{i.product_name}</p><p className="text-xs text-ink-subtle">{i.variant_label} · {i.sku}</p></div>
-                  <span className="text-ink-muted">{money(i.unit_price)} × {i.quantity}</span>
-                  <span className="w-24 text-right font-medium">{money(i.line_total)}</span>
+                  <span className="text-ink-muted">{money(i.unit_price, o.currency)} × {i.quantity}</span>
+                  <span className="w-24 text-right font-medium">{money(i.line_total, o.currency)}</span>
                 </li>
               ))}
             </ul>
             <dl className="mt-4 space-y-1 border-t border-line pt-4 text-sm">
-              {[['Subtotal', money(o.subtotal)], ['Member discount', `−${money(o.member_discount)}`], [`Coupon ${o.coupon_code ?? ''}`, `−${money(o.coupon_discount)}`], [`Points (${num(o.points_redeemed)})`, `−${money(o.points_discount)}`], ['Shipping', money(o.shipping_fee)]].map(([k, v]) => (
+              {[['Subtotal', money(o.subtotal, o.currency)], ['Member discount', `−${money(o.member_discount, o.currency)}`], [`Coupon ${o.coupon_code ?? ''}`, `−${money(o.coupon_discount, o.currency)}`], [`Points (${num(o.points_redeemed)})`, `−${money(o.points_discount, o.currency)}`], ['Shipping', money(o.shipping_fee, o.currency)]].map(([k, v]) => (
                 <div key={k} className="flex justify-between text-ink-muted"><dt>{k}</dt><dd>{v}</dd></div>
               ))}
               <div className="flex justify-between pt-2 text-base font-semibold"><dt>Total</dt><dd>{money(o.grand_total, o.currency)}</dd></div>

@@ -14,10 +14,12 @@ import { uploadViaPresign } from '@/lib/upload'
 import type { Paged, ProductDetail, Translations } from '@/types/api'
 
 const BADGES = ['new', 'bestseller', 'dao_pick', 'limited', 'vip', 'sale'] as const
-type Form = Omit<ProductDetail, 'price' | 'sale_price' | 'member_price' | 'cost'> & { price: string; sale_price: string; member_price: string; cost: string }
+type Form = Omit<ProductDetail, 'price' | 'sale_price' | 'member_price' | 'cost' | 'price_mmk' | 'sale_price_mmk' | 'member_price_mmk'> & {
+  price: string; sale_price: string; member_price: string; cost: string; price_mmk: string; sale_price_mmk: string; member_price_mmk: string
+}
 
 const blank: Form = {
-  id: 0, category_id: null, slug: '', brand: 'DAO', sku: '', barcode: '', price: '', sale_price: '', member_price: '', cost: '', weight_grams: null,
+  id: 0, category_id: null, slug: '', brand: 'DAO', sku: '', barcode: '', price: '', sale_price: '', member_price: '', cost: '', price_mmk: '', sale_price_mmk: '', member_price_mmk: '', weight_grams: null,
   min_order_qty: null, max_order_qty: null, preorder_enabled: false, preorder_min_qty: null, preorder_max_qty: null, preorder_capacity: null,
   status: 'draft', badges: [], is_vip_only: false, vip_min_tier_id: null, video_url: '', external_url: '', social_platform: null, campaign_code: '',
   published_at: null, translations: {}, images: [], variants: [], collection_ids: [], video_ids: [],
@@ -37,7 +39,7 @@ export default function ProductEditPage() {
 
   useEffect(() => {
     const p = product.data
-    if (p) setForm({ ...p, price: toMajor(p.price), sale_price: toMajor(p.sale_price), member_price: toMajor(p.member_price), cost: toMajor(p.cost), badges: p.badges ?? [] })
+    if (p) setForm({ ...p, price: toMajor(p.price), sale_price: toMajor(p.sale_price), member_price: toMajor(p.member_price), cost: toMajor(p.cost), price_mmk: toMajor(p.price_mmk), sale_price_mmk: toMajor(p.sale_price_mmk), member_price_mmk: toMajor(p.member_price_mmk), badges: p.badges ?? [] })
   }, [product.data])
 
   const set = <K extends keyof Form>(k: K, v: Form[K]) => setForm((f) => ({ ...f, [k]: v }))
@@ -48,6 +50,7 @@ export default function ProductEditPage() {
       const body = {
         category_id: form.category_id, brand: form.brand || null, sku: form.sku || null, barcode: form.barcode || null,
         price: toMinor(form.price), sale_price: toMinor(form.sale_price), member_price: toMinor(form.member_price), cost: toMinor(form.cost),
+        price_mmk: toMinor(form.price_mmk), sale_price_mmk: toMinor(form.sale_price_mmk), member_price_mmk: toMinor(form.member_price_mmk),
         weight_grams: form.weight_grams,
         min_order_qty: form.min_order_qty, max_order_qty: form.max_order_qty, preorder_enabled: form.preorder_enabled,
         preorder_min_qty: form.preorder_min_qty, preorder_max_qty: form.preorder_max_qty, preorder_capacity: form.preorder_capacity,
@@ -142,6 +145,14 @@ export default function ProductEditPage() {
               <Field label="Sale price" error={err('sale_price')}><Input type="number" step="0.01" value={form.sale_price} onChange={(e) => set('sale_price', e.target.value)} /></Field>
               <Field label="Member price" hint="Shown to signed-in DAO members"><Input type="number" step="0.01" value={form.member_price} onChange={(e) => set('member_price', e.target.value)} /></Field>
               <Field label="Cost" hint="Internal only — never sent to the app"><Input type="number" step="0.01" value={form.cost} onChange={(e) => set('cost', e.target.value)} /></Field>
+            </div>
+          </DAOAdminCard>
+          <DAOAdminCard title="Pricing in Myanmar kyat (K)">
+            <div className="grid gap-4">
+              <p className="text-xs text-ink-subtle">Shown to customers who choose MMK. Leave the price empty and MMK is the ฿ price converted at the exchange rate (Settings → Currency).</p>
+              <Field label="Price (K)" error={err('price_mmk')}><Input type="number" step="0.01" min="0" value={form.price_mmk} onChange={(e) => set('price_mmk', e.target.value)} /></Field>
+              <Field label="Sale price (K)" hint="Empty = no sale in MMK" error={err('sale_price_mmk')}><Input type="number" step="0.01" min="0" value={form.sale_price_mmk} onChange={(e) => set('sale_price_mmk', e.target.value)} /></Field>
+              <Field label="Member price (K)" error={err('member_price_mmk')}><Input type="number" step="0.01" min="0" value={form.member_price_mmk} onChange={(e) => set('member_price_mmk', e.target.value)} /></Field>
             </div>
           </DAOAdminCard>
           <DAOAdminCard title="Order limits">

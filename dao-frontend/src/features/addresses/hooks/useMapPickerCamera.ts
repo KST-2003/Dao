@@ -12,6 +12,8 @@ export function useMapPickerCamera(startCenter: MapCoords, initialAddress: strin
   const requestId = useRef(0);
   const [center, setCenter] = useState<MapCoords>(startCenter);
   const [resolvedAddress, setResolvedAddress] = useState(initialAddress);
+  // Country the pin is in; null while unknown (before the first lookup, or when Mapbox doesn't say).
+  const [country, setCountry] = useState<string | null>(null);
   const [geocoding, setGeocoding] = useState(false);
 
   useEffect(() => {
@@ -29,17 +31,19 @@ export function useMapPickerCamera(startCenter: MapCoords, initialAddress: strin
     const id = ++requestId.current; // any later camera move invalidates this lookup
     timer.current = setTimeout(async () => {
       setGeocoding(true);
-      const address = await reverseGeocodeApi(lng, lat, i18n.language);
+      const result = await reverseGeocodeApi(lng, lat, i18n.language);
       if (id !== requestId.current) return;
-      setResolvedAddress(address ?? '');
+      setResolvedAddress(result?.address ?? '');
+      setCountry(result?.country ?? null);
       setGeocoding(false);
     }, REVERSE_GEOCODE_DEBOUNCE_MS);
   }, [i18n.language]);
 
-  const moveTo = useCallback((coords: MapCoords, zoom: number, address?: string) => {
+  const moveTo = useCallback((coords: MapCoords, zoom: number, address?: string, placeCountry?: string | null) => {
     if (address !== undefined) setResolvedAddress(address);
+    if (placeCountry !== undefined) setCountry(placeCountry);
     cameraRef.current?.setCamera({ centerCoordinate: coords, zoomLevel: zoom, animationDuration: CAMERA_ANIMATION_MS });
   }, []);
 
-  return { cameraRef, center, resolvedAddress, geocoding, handleCameraChanged, moveTo };
+  return { cameraRef, center, resolvedAddress, country, geocoding, handleCameraChanged, moveTo };
 }

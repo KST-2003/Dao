@@ -78,6 +78,12 @@ function MapPicker({ start }: { start: MapCoords }) {
 
       <View style={[s.bottom, { paddingBottom: insets.bottom + 16 }]}>
         <DAOButton variant="secondary" icon="crosshair" label={t('addresses.map.useCurrentLocation')} loading={vm.isLocating} onPress={vm.handleCurrentLocation} fullWidth />
+        {vm.outsideArea ? (
+          <View style={s.warning} accessibilityRole="alert">
+            <Ionicons name="warning-outline" size={20} color={colors.danger} />
+            <DAOText variant="bodySmall" style={s.addressText}>{t('addresses.map.outsideArea')}</DAOText>
+          </View>
+        ) : null}
         <View style={s.addressCard}>
           {vm.geocoding ? <ActivityIndicator /> : <Ionicons name="location-outline" size={20} color={colors.primary} />}
           <DAOText variant="body" style={s.addressText} numberOfLines={2} tone={vm.resolvedAddress ? undefined : 'textMuted'}>

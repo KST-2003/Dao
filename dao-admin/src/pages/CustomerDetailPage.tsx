@@ -38,7 +38,7 @@ export default function CustomerDetailPage() {
           <DAOAdminCard title="Recent orders">
             <ul className="divide-y divide-line text-sm">
               {c.recent_orders.length === 0 ? <li className="py-2 text-ink-muted">No orders yet.</li> : c.recent_orders.map((o) => (
-                <li key={o.id} className="flex items-center justify-between py-2"><Link to={`/orders/${o.id}`} className="text-primary hover:underline">{o.order_number}</Link><span className="text-ink-muted">{date(o.placed_at)}</span><DAOStatusBadge status={o.status} /><span>{money(o.grand_total)}</span></li>
+                <li key={o.id} className="flex items-center justify-between py-2"><Link to={`/orders/${o.id}`} className="text-primary hover:underline">{o.order_number}</Link><span className="text-ink-muted">{date(o.placed_at)}</span><DAOStatusBadge status={o.status} /><span>{money(o.grand_total, o.currency)}</span></li>
               ))}
             </ul>
           </DAOAdminCard>

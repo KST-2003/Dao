@@ -35,6 +35,8 @@ export interface ThemeColors {
   tabInactive: string;
   /** Soft highlight behind the active tab's icon. */
   tabActiveSoft: string;
+  /** Translucent sage over the frosted video when the floating bar sits on the reels: the video's color shows through. */
+  tabGlass: string;
   statusBar: 'dark' | 'light';
 }
 
@@ -72,6 +74,7 @@ const botanical: ThemeColors = {
   tabActive: palette.champagneLight,
   tabInactive: palette.softCream,
   tabActiveSoft: 'rgba(244,235,221,0.16)',
+  tabGlass: 'rgba(122,133,112,0.5)',
   statusBar: 'dark',
 };
 
@@ -108,6 +111,7 @@ const midnight: ThemeColors = {
   tabActive: palette.champagneLight,
   tabInactive: palette.softCream,
   tabActiveSoft: 'rgba(244,235,221,0.16)',
+  tabGlass: 'rgba(122,133,112,0.5)',
   statusBar: 'light',
 };
 

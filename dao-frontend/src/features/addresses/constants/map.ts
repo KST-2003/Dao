@@ -9,6 +9,11 @@ export const DEFAULT_MAP_CENTERS: Record<Address['country_code'], MapCoords> = {
 };
 export const FALLBACK_COUNTRY: Address['country_code'] = 'TH';
 
+/** We only take orders and addresses from these countries. */
+export const SUPPORTED_COUNTRIES = ['TH', 'MM'] as const;
+export type SupportedCountry = (typeof SUPPORTED_COUNTRIES)[number];
+export const isSupportedCountry = (code: string | null | undefined): code is SupportedCountry => SUPPORTED_COUNTRIES.some((c) => c === code);
+
 /** ISO codes the place search is limited to (reverse geocoding is never filtered). */
 export const SEARCH_COUNTRIES = ['TH', 'MM'] as const;
 

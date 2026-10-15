@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Enums\PaymentStatus;
 use App\Http\Requests\Admin\CustomerContentAccessRequest;
+use App\Models\Order;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -15,7 +16,8 @@ class CustomerController extends AdminController
     {
         $query = User::query()->with(['membership.tier.translations', 'loyaltyAccount'])
             ->withCount('orders')
-            ->withSum(['orders as total_spent' => fn ($q) => $q->where('payment_status', PaymentStatus::Succeeded->value)], 'grand_total')
+            ->addSelect(['total_spent' => Order::query()->selectRaw('COALESCE(SUM(grand_total / exchange_rate), 0)')
+                ->whereColumn('orders.user_id', 'users.id')->where('payment_status', PaymentStatus::Succeeded->value)])
             ->when($request->filled('q'), fn ($q) => $q->where(fn ($w) => $w
                 ->where('name', 'like', $this->like((string) $request->input('q')))
                 ->orWhere('display_name', 'like', $this->like((string) $request->input('q')))
@@ -31,7 +33,8 @@ class CustomerController extends AdminController
     {
         $user = User::query()->with(['membership.tier.translations', 'loyaltyAccount', 'authProviders', 'addresses', 'referrer:id,name,display_name,referral_code'])
             ->withCount('orders')
-            ->withSum(['orders as total_spent' => fn ($q) => $q->where('payment_status', PaymentStatus::Succeeded->value)], 'grand_total')
+            ->addSelect(['total_spent' => Order::query()->selectRaw('COALESCE(SUM(grand_total / exchange_rate), 0)')
+                ->whereColumn('orders.user_id', 'users.id')->where('payment_status', PaymentStatus::Succeeded->value)])
             ->findOrFail($id);
 
         return response()->json(['data' => array_merge($this->row($user), [
@@ -41,7 +44,7 @@ class CustomerController extends AdminController
             'providers' => $user->authProviders->map(fn ($p) => ['provider' => $p->provider->value, 'linked_at' => $p->created_at?->toIso8601String()]),
             'addresses' => $user->addresses,
             'referred_by' => $user->referrer?->only(['id', 'display_name', 'referral_code']),
-            'recent_orders' => $user->orders()->latest('placed_at')->limit(10)->get(['id', 'order_number', 'status', 'grand_total', 'placed_at']),
+            'recent_orders' => $user->orders()->latest('placed_at')->limit(10)->get(['id', 'order_number', 'status', 'grand_total', 'currency', 'placed_at']),
             'lifetime_spend' => $user->membership?->lifetime_spend ?? 0,
             'screenshot_override' => $user->screenshot_override,
             'download_override' => $user->download_override,
@@ -82,7 +85,7 @@ class CustomerController extends AdminController
             'tier' => $u->membership?->tier?->translated('name'),
             'points' => (int) ($u->loyaltyAccount?->balance ?? 0),
             'orders_count' => (int) $u->orders_count,
-            'total_spent' => (int) ($u->total_spent ?? 0),
+            'total_spent' => (int) round((float) ($u->total_spent ?? 0)), // THB, whatever currency the orders were in
             'referral_code' => $u->referral_code,
             'registered_at' => $u->created_at?->toIso8601String(),
             'last_active_at' => $u->last_active_at?->toIso8601String(),

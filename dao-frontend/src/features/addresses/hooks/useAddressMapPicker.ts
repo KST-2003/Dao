@@ -4,7 +4,7 @@ import { usePickedLocationStore } from '@/shared/store/pickedLocationStore';
 import type { AddressInput } from '@/types/models';
 
 /** Opens the map picker with the form's current location and applies the result when it returns. */
-export function useAddressMapPicker(form: AddressInput, setCoordinates: (lat: number, lng: number, address: string) => void) {
+export function useAddressMapPicker(form: AddressInput, setCoordinates: (lat: number, lng: number, address: string, country: 'TH' | 'MM') => void) {
   const picked = usePickedLocationStore((s) => s.picked);
 
   // A pick lives only between "Confirm" and the form consuming it — never across form sessions.
@@ -15,7 +15,7 @@ export function useAddressMapPicker(form: AddressInput, setCoordinates: (lat: nu
 
   useEffect(() => {
     if (!picked) return;
-    setCoordinates(picked.lat, picked.lng, picked.address);
+    setCoordinates(picked.lat, picked.lng, picked.address, picked.country);
     usePickedLocationStore.getState().clear();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [picked]);

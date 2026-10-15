@@ -5,8 +5,9 @@ export const toMinor = (major: string | number | null | undefined): number | nul
   const n = Number(major)
   return Number.isFinite(n) ? Math.round(n * 100) : null
 }
+const SYMBOLS: Record<string, string> = { THB: '฿', MMK: 'K ' }
 export const money = (minor: number | null | undefined, currency = 'THB') =>
-  `${currency === 'THB' ? '฿' : `${currency} `}${((minor ?? 0) / 100).toLocaleString('en-US', { maximumFractionDigits: 2 })}`
+  `${SYMBOLS[currency] ?? `${currency} `}${((minor ?? 0) / 100).toLocaleString('en-US', { maximumFractionDigits: 2 })}`
 export const num = (n: number | null | undefined) => (n ?? 0).toLocaleString('en-US')
 export const dateTime = (iso: string | null | undefined) => (iso ? new Date(iso).toLocaleString('en-GB', { dateStyle: 'medium', timeStyle: 'short' }) : '—')
 export const date = (iso: string | null | undefined) => (iso ? new Date(iso).toLocaleDateString('en-GB', { dateStyle: 'medium' }) : '—')

@@ -67,14 +67,30 @@ return [
         'referral.referrer_bonus' => 200,
         'referral.referee_bonus' => 100,
         'referral.min_order_total' => 50000,       // referee's first paid order ≥ ฿500 qualifies
+        // 1 THB = N MMK. Used to convert every THB price/fee/threshold that has no MMK price of its own.
+        'currency.mmk_per_thb' => 100,
+        // Delivery fees (THB minor units). Thailand: standard/express. Myanmar: air/land cargo.
         'shipping.standard_fee' => 5000,
         'shipping.express_fee' => 10000,
+        'shipping.air_cargo_fee' => 50000,
+        'shipping.land_cargo_fee' => 30000,
+        // Fees in MMK minor units; '' (blank) = convert the THB fee at the exchange rate.
+        'shipping.standard_fee_mmk' => '',
+        'shipping.express_fee_mmk' => '',
+        'shipping.air_cargo_fee_mmk' => '',
+        'shipping.land_cargo_fee_mmk' => '',
         'shipping.free_threshold' => 100000,
         'payments.bank_transfer' => [
             'bank_name' => '',
             'account_name' => '',
             'account_number' => '',
             'promptpay_id' => '',
+        ],
+        // Where MMK orders are paid (a Myanmar bank / mobile wallet account).
+        'payments.bank_transfer_mmk' => [
+            'bank_name' => '',
+            'account_name' => '',
+            'account_number' => '',
         ],
     ],
 ];

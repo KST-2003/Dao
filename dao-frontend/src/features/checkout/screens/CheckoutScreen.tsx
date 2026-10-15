@@ -55,7 +55,8 @@ export default function CheckoutScreen() {
 
       <View style={s.section}>
         <DAOText variant="heading">{t('checkout.delivery')}</DAOText>
-        {(vm.options.data?.delivery_methods ?? []).map((d) => (
+        {vm.address && vm.options.data && vm.deliveryMethods.length === 0 ? <DAOText variant="bodySmall" tone="danger">{t('checkout.unsupportedAddress')}</DAOText> : null}
+        {vm.deliveryMethods.map((d) => (
           <Pressable key={d.code} accessibilityRole="radio" accessibilityState={{ selected: vm.delivery === d.code }} onPress={() => vm.setDelivery(d.code)} style={[s.option, vm.delivery === d.code && s.optionActive]}>
             <Radio selected={vm.delivery === d.code} />
             <DAOText style={{ flex: 1 }}>{t(`checkout.deliveryMethods.${d.code}`)}</DAOText>
