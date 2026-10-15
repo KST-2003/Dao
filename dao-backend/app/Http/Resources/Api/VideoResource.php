@@ -15,7 +15,9 @@ class VideoResource extends VideoCardResource
             'video_url' => $this->is_members_only && ! $request->user('sanctum') ? null : $this->video_url,
             'tags' => $this->tags ?? [],
             'shop_the_look' => ProductCardResource::collection($this->whenLoaded('products')),
-            'is_liked' => (bool) $request->attributes->get('video_is_liked', false),
+            'is_liked' => $request->attributes->has('video_liked_ids')
+                ? in_array($this->id, (array) $request->attributes->get('video_liked_ids'), true)
+                : (bool) $request->attributes->get('video_is_liked', false),
             'author' => ['name' => 'Dao', 'avatar_url' => null],
         ]);
     }

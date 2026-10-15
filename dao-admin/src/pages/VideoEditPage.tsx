@@ -9,7 +9,7 @@ import {
 } from '@/components/ui'
 import { api, ApiError, errorMessage } from '@/lib/api'
 import { fromLocalInput, toLocalInput } from '@/lib/format'
-import type { Translations } from '@/types/api'
+import type { Paged, Translations } from '@/types/api'
 
 interface VideoForm {
   id?: number; content_type: string; category: string | null; slug: string; thumbnail_url: string | null; video_url: string | null
@@ -17,7 +17,6 @@ interface VideoForm {
   translations: Translations<'title' | 'description'>; products: { id: number; name?: string | null; timestamp_seconds: number | null }[]
 }
 const blank: VideoForm = { content_type: 'vlog', category: 'daos_life', slug: '', thumbnail_url: null, video_url: null, duration_seconds: 0, status: 'draft', tags: [], is_members_only: false, published_at: null, translations: {}, products: [] }
-const CATEGORIES = ['daily_life', 'fashion', 'travel', 'beauty', 'food', 'behind_the_scenes', 'daos_life']
 
 export default function VideoEditPage() {
   const { id } = useParams()
@@ -26,6 +25,7 @@ export default function VideoEditPage() {
   const toast = useToast()
   const [form, setForm] = useState<VideoForm>(blank)
   const [confirm, setConfirm] = useState(false)
+  const categories = useQuery({ queryKey: ['video-category-options'], queryFn: () => api.page<Paged<{ id: number; slug: string; display_name: string | null; is_active: boolean }>>('/video-categories', { per_page: 100 }) })
   const q = useQuery({ queryKey: ['video', id], queryFn: () => api.get<VideoForm & { products: { id: number; name?: string | null; timestamp_seconds: number | null }[] }>(`/videos/${id}`), enabled: !isNew })
   useEffect(() => { if (q.data) setForm({ ...blank, ...q.data, tags: q.data.tags ?? [] }) }, [q.data])
   const set = <K extends keyof VideoForm>(k: K, v: VideoForm[K]) => setForm((f) => ({ ...f, [k]: v }))
@@ -69,7 +69,7 @@ export default function VideoEditPage() {
           <DAOAdminCard title="Publishing">
             <div className="grid gap-4">
               <Field label="Type"><Select value={form.content_type} onChange={(e) => set('content_type', e.target.value)}>{['vlog', 'fashion', 'recipe', 'tutorial', 'short'].map((t) => <option key={t}>{t}</option>)}</Select></Field>
-              <Field label="Category"><Select value={form.category ?? ''} onChange={(e) => set('category', e.target.value || null)}><option value="">—</option>{CATEGORIES.map((c) => <option key={c} value={c}>{c.replace(/_/g, ' ')}</option>)}</Select></Field>
+              <Field label="Category"><Select value={form.category ?? ''} onChange={(e) => set('category', e.target.value || null)}><option value="">—</option>{categories.data?.data.filter((c) => c.is_active || c.slug === form.category).map((c) => <option key={c.slug} value={c.slug}>{c.display_name ?? c.slug}{c.is_active ? '' : ' (inactive)'}</option>)}</Select></Field>
               <Field label="Slug *" error={err('slug')}><Input required value={form.slug} onChange={(e) => set('slug', e.target.value)} /></Field>
               <TagsInput value={form.tags} onChange={(tags) => set('tags', tags)} />
               <Field label="Status"><Select value={form.status} onChange={(e) => set('status', e.target.value)}>{['draft', 'scheduled', 'published', 'archived'].map((s) => <option key={s}>{s}</option>)}</Select></Field>

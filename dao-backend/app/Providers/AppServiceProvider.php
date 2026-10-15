@@ -77,6 +77,7 @@ class AppServiceProvider extends ServiceProvider
             'product' => Models\Product::class,
             'product_variant' => Models\ProductVariant::class,
             'video' => Models\Video::class,
+            'video_category' => Models\VideoCategory::class,
             'recipe' => Models\Recipe::class,
             'review' => Models\Review::class,
             'reward' => Models\Reward::class,

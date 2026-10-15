@@ -27,6 +27,7 @@ const Videos = lazy(() => import('@/pages/VideosPage'))
 const VideoEdit = lazy(() => import('@/pages/VideoEditPage'))
 const Recipes = lazy(() => import('@/pages/RecipesPage'))
 const RecipeEdit = lazy(() => import('@/pages/RecipeEditPage'))
+const VideoCategories = lazy(() => import('@/pages/ResourcePages').then((m) => ({ default: m.VideoCategoriesPage })))
 const Categories = lazy(() => import('@/pages/ResourcePages').then((m) => ({ default: m.CategoriesPage })))
 const Collections = lazy(() => import('@/pages/ResourcePages').then((m) => ({ default: m.CollectionsPage })))
 const Tiers = lazy(() => import('@/pages/ResourcePages').then((m) => ({ default: m.MembershipTiersPage })))
@@ -57,6 +58,7 @@ export default function App() {
             <Route path="products" element={g(['products.manage'], <Products />)} />
             <Route path="products/:id" element={g(['products.manage'], <ProductEdit />)} />
             <Route path="inventory" element={g(['inventory.manage'], <Inventory />)} />
+            <Route path="video-categories" element={g(['content.manage'], <VideoCategories />)} />
             <Route path="categories" element={g(['products.manage'], <Categories />)} />
             <Route path="collections" element={g(['products.manage'], <Collections />)} />
             <Route path="reviews" element={g(['reviews.moderate'], <Reviews />)} />

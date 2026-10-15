@@ -4,7 +4,7 @@ import { qk } from '@/shared/constants/queryKeys';
 import { useLocale } from '@/shared/hooks/useLocale';
 import { analytics } from '@/shared/services/analytics/AnalyticsService';
 import type { ContentType } from '@/types/enums';
-import type { Comment, Paginated, VideoCard, VideoDetail } from '@/types/models';
+import type { Comment, Paginated, VideoCard, VideoCategory, VideoDetail } from '@/types/models';
 
 export function useVideos(type?: ContentType, category?: string) {
   const locale = useLocale();
@@ -12,6 +12,23 @@ export function useVideos(type?: ContentType, category?: string) {
     queryKey: qk.videos(type, category, locale),
     initialPageParam: 1,
     queryFn: ({ pageParam }) => api.getRaw<Paginated<VideoCard>>('/videos', { params: { type, category, page: pageParam } }),
+    getNextPageParam: (last) => (last.meta.current_page < last.meta.last_page ? last.meta.current_page + 1 : undefined),
+  });
+}
+
+/** Tabs for the reels feed, in the order the admin set. */
+export function useVideoCategories() {
+  const locale = useLocale();
+  return useQuery({ queryKey: qk.videoCategories(locale), queryFn: () => api.get<VideoCategory[]>('/video-categories') });
+}
+
+/** Reels: full video payloads (playable URL, products, like state) so the next video plays without another request. */
+export function useVideoFeed(category?: string) {
+  const locale = useLocale();
+  return useInfiniteQuery({
+    queryKey: qk.videoFeed(category, locale),
+    initialPageParam: 1,
+    queryFn: ({ pageParam }) => api.getRaw<Paginated<VideoDetail>>('/videos/feed', { params: { category, page: pageParam } }),
     getNextPageParam: (last) => (last.meta.current_page < last.meta.last_page ? last.meta.current_page + 1 : undefined),
   });
 }
@@ -25,8 +42,9 @@ export function useRelatedVideos(id: number) {
   return useQuery({ queryKey: qk.videoRelated(id), queryFn: () => api.get<VideoCard[]>(`/videos/${id}/related`) });
 }
 
-export function useComments(id: number) {
+export function useComments(id: number, enabled = true) {
   return useInfiniteQuery({
+    enabled,
     queryKey: qk.comments(id),
     initialPageParam: 1,
     queryFn: ({ pageParam }) => api.getRaw<Paginated<Comment>>(`/videos/${id}/comments`, { params: { page: pageParam } }),

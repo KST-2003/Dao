@@ -11,6 +11,7 @@ use App\Http\Resources\Api\CommentResource;
 use App\Http\Resources\Api\VideoCardResource;
 use App\Http\Resources\Api\VideoResource;
 use App\Models\Video;
+use App\Models\VideoCategory;
 use App\Services\Content\ContentAccessService;
 use App\Services\Content\EngagementService;
 use Illuminate\Http\JsonResponse;
@@ -44,6 +45,39 @@ class VideoController extends Controller
             ->latest('published_at')->paginate($data['per_page'] ?? 12);
 
         return VideoCardResource::collection($videos);
+    }
+
+    /**
+     * The reels feed: full video payloads (playable URL, description, linked products, like state) a page at a
+     * time, newest first, so the app can play the next video without a second request per item.
+     * Recipes and videos without a file yet are left out — there is nothing to play.
+     */
+    public function feed(Request $request): AnonymousResourceCollection
+    {
+        $data = $request->validate([
+            'category' => ['nullable', 'string', 'max:40'],
+            'per_page' => ['nullable', 'integer', 'min:1', 'max:10'],
+        ]);
+        $user = $request->user('sanctum');
+
+        $page = Video::query()->published()
+            ->where('content_type', '!=', ContentType::Recipe->value)->whereNotNull('video_url')
+            ->with(['translations', 'products' => fn ($q) => $q->published()->with(['translations', 'images', 'variants'])])
+            ->when($data['category'] ?? null, fn ($q, $c) => $q->where('category', $c))
+            ->latest('published_at')->latest('id')->paginate($data['per_page'] ?? 6);
+
+        $request->attributes->set('saved_video_ids', $this->engagement->savedIds($user, SaveableType::Video));
+        $request->attributes->set('saved_product_ids', $this->engagement->savedIds($user, SaveableType::Product));
+        $request->attributes->set('video_liked_ids', $this->engagement->likedVideoIds($user, $page->pluck('id')->all()));
+
+        return VideoResource::collection($page);
+    }
+
+    /** The tabs along the top of the feed, in the order admins set. */
+    public function categories(): JsonResponse
+    {
+        return $this->ok(VideoCategory::query()->active()->with('translations')->orderBy('sort_order')->orderBy('id')->get()
+            ->map(fn (VideoCategory $c) => ['slug' => $c->slug, 'name' => $c->translated('name') ?? $c->slug])->values());
     }
 
     public function show(Request $request, int $id): VideoResource

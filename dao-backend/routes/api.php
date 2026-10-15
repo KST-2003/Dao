@@ -35,6 +35,8 @@ Route::prefix('v1')->middleware('throttle:api')->name('v1.')->group(function () 
     Route::get('/products/{id}/related', [V1\ProductController::class, 'related'])->whereNumber('id');
     Route::get('/products/{id}/reviews', [V1\ProductController::class, 'reviews'])->whereNumber('id');
     Route::get('/videos', [V1\VideoController::class, 'index']);
+    Route::get('/videos/feed', [V1\VideoController::class, 'feed']);
+    Route::get('/video-categories', [V1\VideoController::class, 'categories']);
     Route::get('/videos/{id}', [V1\VideoController::class, 'show'])->whereNumber('id');
     Route::get('/videos/{id}/related', [V1\VideoController::class, 'related'])->whereNumber('id');
     Route::get('/videos/{id}/comments', [V1\VideoController::class, 'comments'])->whereNumber('id');

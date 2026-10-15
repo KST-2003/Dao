@@ -1,1 +1,1 @@
-export { default } from '@/features/content/screens/VlogScreen';
+export { default } from '@/features/content/screens/ReelsScreen';

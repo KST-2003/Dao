@@ -423,6 +423,12 @@ export interface VideoCard {
   is_saved: boolean;
 }
 
+/** A tab along the top of the video feed; managed in the admin dashboard. */
+export interface VideoCategory {
+  slug: string;
+  name: string;
+}
+
 export interface VideoDetail extends VideoCard {
   description: string | null;
   video_url: string | null;

@@ -50,6 +50,22 @@ class EngagementService
         ])->exists();
     }
 
+    /**
+     * Which of these videos the user has liked, in one query (feed pages — avoids N isLiked() calls).
+     *
+     * @param  list<int>  $videoIds
+     * @return list<int>
+     */
+    public function likedVideoIds(?User $user, array $videoIds): array
+    {
+        if ($user === null || $videoIds === []) {
+            return [];
+        }
+
+        return Like::query()->where('user_id', $user->id)->where('likeable_type', (new Video)->getMorphClass())
+            ->whereIn('likeable_id', $videoIds)->pluck('likeable_id')->all();
+    }
+
     public function save(User $user, SaveableType $type, int $id): void
     {
         $type->modelClass()::query()->findOrFail($id);

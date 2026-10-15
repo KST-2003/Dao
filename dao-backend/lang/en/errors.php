@@ -76,4 +76,5 @@ return [
     'PREORDER_QTY_ABOVE_MAX' => "You can pre-order at most :max of this item.",
     'PREORDER_QTY_BELOW_MIN' => "Pre-order at least :min of this item.",
     'QTY_RANGE_INVALID' => "The minimum can't be higher than the maximum.",
+    'VIDEO_CATEGORY_IN_USE' => "This category still has videos. Move them or deactivate the category instead.",
 ];

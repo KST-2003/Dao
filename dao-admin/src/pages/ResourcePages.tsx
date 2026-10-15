@@ -45,6 +45,27 @@ export function CategoriesPage() {
   return <ResourcePage config={config} />
 }
 
+export function VideoCategoriesPage() {
+  const config: ResourceConfig<Row> = {
+    title: 'Video categories', subtitle: 'The tabs along the top of the video feed in the app. Lowest sort order comes first.', endpoint: '/video-categories',
+    columns: [
+      { key: 'name', header: 'Name', render: (r) => s(r.display_name) },
+      { key: 'slug', header: 'Slug', render: (r) => s(r.slug) },
+      { key: 'videos', header: 'Videos', render: (r) => s(r.videos_count) },
+      { key: 'sort', header: 'Order', render: (r) => s(r.sort_order) },
+      { key: 'active', header: 'Status', render: (r) => active(r.is_active) },
+    ],
+    fields: [
+      { name: 'slug', label: 'Slug', type: 'slug', required: true, hint: 'lowercase_with_underscores. Renaming it moves the category\'s videos along.' },
+      { name: 'sort_order', label: 'Sort order', type: 'number' },
+      { name: 'is_active', label: 'Active (shown in the app)', type: 'toggle' },
+    ],
+    translations: [{ name: 'name', label: 'Name', required: true }],
+    defaults: { is_active: true, sort_order: 0 },
+  }
+  return <ResourcePage config={config} />
+}
+
 export function CollectionsPage() {
   const config: ResourceConfig<Row> = {
     title: 'Collections', subtitle: 'New Season, DAO Essentials, Limited Drop, VIP Collection…', endpoint: '/collections',

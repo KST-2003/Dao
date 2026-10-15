@@ -107,6 +107,11 @@ Route::middleware(['auth:sanctum', 'admin', 'throttle:api'])->group(function () 
             Route::delete("/{$uri}/{id}", [$controller, 'destroy'])->whereNumber('id');
         }
         Route::get('/videos/tags', [Admin\VideoController::class, 'tags']);
+        Route::get('/video-categories', [Admin\VideoCategoryController::class, 'index']);
+        Route::post('/video-categories', [Admin\VideoCategoryController::class, 'store']);
+        Route::get('/video-categories/{id}', [Admin\VideoCategoryController::class, 'show'])->whereNumber('id');
+        Route::put('/video-categories/{id}', [Admin\VideoCategoryController::class, 'update'])->whereNumber('id');
+        Route::delete('/video-categories/{id}', [Admin\VideoCategoryController::class, 'destroy'])->whereNumber('id');
     });
 
     Route::post('/uploads', Admin\UploadController::class)->middleware('admin.can:products.manage,content.manage,marketing.manage');
