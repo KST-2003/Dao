@@ -66,6 +66,11 @@ export default function ProductEditPage() {
     onSuccess: () => { toast('Status updated'); refresh() },
     onError: (e) => toast(errorMessage(e), 'error'),
   })
+  const restore = useMutation({
+    mutationFn: () => api.post(`/products/${id}/restore`),
+    onSuccess: () => { toast('Product restored as a draft — review it, then publish'); refresh(); void qc.invalidateQueries({ queryKey: ['products'] }) },
+    onError: (e) => toast(errorMessage(e), 'error'),
+  })
   const remove = useMutation({ mutationFn: () => api.del(`/products/${id}`), onSuccess: () => { toast('Product archived'); navigate('/products') } })
   const imageAction = useMutation({
     mutationFn: async (a: { kind: 'upload'; file: File; color: string } | { kind: 'delete'; imageId: number } | { kind: 'order'; ids: number[] }) => {
@@ -79,6 +84,7 @@ export default function ProductEditPage() {
 
   if (!isNew && product.isPending) return <TableSkeleton />
   if (!isNew && product.isError) return <ErrorState error={product.error} onRetry={() => void product.refetch()} />
+  const archived = !isNew && form.status === 'archived'
   const err = (k: string) => (save.error instanceof ApiError ? save.error.field(k) : undefined)
   const move = (i: number, d: -1 | 1) => { const ids = form.images.map((x) => x.id); const j = i + d; if (j < 0 || j >= ids.length) return; [ids[i], ids[j]] = [ids[j]!, ids[i]!]; imageAction.mutate({ kind: 'order', ids }) }
 
@@ -88,11 +94,14 @@ export default function ProductEditPage() {
         subtitle={isNew ? 'Save details first, then add variants and photos.' : undefined}
         actions={<>
           {!isNew ? <DAOStatusBadge status={form.status} /> : null}
-          {!isNew && form.status !== 'published' ? <Button type="button" variant="gold" onClick={() => publish.mutate(true)} loading={publish.isPending}>Publish</Button> : null}
-          {!isNew && form.status === 'published' ? <Button type="button" variant="secondary" onClick={() => publish.mutate(false)} loading={publish.isPending}>Unpublish</Button> : null}
-          <Button type="submit" loading={save.isPending}>Save</Button>
+          {archived ? <Button type="button" variant="gold" onClick={() => restore.mutate()} loading={restore.isPending}>Restore</Button> : null}
+          {!isNew && !archived && form.status !== 'published' ? <Button type="button" variant="gold" onClick={() => publish.mutate(true)} loading={publish.isPending}>Publish</Button> : null}
+          {!isNew && !archived && form.status === 'published' ? <Button type="button" variant="secondary" onClick={() => publish.mutate(false)} loading={publish.isPending}>Unpublish</Button> : null}
+          {!archived ? <Button type="submit" loading={save.isPending}>Save</Button> : null}
         </>} />
 
+      {archived ? <p className="rounded-xl bg-danger-soft px-4 py-3 text-sm text-danger">This product is archived: it's hidden from the app and read-only. Restore it to edit — it comes back as a draft.</p> : null}
+      <fieldset disabled={archived} className="min-w-0 space-y-6">
       <div className="grid gap-6 xl:grid-cols-3">
         <div className="space-y-6 xl:col-span-2">
           <DAOAdminCard title="Content (EN · TH · MY)">
@@ -197,9 +206,10 @@ export default function ProductEditPage() {
             <VideoPicker label="Linked videos" value={form.video_ids} onChange={(ids) => set('video_ids', ids)} />
             <p className="mt-2 text-xs text-ink-subtle">Shows on the product page in the app. Same link as that video's own "Related products" — add here or there, either way links both pages.</p>
           </DAOAdminCard>
-          {!isNew ? <Button type="button" variant="danger" className="w-full" onClick={() => setConfirmDelete(true)}>Archive product</Button> : null}
+          {!isNew && !archived ? <Button type="button" variant="danger" className="w-full" onClick={() => setConfirmDelete(true)}>Archive product</Button> : null}
         </div>
       </div>
+      </fieldset>
       <DAOConfirmDialog open={confirmDelete} title="Archive this product?" message="It disappears from the app. Past orders keep their snapshot." destructive loading={remove.isPending} onClose={() => setConfirmDelete(false)} onConfirm={() => remove.mutate()} />
     </form>
   )

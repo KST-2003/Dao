@@ -247,6 +247,24 @@ it('leaves products without limits unrestricted (up to the default line cap)', f
     $this->postJson('/api/v1/cart/items', ['variant_id' => $v->id, 'quantity' => 1])->assertStatus(422)->assertJsonPath('code', 'QUANTITY_INVALID');
 });
 
+it('archives a product, lists it under archived, and restores it as a draft', function () {
+    asAdmin();
+    $v = variant();
+    $id = $v->product_id;
+    $v->product->update(['status' => 'published']);
+
+    $this->deleteJson("/api/admin/v1/products/{$id}")->assertOk();
+    $this->getJson('/api/admin/v1/products')->assertJsonCount(0, 'data');
+    $this->getJson('/api/admin/v1/products?status=archived')->assertJsonCount(1, 'data')->assertJsonPath('data.0.id', $id);
+    $this->getJson("/api/admin/v1/products/{$id}")->assertOk()->assertJsonPath('data.status', 'archived');
+    $this->putJson("/api/admin/v1/products/{$id}", ['brand' => 'X'])->assertNotFound(); // archived products can't be edited
+
+    $this->postJson("/api/admin/v1/products/{$id}/restore")->assertOk()->assertJsonPath('data.status', 'draft');
+    $this->getJson('/api/admin/v1/products')->assertJsonCount(1, 'data');
+    $this->postJson("/api/admin/v1/products/{$id}/restore")->assertNotFound(); // not archived anymore
+    expect(App\Models\AuditLog::query()->where('action', 'product.restored')->count())->toBe(1);
+});
+
 it('saves and validates product limits from the admin API', function () {
     asAdmin();
     $v = variant();

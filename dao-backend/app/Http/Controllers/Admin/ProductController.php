@@ -27,6 +27,8 @@ class ProductController extends AdminController
             ->when($request->filled('q'), fn ($q) => $q->where(fn ($w) => $w
                 ->whereHas('translations', fn ($t) => $t->where('name', 'like', $this->like((string) $request->input('q'))))
                 ->orWhere('sku', 'like', $this->like((string) $request->input('q')))))
+            // Archived products are soft-deleted, so they only show when asked for.
+            ->when($request->input('status') === ProductStatus::Archived->value, fn ($q) => $q->onlyTrashed())
             ->when($request->filled('status'), fn ($q) => $q->where('status', (string) $request->input('status')))
             ->when($request->filled('category_id'), fn ($q) => $q->where('category_id', $request->integer('category_id')))
             ->latest('id');
@@ -50,7 +52,7 @@ class ProductController extends AdminController
 
     public function show(int $id): JsonResponse
     {
-        return response()->json(['data' => $this->present(Product::query()->findOrFail($id))]);
+        return response()->json(['data' => $this->present(Product::query()->withTrashed()->findOrFail($id))]);
     }
 
     public function store(ProductRequest $request): JsonResponse
@@ -128,6 +130,18 @@ class ProductController extends AdminController
         HomeService::flushCache();
 
         return response()->json(['data' => ['deleted' => true]]);
+    }
+
+    /** Undo an archive. Comes back as a draft so nothing reappears in the app until staff publish it. */
+    public function restore(int $id): JsonResponse
+    {
+        $product = Product::query()->onlyTrashed()->findOrFail($id);
+        $product->restore();
+        $product->forceFill(['status' => ProductStatus::Draft])->save();
+        $this->audit('product.restored', $product);
+        HomeService::flushCache();
+
+        return response()->json(['data' => $this->present($product)]);
     }
 
     // ---------- Variants ----------

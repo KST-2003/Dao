@@ -22,6 +22,7 @@ Route::middleware(['auth:sanctum', 'admin', 'throttle:api'])->group(function () 
         Route::get('/products/{id}', [Admin\ProductController::class, 'show'])->whereNumber('id');
         Route::put('/products/{id}', [Admin\ProductController::class, 'update'])->whereNumber('id');
         Route::delete('/products/{id}', [Admin\ProductController::class, 'destroy'])->whereNumber('id');
+        Route::post('/products/{id}/restore', [Admin\ProductController::class, 'restore'])->whereNumber('id');
         Route::post('/products/{id}/publish', [Admin\ProductController::class, 'publish'])->whereNumber('id');
         Route::post('/products/{id}/unpublish', [Admin\ProductController::class, 'unpublish'])->whereNumber('id');
         Route::post('/products/{id}/variants', [Admin\ProductController::class, 'storeVariant'])->whereNumber('id');
