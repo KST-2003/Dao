@@ -1,7 +1,9 @@
 import { useVideoPlayer, VideoView } from 'expo-video';
 import { useEffect } from 'react';
+import { View } from 'react-native';
+import { ReelProgress } from './ReelProgress';
 
-/** One playing reel: autoplays on mount, loops, no native controls (tap handling lives in ReelItem). */
+/** One playing reel: autoplays on mount, loops, no native controls (taps live in ReelItem, seeking in ReelProgress). */
 export function ReelPlayer({ uri, paused }: { uri: string; paused: boolean }) {
   const player = useVideoPlayer({ uri }, (p) => {
     p.loop = true;
@@ -17,5 +19,10 @@ export function ReelPlayer({ uri, paused }: { uri: string; paused: boolean }) {
     }
   }, [paused, player]);
 
-  return <VideoView player={player} style={{ width: '100%', height: '100%' }} contentFit="cover" nativeControls={false} />;
+  return (
+    <View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}>
+      <VideoView player={player} style={{ width: '100%', height: '100%' }} contentFit="cover" nativeControls={false} />
+      <ReelProgress player={player} />
+    </View>
+  );
 }

@@ -9,6 +9,36 @@ use App\Models\VideoCategory;
 use Illuminate\Support\Str;
 use Laravel\Sanctum\Sanctum;
 
+/** The test disk is local and can't sign URLs, so stand in for R2 with predictable ones. */
+function fakeMedia(): void
+{
+    $real = app(App\Contracts\MediaStorageInterface::class);
+    app()->bind(App\Contracts\MediaStorageInterface::class, fn () => new class($real) extends App\Services\Storage\R2MediaService
+    {
+        public function __construct(private $real) {}
+
+        public function makeKey(string $folder, int|string $owner, string $extension): string
+        {
+            return $this->real->makeKey($folder, $owner, $extension);
+        }
+
+        public function createUploadUrl(string $key, string $contentType): string
+        {
+            return 'https://upload.test/'.$key;
+        }
+
+        public function getMediaUrl(?string $key): ?string
+        {
+            return $key === null ? null : 'https://cdn.test/'.$key;
+        }
+
+        public function normalizeKey(?string $value): ?string
+        {
+            return $value;
+        }
+    });
+}
+
 function feedVideo(array $overrides = []): Video
 {
     $video = Video::query()->create(array_merge([
@@ -82,4 +112,35 @@ it('lets admins manage video categories and carries a rename to the videos', fun
 
     $video->update(['category' => null]);
     $this->deleteJson("/api/admin/v1/video-categories/{$id}")->assertOk();
+});
+
+it('shows the publishing admin as the creator, falling back to Dao', function () {
+    fakeMedia();
+    $admin = AdminUser::factory()->create(['name' => 'Moi', 'avatar_url' => 'avatars/1/me.jpg']);
+    $mine = feedVideo(['author_id' => $admin->id, 'published_at' => now()]);
+    $orphan = feedVideo(['published_at' => now()->subHour()]);
+
+    $data = collect($this->getJson('/api/v1/videos/feed')->assertOk()->json('data'))->keyBy('id');
+    expect($data[$mine->id]['author']['name'])->toBe('Moi')->and($data[$mine->id]['author']['avatar_url'])->not->toBeNull()
+        ->and($data[$orphan->id]['author'])->toBe(['name' => 'Dao', 'avatar_url' => null]);
+    $this->getJson("/api/v1/videos/{$mine->id}")->assertJsonPath('data.author.name', 'Moi');
+});
+
+it('lets any admin update their own name and picture, only with their own avatar key', function () {
+    fakeMedia();
+    $admin = AdminUser::factory()->create(['name' => 'Old']);
+    Sanctum::actingAs($admin, ['admin']);
+
+    $presign = $this->postJson('/api/admin/v1/auth/profile/avatar/presign', ['content_type' => 'image/png', 'size' => 1000])->assertCreated();
+    expect($presign->json('data.key'))->toStartWith("avatars/{$admin->id}/");
+    $this->postJson('/api/admin/v1/auth/profile/avatar/presign', ['content_type' => 'video/mp4', 'size' => 1000])->assertStatus(422);
+
+    $this->putJson('/api/admin/v1/auth/profile', ['name' => 'New Name', 'avatar_url' => 'avatars/999/other.png'])->assertStatus(422);
+    $this->putJson('/api/admin/v1/auth/profile', ['name' => 'New Name', 'avatar_url' => $presign->json('data.key')])->assertOk()->assertJsonPath('data.name', 'New Name');
+    $this->putJson('/api/admin/v1/auth/profile', ['name' => ''])->assertStatus(422);
+
+    expect($admin->fresh()->name)->toBe('New Name')->and($admin->fresh()->getRawOriginal('avatar_url'))->toBe($presign->json('data.key'));
+    $this->putJson('/api/admin/v1/auth/profile', ['name' => 'New Name', 'avatar_url' => null])->assertOk();
+    expect($admin->fresh()->getRawOriginal('avatar_url'))->toBeNull();
+    $this->getJson('/api/admin/v1/auth/me')->assertJsonPath('data.name', 'New Name');
 });

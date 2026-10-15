@@ -1,6 +1,6 @@
 import { LogOut, Menu, Moon, Sun } from 'lucide-react'
 import { useState } from 'react'
-import { Navigate, Outlet, useLocation } from 'react-router-dom'
+import { Link, Navigate, Outlet, useLocation } from 'react-router-dom'
 import { useAuth } from '@/auth/AuthProvider'
 import { useThemeMode } from '@/hooks/useTheme'
 import { DAOSidebar } from './DAOSidebar'
@@ -31,10 +31,13 @@ export function AdminLayout() {
             <button onClick={toggle} aria-label={mode === 'botanical' ? 'Switch to DAO Midnight' : 'Switch to DAO Botanical'} className="rounded-full p-2 hover:bg-muted">
               {mode === 'botanical' ? <Moon className="size-4" /> : <Sun className="size-4" />}
             </button>
-            <div className="text-right text-xs leading-tight">
-              <p className="font-medium">{me.name}</p>
-              <p className="text-ink-muted">{me.role.name}</p>
-            </div>
+            <Link to="/profile" aria-label="My profile" className="flex items-center gap-2 rounded-full py-1 pl-2 pr-1 hover:bg-muted">
+              <span className="text-right text-xs leading-tight">
+                <span className="block font-medium">{me.name}</span>
+                <span className="block text-ink-muted">{me.role.name}</span>
+              </span>
+              {me.avatar_url ? <img src={me.avatar_url} alt="" className="size-8 rounded-full object-cover" /> : <span className="grid size-8 place-items-center rounded-full bg-primary-soft text-xs font-semibold text-primary">{me.name.slice(0, 1).toUpperCase()}</span>}
+            </Link>
             <button onClick={() => void logout()} aria-label="Log out" className="rounded-full p-2 hover:bg-muted"><LogOut className="size-4" /></button>
           </div>
         </header>

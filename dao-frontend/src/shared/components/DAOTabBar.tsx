@@ -16,11 +16,11 @@ export const TAB_ICONS: Record<string, keyof typeof Feather.glyphMap> = {
 
 /** Quiet, editorial tab bar. Shop is the visual center of gravity (centered, slightly emphasized). */
 export function DAOTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
-  const { colors, spacing, typography } = useTheme();
+  const { colors, spacing, typography, radius } = useTheme();
   const insets = useSafeAreaInsets();
   return (
     <View
-      style={{ flexDirection: 'row', backgroundColor: colors.tabBar, borderTopWidth: 1, borderTopColor: colors.divider, paddingBottom: Math.max(insets.bottom, spacing.sm), paddingTop: spacing.sm }}
+      style={{ flexDirection: 'row', backgroundColor: colors.tabBar, borderTopLeftRadius: radius.xl, borderTopRightRadius: radius.xl, paddingBottom: Math.max(insets.bottom, spacing.sm), paddingTop: spacing.sm }}
       accessibilityRole="tablist"
     >
       {state.routes.map((route, index) => {
@@ -44,10 +44,10 @@ export function DAOTabBar({ state, descriptors, navigation }: BottomTabBarProps)
             }}
             style={{ flex: 1, alignItems: 'center', justifyContent: 'center', minHeight: 48 }}
           >
-            <View style={isShop ? { width: 40, height: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center', backgroundColor: focused ? colors.primarySoft : 'transparent' } : undefined}>
+            <View style={isShop ? { width: 40, height: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center', backgroundColor: focused ? colors.tabActiveSoft : 'transparent' } : undefined}>
               <Feather name={TAB_ICONS[route.name] ?? 'circle'} size={isShop ? 22 : 21} color={color} />
             </View>
-            <DAOText style={[typography.caption, { color, fontSize: 11, marginTop: isShop ? 0 : 3 }]} numberOfLines={1}>
+            <DAOText style={[typography.caption, { color, fontSize: 11, marginTop: isShop ? 0 : 3, fontWeight: focused ? '700' : '500' }]} numberOfLines={1}>
               {label}
             </DAOText>
           </Pressable>

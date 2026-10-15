@@ -56,7 +56,7 @@ class AdminUserController extends AdminController
     private function present(AdminUser $a): array
     {
         return [
-            'id' => $a->id, 'name' => $a->name, 'email' => $a->email, 'is_active' => $a->is_active,
+            'id' => $a->id, 'name' => $a->name, 'email' => $a->email, 'avatar_url' => $a->avatar_url, 'is_active' => $a->is_active,
             'role' => $a->role?->only(['id', 'slug', 'name']),
             'last_login_at' => $a->last_login_at?->toIso8601String(),
         ];

@@ -51,6 +51,7 @@ class AuthController extends AdminController
             'id' => $admin->id,
             'name' => $admin->name,
             'email' => $admin->email,
+            'avatar_url' => $admin->avatar_url,
             'role' => ['slug' => $admin->role->slug, 'name' => $admin->role->name],
             'permissions' => $admin->role->permissions,
         ];

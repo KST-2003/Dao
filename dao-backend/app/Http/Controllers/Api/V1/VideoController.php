@@ -62,7 +62,7 @@ class VideoController extends Controller
 
         $page = Video::query()->published()
             ->where('content_type', '!=', ContentType::Recipe->value)->whereNotNull('video_url')
-            ->with(['translations', 'products' => fn ($q) => $q->published()->with(['translations', 'images', 'variants'])])
+            ->with(['translations', 'author:id,name,avatar_url', 'products' => fn ($q) => $q->published()->with(['translations', 'images', 'variants'])])
             ->when($data['category'] ?? null, fn ($q, $c) => $q->where('category', $c))
             ->latest('published_at')->latest('id')->paginate($data['per_page'] ?? 6);
 
@@ -82,7 +82,7 @@ class VideoController extends Controller
 
     public function show(Request $request, int $id): VideoResource
     {
-        $video = Video::query()->published()->with(['translations', 'products' => fn ($q) => $q->published()->with(['translations', 'images', 'variants'])])->findOrFail($id);
+        $video = Video::query()->published()->with(['translations', 'author:id,name,avatar_url', 'products' => fn ($q) => $q->published()->with(['translations', 'images', 'variants'])])->findOrFail($id);
         $user = $request->user('sanctum');
         $request->attributes->set('saved_video_ids', $this->engagement->savedIds($user, SaveableType::Video));
         $request->attributes->set('saved_product_ids', $this->engagement->savedIds($user, SaveableType::Product));

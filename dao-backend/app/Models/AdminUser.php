@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Casts\MediaUrl;
 use App\Enums\AdminPermission;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -12,13 +13,13 @@ class AdminUser extends Authenticatable
 {
     use HasApiTokens, HasFactory;
 
-    protected $fillable = ['admin_role_id', 'name', 'email', 'password', 'is_active', 'last_login_at'];
+    protected $fillable = ['admin_role_id', 'name', 'email', 'avatar_url', 'password', 'is_active', 'last_login_at'];
 
     protected $hidden = ['password', 'remember_token'];
 
     protected function casts(): array
     {
-        return ['password' => 'hashed', 'is_active' => 'boolean', 'last_login_at' => 'datetime'];
+        return ['avatar_url' => MediaUrl::class, 'password' => 'hashed', 'is_active' => 'boolean', 'last_login_at' => 'datetime'];
     }
 
     public function role(): BelongsTo

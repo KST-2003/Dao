@@ -6,7 +6,7 @@ import { api, errorMessage } from '@/lib/api'
 import { dateTime } from '@/lib/format'
 import type { Paged } from '@/types/api'
 
-interface Row { id: number; name: string; email: string; is_active: boolean; role: { id: number; slug: string; name: string } | null; last_login_at: string | null }
+interface Row { id: number; name: string; email: string; avatar_url: string | null; is_active: boolean; role: { id: number; slug: string; name: string } | null; last_login_at: string | null }
 interface Role { id: number; slug: string; name: string; permissions: string[] }
 type Draft = { id?: number; name: string; email: string; password: string; admin_role_id: string; is_active: boolean }
 
@@ -26,7 +26,7 @@ export default function AdminUsersPage() {
     onError: (e) => toast(errorMessage(e), 'error'),
   })
   const columns: Column<Row>[] = [
-    { key: 'n', header: 'Name', render: (u) => <div><p className="font-medium">{u.name}</p><p className="text-xs text-ink-subtle">{u.email}</p></div> },
+    { key: 'n', header: 'Name', render: (u) => <div className="flex items-center gap-3">{u.avatar_url ? <img src={u.avatar_url} alt="" className="size-9 rounded-full object-cover" /> : <span className="grid size-9 place-items-center rounded-full bg-primary-soft text-xs font-semibold text-primary">{u.name.slice(0, 1).toUpperCase()}</span>}<div><p className="font-medium">{u.name}</p><p className="text-xs text-ink-subtle">{u.email}</p></div></div> },
     { key: 'r', header: 'Role', render: (u) => u.role?.name ?? '—' },
     { key: 'l', header: 'Last login', render: (u) => dateTime(u.last_login_at) },
     { key: 's', header: 'Status', render: (u) => <DAOStatusBadge status={u.is_active ? 'active' : 'inactive'} /> },

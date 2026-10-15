@@ -12,6 +12,7 @@ const ProductEdit = lazy(() => import('@/pages/ProductEditPage'))
 const Inventory = lazy(() => import('@/pages/InventoryPage'))
 const Preorders = lazy(() => import('@/pages/PreordersPage'))
 const PreorderDetail = lazy(() => import('@/pages/PreorderDetailPage'))
+const Profile = lazy(() => import('@/pages/ProfilePage'))
 const Orders = lazy(() => import('@/pages/OrdersPage'))
 const OrderDetail = lazy(() => import('@/pages/OrderDetailPage'))
 const Customers = lazy(() => import('@/pages/CustomersPage'))
@@ -53,6 +54,7 @@ export default function App() {
             <Route index element={g(['dashboard.view'], <Dashboard />)} />
             <Route path="orders" element={g(['orders.view', 'orders.manage'], <Orders />)} />
             <Route path="orders/:id" element={g(['orders.view', 'orders.manage'], <OrderDetail />)} />
+            <Route path="profile" element={<Profile />} />
             <Route path="preorders" element={g(['orders.view', 'orders.manage'], <Preorders />)} />
             <Route path="preorders/:id" element={g(['orders.view', 'orders.manage'], <PreorderDetail />)} />
             <Route path="products" element={g(['products.manage'], <Products />)} />

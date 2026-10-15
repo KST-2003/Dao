@@ -58,7 +58,7 @@ export function useProductScreen() {
     );
   };
 
-  const preorderOn = !!p?.preorder.enabled;
+  const preorderOn = !!p?.preorder?.enabled;
   // Sold-out selection (or nothing in stock) with pre-order open → pre-order replaces the cart buttons.
   const preorderOnly = preorderOn && (variant ? variant.stock_status === 'out_of_stock' : !p?.in_stock);
   const preorder = () => {

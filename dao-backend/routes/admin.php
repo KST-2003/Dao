@@ -13,6 +13,9 @@ Route::post('/auth/login', [Admin\AuthController::class, 'login'])->middleware('
 Route::middleware(['auth:sanctum', 'admin', 'throttle:api'])->group(function () {
     Route::get('/auth/me', [Admin\AuthController::class, 'me']);
     Route::post('/auth/logout', [Admin\AuthController::class, 'logout']);
+    // Every admin manages their own name + picture (shown as the creator on reels), whatever their role.
+    Route::put('/auth/profile', [Admin\ProfileController::class, 'update']);
+    Route::post('/auth/profile/avatar/presign', [Admin\ProfileController::class, 'presignAvatar']);
 
     Route::get('/dashboard', Admin\DashboardController::class)->middleware('admin.can:dashboard.view');
 

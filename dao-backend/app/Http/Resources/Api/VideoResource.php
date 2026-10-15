@@ -18,7 +18,8 @@ class VideoResource extends VideoCardResource
             'is_liked' => $request->attributes->has('video_liked_ids')
                 ? in_array($this->id, (array) $request->attributes->get('video_liked_ids'), true)
                 : (bool) $request->attributes->get('video_is_liked', false),
-            'author' => ['name' => 'Dao', 'avatar_url' => null],
+            // The admin who published it — their profile name and picture ("Dao" for videos with no author).
+            'author' => ['name' => $this->author?->name ?: 'Dao', 'avatar_url' => $this->author?->avatar_url],
         ]);
     }
 }

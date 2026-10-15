@@ -33,6 +33,8 @@ export interface ThemeColors {
   tabBar: string;
   tabActive: string;
   tabInactive: string;
+  /** Soft highlight behind the active tab's icon. */
+  tabActiveSoft: string;
   statusBar: 'dark' | 'light';
 }
 
@@ -65,9 +67,11 @@ const botanical: ThemeColors = {
   scrim: 'rgba(23,25,23,0.28)',
   skeleton: '#F1E9DD',
   skeletonHighlight: '#F8F2E9',
-  tabBar: palette.white,
-  tabActive: palette.deepSage,
-  tabInactive: '#B3A69B',
+  // Soft Sage Bar: muted sage background, cream icons, champagne-gold active tab (same in both themes)
+  tabBar: palette.softSageBar,
+  tabActive: palette.champagneLight,
+  tabInactive: palette.softCream,
+  tabActiveSoft: 'rgba(244,235,221,0.16)',
   statusBar: 'dark',
 };
 
@@ -100,9 +104,10 @@ const midnight: ThemeColors = {
   scrim: 'rgba(0,0,0,0.4)',
   skeleton: '#262A26',
   skeletonHighlight: '#2F342F',
-  tabBar: '#1C1F1C',
-  tabActive: palette.midnightGold,
-  tabInactive: '#7B766E',
+  tabBar: palette.softSageBar,
+  tabActive: palette.champagneLight,
+  tabInactive: palette.softCream,
+  tabActiveSoft: 'rgba(244,235,221,0.16)',
   statusBar: 'light',
 };
 

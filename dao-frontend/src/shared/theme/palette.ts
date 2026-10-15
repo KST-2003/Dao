@@ -12,6 +12,9 @@ export const palette = {
   lilyRose: '#D9A5A5',
   dustyRose: '#C99598',
   champagneGold: '#C9A96E',
+  // "Soft Sage Bar" tab bar: muted sage, cream icons, champagne active tab
+  softSageBar: '#7A8570',
+  champagneLight: '#E9DAB6',
   midnight: '#171917',
   white: '#FFFFFF',
   // Midnight theme companions

@@ -14,6 +14,7 @@ export interface AdminMe {
   id: number
   name: string
   email: string
+  avatar_url: string | null
   role: { slug: string; name: string }
   permissions: string[]
 }
