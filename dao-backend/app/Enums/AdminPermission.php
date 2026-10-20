@@ -16,6 +16,7 @@ enum AdminPermission: string
     case MarketingManage = 'marketing.manage';
     case ContentManage = 'content.manage';
     case ReviewsModerate = 'reviews.moderate';
+    case CommentsModerate = 'comments.moderate';
     case NotificationsSend = 'notifications.send';
     case SettingsManage = 'settings.manage';
     case AdminsManage = 'admins.manage';

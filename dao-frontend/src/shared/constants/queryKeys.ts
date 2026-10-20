@@ -34,6 +34,7 @@ export const qk = {
   videoCategories: (locale: string) => ['videoCategories', locale] as const,
   videoRelated: (id: number) => ['video', id, 'related'] as const,
   comments: (id: number) => ['video', id, 'comments'] as const,
+  commentReplies: (commentId: number) => ['comment', commentId, 'replies'] as const,
   kitchen: (locale: string) => ['kitchen', locale] as const,
   recipes: (category: string | undefined, locale: string) => ['recipes', locale, category] as const,
   recipe: (id: number, locale: string) => ['recipe', id, locale] as const,

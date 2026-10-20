@@ -81,6 +81,7 @@ class AppServiceProvider extends ServiceProvider
             'video_category' => Models\VideoCategory::class,
             'recipe' => Models\Recipe::class,
             'review' => Models\Review::class,
+            'comment' => Models\Comment::class,
             'reward' => Models\Reward::class,
             'referral' => Models\Referral::class,
             'coupon' => Models\Coupon::class,

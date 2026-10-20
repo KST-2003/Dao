@@ -13,10 +13,10 @@ class AdminRoleSeeder extends Seeder
     {
         $roles = [
             'super_admin' => ['Super Admin', [P::All]],
-            'manager' => ['Manager', [P::DashboardView, P::ProductsManage, P::InventoryManage, P::OrdersManage, P::OrdersView, P::CustomersView, P::CustomersManage, P::LoyaltyManage, P::MarketingManage, P::ContentManage, P::ReviewsModerate, P::NotificationsSend, P::AuditView]],
-            'content_manager' => ['Content Manager', [P::DashboardView, P::ContentManage, P::ReviewsModerate, P::MarketingManage]],
+            'manager' => ['Manager', [P::DashboardView, P::ProductsManage, P::InventoryManage, P::OrdersManage, P::OrdersView, P::CustomersView, P::CustomersManage, P::LoyaltyManage, P::MarketingManage, P::ContentManage, P::ReviewsModerate, P::CommentsModerate, P::NotificationsSend, P::AuditView]],
+            'content_manager' => ['Content Manager', [P::DashboardView, P::ContentManage, P::ReviewsModerate, P::CommentsModerate, P::MarketingManage]],
             'order_manager' => ['Order Manager', [P::DashboardView, P::OrdersManage, P::OrdersView, P::InventoryManage, P::CustomersView]],
-            'customer_support' => ['Customer Support', [P::OrdersView, P::CustomersView, P::ReviewsModerate]],
+            'customer_support' => ['Customer Support', [P::OrdersView, P::CustomersView, P::ReviewsModerate, P::CommentsModerate]],
         ];
         foreach ($roles as $slug => [$name, $perms]) {
             AdminRole::query()->updateOrCreate(['slug' => $slug], ['name' => $name, 'permissions' => array_map(fn (P $p) => $p->value, $perms)]);

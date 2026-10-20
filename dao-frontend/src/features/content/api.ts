@@ -1,3 +1,4 @@
+import * as FileSystem from 'expo-file-system/legacy';
 import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { api } from '@/shared/api/client';
 import { qk } from '@/shared/constants/queryKeys';
@@ -52,11 +53,70 @@ export function useComments(id: number, enabled = true) {
   });
 }
 
-export function usePostComment(id: number) {
+export interface NewComment {
+  body: string;
+  /** Local file to upload (presigned PUT to storage) before the comment is posted. */
+  image?: { uri: string; contentType: string };
+  /** Top-level comment id the reply attaches to; the server flattens deeper replies onto it. */
+  rootId?: number;
+  /** The comment being answered (may itself be a reply), so the app can show "replying to". */
+  parentId?: number;
+}
+
+export function usePostComment(videoId: number) {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (body: string) => api.post<Comment>(`/videos/${id}/comments`, { body }),
-    onSuccess: () => void qc.invalidateQueries({ queryKey: qk.comments(id) }),
+    mutationFn: async ({ body, image, parentId }: NewComment) => {
+      let key: string | undefined;
+      if (image) {
+        const presigned = await api.post<{ upload_url: string; key: string }>('/comments/image/presign', { content_type: image.contentType });
+        const put = await FileSystem.uploadAsync(presigned.upload_url, image.uri, {
+          httpMethod: 'PUT',
+          uploadType: FileSystem.FileSystemUploadType.BINARY_CONTENT,
+          headers: { 'Content-Type': image.contentType },
+        });
+        if (put.status < 200 || put.status >= 300) {
+          throw new Error('Upload to storage failed');
+        }
+        key = presigned.key;
+      }
+      return api.post<Comment>(`/videos/${videoId}/comments`, { body: body || undefined, image: key, parent_id: parentId });
+    },
+    onSuccess: (_c, vars) => {
+      void qc.invalidateQueries({ queryKey: qk.comments(videoId) });
+      if (vars.rootId) {
+        void qc.invalidateQueries({ queryKey: qk.commentReplies(vars.rootId) });
+      }
+    },
+  });
+}
+
+export function useCommentReplies(commentId: number, enabled: boolean) {
+  return useInfiniteQuery({
+    enabled,
+    queryKey: qk.commentReplies(commentId),
+    initialPageParam: 1,
+    queryFn: ({ pageParam }) => api.getRaw<Paginated<Comment>>(`/comments/${commentId}/replies`, { params: { page: pageParam } }),
+    getNextPageParam: (last) => (last.meta.current_page < last.meta.last_page ? last.meta.current_page + 1 : undefined),
+  });
+}
+
+export function useToggleCommentLike() {
+  return useMutation({
+    mutationFn: ({ id, liked }: { id: number; liked: boolean }) => (liked ? api.post<{ like_count: number }>(`/comments/${id}/like`) : api.delete<{ like_count: number }>(`/comments/${id}/like`)),
+  });
+}
+
+export function useDeleteComment(videoId: number, rootId: number | null) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id: number) => api.delete(`/comments/${id}`),
+    onSuccess: () => {
+      void qc.invalidateQueries({ queryKey: qk.comments(videoId) });
+      if (rootId) {
+        void qc.invalidateQueries({ queryKey: qk.commentReplies(rootId) });
+      }
+    },
   });
 }
 

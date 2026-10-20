@@ -26,7 +26,7 @@ it('stores when each step happens in the video and serves it with the recipe', f
         'slug' => 'timed-curry', 'video_id' => $video->id, 'status' => 'published', 'published_at' => now()->subMinute()->toIso8601String(),
         'translations' => ['en' => ['title' => 'Timed curry']],
         'steps' => [
-            ['instruction' => ['en' => 'Chop'], 'video_seconds' => 65],
+            ['instruction' => ['en' => 'Chop'], 'video_seconds' => 65, 'video_end_seconds' => 90],
             ['instruction' => ['en' => 'Fry'], 'video_seconds' => null],
         ],
     ])->assertCreated()->json('data.id');
@@ -34,6 +34,7 @@ it('stores when each step happens in the video and serves it with the recipe', f
     $this->app['auth']->forgetGuards();
     $this->getJson("/api/v1/recipes/{$id}")->assertOk()
         ->assertJsonPath('data.steps.0.video_seconds', 65)
+        ->assertJsonPath('data.steps.0.video_end_seconds', 90)
         ->assertJsonPath('data.steps.1.video_seconds', null)
         ->assertJsonPath('data.video.id', $video->id);
 });
@@ -48,4 +49,13 @@ it('withholds a members-only recipe video from guests', function () {
 
     $this->app['auth']->forgetGuards();
     $this->getJson("/api/v1/recipes/{$id}")->assertOk()->assertJsonPath('data.video_url', null);
+});
+
+it('rejects a step that ends before it starts', function () {
+    Sanctum::actingAs(AdminUser::factory()->create(), ['admin']);
+
+    $this->postJson('/api/admin/v1/recipes', [
+        'slug' => 'bad-times', 'translations' => ['en' => ['title' => 'Bad times']],
+        'steps' => [['instruction' => ['en' => 'Chop'], 'video_seconds' => 60, 'video_end_seconds' => 30]],
+    ])->assertUnprocessable()->assertJsonValidationErrors('steps.0.video_end_seconds');
 });

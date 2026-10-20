@@ -12,6 +12,7 @@ type Step = RecipeDetail['steps'][number];
  */
 export function useCookAlong(uri: string, steps: Step[], startAt: number) {
   const [time, setTime] = useState(0);
+  const [fullscreen, setFullscreen] = useState(false);
   const seeded = useRef(false);
   const player = useVideoPlayer({ uri }, (p) => {
     p.loop = false;
@@ -48,13 +49,20 @@ export function useCookAlong(uri: string, steps: Step[], startAt: number) {
   );
 
   const timed = steps.filter((s) => s.video_seconds != null);
-  const current = [...timed].reverse().find((s) => (s.video_seconds ?? 0) <= time + 0.3) ?? null;
+  // A caption shows from its start until its end (or, with no end, until the next step starts).
+  const current = timed.find((s, i) => {
+    const start = s.video_seconds ?? 0;
+    const end = s.video_end_seconds ?? timed[i + 1]?.video_seconds ?? Infinity;
+    return time + 0.3 >= start && time < end;
+  }) ?? null;
 
   return {
     player,
     isPlaying,
     current,
     marks: timed.map((s) => s.video_seconds as number),
+    fullscreen,
+    toggleFullscreen: () => setFullscreen((f) => !f),
     toggle: () => (isPlaying ? player.pause() : player.play()),
     seekTo: (seconds: number) => {
       player.currentTime = seconds;

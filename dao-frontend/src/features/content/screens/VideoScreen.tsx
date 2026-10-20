@@ -6,11 +6,12 @@ import { FlatList, Pressable, ScrollView, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import {
-  AsyncState, DAOAvatar, DAOBottomSheet, DAOButton, DAOIconButton, DAOImage, DAOInput, DAOProductCard, DAOSectionHeader,
+  AsyncState, DAOAvatar, DAOButton, DAOIconButton, DAOImage, DAOProductCard, DAOSectionHeader,
   DAOText, DAOVideoCard,
 } from '@/shared/components';
 import { formatCount } from '@/shared/utils/format';
 import { ratios, useTheme, media } from '@/shared/theme';
+import { ReelCommentsSheet } from '../components/CommentsSheet';
 import { VideoPlayer } from '../components/VideoPlayer';
 import { useVideoScreen } from '../hooks/useVideoScreen';
 
@@ -94,23 +95,7 @@ export default function VideoScreen() {
           </ScrollView>
         )}
       </AsyncState>
-      <DAOBottomSheet visible={vm.showComments} onClose={vm.closeComments} title={t('vlog.comments')}>
-        <ScrollView style={{ maxHeight: 360 }} contentContainerStyle={{ gap: spacing.md, paddingBottom: spacing.md }}>
-          {vm.comments.length === 0 ? <DAOText tone="textMuted">{t('vlog.noComments')}</DAOText> : vm.comments.map((c) => (
-            <View key={c.id} style={{ flexDirection: 'row', gap: spacing.sm }}>
-              <DAOAvatar name={c.user.name} uri={c.user.avatar_url} size={30} />
-              <View style={{ flex: 1 }}>
-                <DAOText variant="caption" tone="textMuted">{c.user.name}</DAOText>
-                <DAOText variant="bodySmall">{c.body}</DAOText>
-              </View>
-            </View>
-          ))}
-        </ScrollView>
-        <View style={{ flexDirection: 'row', gap: spacing.sm, alignItems: 'center' }}>
-          <View style={{ flex: 1 }}><DAOInput value={vm.comment} onChangeText={vm.setComment} placeholder={t('vlog.commentPlaceholder')} maxLength={1000} /></View>
-          <DAOIconButton icon="send" tone="primary" accessibilityLabel={t('vlog.post')} onPress={vm.postComment} />
-        </View>
-      </DAOBottomSheet>
+      <ReelCommentsSheet videoId={vm.id} visible={vm.showComments} onClose={vm.closeComments} />
       {/*
         Fixed top navbar, deliberately OUTSIDE AsyncState and the scrolling content:
         - Always on screen, including while the video is loading or failed to load (it used

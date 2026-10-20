@@ -12,6 +12,7 @@ use App\Http\Resources\Api\VideoCardResource;
 use App\Http\Resources\Api\VideoResource;
 use App\Models\Video;
 use App\Models\VideoCategory;
+use App\Services\Content\CommentService;
 use App\Services\Content\ContentAccessService;
 use App\Services\Content\EngagementService;
 use Illuminate\Http\JsonResponse;
@@ -22,7 +23,7 @@ use Illuminate\Validation\Rule;
 /** One controller for all creator content (vlog, fashion, tutorial, short, recipe video). */
 class VideoController extends Controller
 {
-    public function __construct(private readonly EngagementService $engagement, private readonly ContentAccessService $contentAccess) {}
+    public function __construct(private readonly EngagementService $engagement, private readonly ContentAccessService $contentAccess, private readonly CommentService $comments) {}
 
     public function index(Request $request): AnonymousResourceCollection
     {
@@ -130,18 +131,22 @@ class VideoController extends Controller
         return $this->ok(['liked' => false, 'like_count' => $this->engagement->unlike($request->user(), Video::query()->published()->findOrFail($id))]);
     }
 
-    public function comments(int $id): AnonymousResourceCollection
+    public function comments(Request $request, int $id): AnonymousResourceCollection
     {
         $video = Video::query()->published()->findOrFail($id);
+        $user = $request->user('sanctum');
+        $page = $this->comments->topLevel($video, $user);
+        $request->attributes->set('comment_liked_ids', $this->comments->likedIds($user, $page->pluck('id')->all()));
 
-        return CommentResource::collection($video->comments()->where('is_hidden', false)->with('user')->latest()->paginate(20));
+        return CommentResource::collection($page);
     }
 
     public function comment(CommentRequest $request, int $id): CommentResource
     {
         $video = Video::query()->published()->findOrFail($id);
+        $comment = $this->comments->post($request->user(), $video, $request->input('body'), $request->input('image'), $request->integer('parent_id') ?: null);
 
-        return new CommentResource($this->engagement->comment($request->user(), $video, (string) $request->input('body'), $request->integer('parent_id') ?: null)->load('user'));
+        return new CommentResource($comment->load(['user', 'replyToUser']));
     }
 
     /**

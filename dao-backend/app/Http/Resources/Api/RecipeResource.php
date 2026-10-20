@@ -31,6 +31,7 @@ class RecipeResource extends RecipeCardResource
                 'image_url' => $s->image_url,
                 'timer_seconds' => $s->timer_seconds,
                 'video_seconds' => $s->video_seconds,
+                'video_end_seconds' => $s->video_end_seconds,
             ])->values(),
         ]);
     }

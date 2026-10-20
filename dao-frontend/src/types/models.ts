@@ -444,8 +444,16 @@ export interface VideoDetail extends VideoCard {
 export interface Comment {
   id: number;
   parent_id: number | null;
-  body: string;
-  user: { name: string; avatar_url: string | null };
+  /** `banned` comments are only returned to their own author, with body/image masked (null). */
+  status: 'visible' | 'banned';
+  body: string | null;
+  image_url: string | null;
+  user: { id: number; name: string; avatar_url: string | null };
+  reply_to: string | null;
+  like_count: number;
+  reply_count: number;
+  is_liked: boolean;
+  is_mine: boolean;
   created_at: string | null;
 }
 
@@ -472,7 +480,7 @@ export interface RecipeDetail extends RecipeCard {
   video?: VideoCard | null;
   video_url?: string | null;
   ingredients: { id: number; name: string | null; quantity: string | null; unit: string | null; product_id: number | null }[];
-  steps: { number: number; instruction: string | null; image_url: string | null; timer_seconds: number | null; video_seconds?: number | null }[];
+  steps: { number: number; instruction: string | null; image_url: string | null; timer_seconds: number | null; video_seconds?: number | null; video_end_seconds?: number | null }[];
 }
 
 export interface KitchenFeed {

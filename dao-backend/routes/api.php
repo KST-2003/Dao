@@ -40,6 +40,7 @@ Route::prefix('v1')->middleware('throttle:api')->name('v1.')->group(function () 
     Route::get('/videos/{id}', [V1\VideoController::class, 'show'])->whereNumber('id');
     Route::get('/videos/{id}/related', [V1\VideoController::class, 'related'])->whereNumber('id');
     Route::get('/videos/{id}/comments', [V1\VideoController::class, 'comments'])->whereNumber('id');
+    Route::get('/comments/{id}/replies', [V1\CommentController::class, 'replies'])->whereNumber('id');
     Route::post('/videos/{id}/view', [V1\VideoController::class, 'view'])->whereNumber('id')->middleware('throttle:writes');
     Route::get('/kitchen', [V1\RecipeController::class, 'kitchen']);
     Route::get('/recipes', [V1\RecipeController::class, 'index']);
@@ -106,6 +107,10 @@ Route::prefix('v1')->middleware('throttle:api')->name('v1.')->group(function () 
         Route::post('/videos/{id}/like', [V1\VideoController::class, 'like'])->whereNumber('id');
         Route::delete('/videos/{id}/like', [V1\VideoController::class, 'unlike'])->whereNumber('id');
         Route::post('/videos/{id}/comments', [V1\VideoController::class, 'comment'])->whereNumber('id')->middleware('throttle:writes');
+        Route::post('/comments/image/presign', [V1\CommentController::class, 'presignImage'])->middleware('throttle:writes');
+        Route::post('/comments/{id}/like', [V1\CommentController::class, 'like'])->whereNumber('id')->middleware('throttle:writes');
+        Route::delete('/comments/{id}/like', [V1\CommentController::class, 'unlike'])->whereNumber('id');
+        Route::delete('/comments/{id}', [V1\CommentController::class, 'destroy'])->whereNumber('id');
         Route::post('/videos/{id}/download', [V1\VideoController::class, 'download'])->whereNumber('id')->middleware('throttle:writes');
 
         Route::get('/notifications', [V1\NotificationController::class, 'index']);

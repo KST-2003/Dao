@@ -12,7 +12,7 @@ import { LOCALES, type Locale, type Translations } from '@/types/api'
 
 type L = Partial<Record<Locale, string>>
 interface Ingredient { name: L; quantity: string | null; unit: string | null; product_id: number | null }
-interface Step { instruction: L; image_url: string | null; timer_seconds: number | null; video_seconds: number | null }
+interface Step { instruction: L; image_url: string | null; timer_seconds: number | null; video_seconds: number | null; video_end_seconds: number | null }
 interface RecipeForm {
   video_id: number | null; slug: string; category: string | null; cover_image_url: string | null; prep_minutes: number; cook_minutes: number; servings: number
   difficulty: string; spice_level: number; is_featured: boolean; status: string; published_at: string | null
@@ -31,6 +31,18 @@ function timeValue(raw: string, current: number, part: 'min' | 'sec'): number | 
   return part === 'min' ? n * 60 + (current % 60) : Math.floor(current / 60) * 60 + Math.min(59, n)
 }
 
+/** Minutes + seconds boxes for a moment in the linked video; empty = not set. */
+function TimeInput({ label, value, onChange }: { label: string; value: number | null; onChange: (v: number | null) => void }) {
+  return (
+    <div className="flex items-center gap-1" title={`${label}: when this step's caption ${label === 'Start' ? 'appears' : 'disappears (blank = when the next step starts)'}`}>
+      <span className="w-9 text-xs text-ink-muted">{label}</span>
+      <Input className="w-16" type="number" min={0} placeholder="Min" aria-label={`${label} minutes`} value={value == null ? '' : Math.floor(value / 60)} onChange={(e) => onChange(timeValue(e.target.value, value ?? 0, 'min'))} />
+      <span className="text-ink-subtle">:</span>
+      <Input className="w-16" type="number" min={0} max={59} placeholder="Sec" aria-label={`${label} seconds`} value={value == null ? '' : value % 60} onChange={(e) => onChange(timeValue(e.target.value, value ?? 0, 'sec'))} />
+    </div>
+  )
+}
+
 export default function RecipeEditPage() {
   const { id } = useParams()
   const isNew = id === 'new'
@@ -47,7 +59,7 @@ export default function RecipeEditPage() {
       const body = {
         ...form,
         ingredients: form.ingredients.map(({ name, quantity, unit, product_id }) => ({ name, quantity, unit, product_id })),
-        steps: form.steps.map(({ instruction, image_url, timer_seconds, video_seconds }) => ({ instruction, image_url, timer_seconds, video_seconds })),
+        steps: form.steps.map(({ instruction, image_url, timer_seconds, video_seconds, video_end_seconds }) => ({ instruction, image_url, timer_seconds, video_seconds, video_end_seconds })),
       }
       return isNew ? api.post<{ id: number }>('/recipes', body) : api.put<{ id: number }>(`/recipes/${id}`, body)
     },
@@ -81,16 +93,15 @@ export default function RecipeEditPage() {
               ))}
             </div>
           </DAOAdminCard>
-          <DAOAdminCard title="Steps" actions={<Button type="button" size="sm" variant="secondary" icon={<Plus className="size-4" />} onClick={() => set('steps', [...form.steps, { instruction: {}, image_url: null, timer_seconds: null, video_seconds: null }])}>Add step</Button>}>
+          <DAOAdminCard title="Steps" actions={<Button type="button" size="sm" variant="secondary" icon={<Plus className="size-4" />} onClick={() => set('steps', [...form.steps, { instruction: {}, image_url: null, timer_seconds: null, video_seconds: null, video_end_seconds: null }])}>Add step</Button>}>
             <ol className="space-y-3">
               {form.steps.map((st, i) => (
                 <li key={i} className="flex items-start gap-3 rounded-xl bg-muted p-3">
                   <span className="mt-2 grid size-7 shrink-0 place-items-center rounded-full bg-primary-soft text-sm text-primary">{i + 1}</span>
                   <LocalizedInputs placeholder="Instruction" value={st.instruction} onChange={(instruction) => set('steps', form.steps.map((x, j) => (j === i ? { ...x, instruction } : x)))} />
-                  <div className="flex shrink-0 items-center gap-1" title="When this step starts in the video">
-                    <Input className="w-16" type="number" min={0} placeholder="Min" aria-label="Minutes" value={st.video_seconds == null ? '' : Math.floor(st.video_seconds / 60)} onChange={(e) => set('steps', form.steps.map((x, j) => (j === i ? { ...x, video_seconds: timeValue(e.target.value, x.video_seconds ?? 0, 'min') } : x)))} />
-                    <span className="text-ink-subtle">:</span>
-                    <Input className="w-16" type="number" min={0} max={59} placeholder="Sec" aria-label="Seconds" value={st.video_seconds == null ? '' : st.video_seconds % 60} onChange={(e) => set('steps', form.steps.map((x, j) => (j === i ? { ...x, video_seconds: timeValue(e.target.value, x.video_seconds ?? 0, 'sec') } : x)))} />
+                  <div className="flex shrink-0 flex-col gap-2">
+                    <TimeInput label="Start" value={st.video_seconds} onChange={(v) => set('steps', form.steps.map((x, j) => (j === i ? { ...x, video_seconds: v } : x)))} />
+                    <TimeInput label="End" value={st.video_end_seconds} onChange={(v) => set('steps', form.steps.map((x, j) => (j === i ? { ...x, video_end_seconds: v } : x)))} />
                   </div>
                   <button type="button" aria-label="Remove step" onClick={() => set('steps', form.steps.filter((_, j) => j !== i))}><Trash2 className="mt-2 size-4 text-danger" /></button>
                 </li>

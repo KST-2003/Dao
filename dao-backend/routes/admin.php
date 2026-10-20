@@ -124,6 +124,13 @@ Route::middleware(['auth:sanctum', 'admin', 'throttle:api'])->group(function () 
         Route::post('/reviews/{id}/moderate', [Admin\ReviewController::class, 'moderate'])->whereNumber('id');
     });
 
+    Route::middleware('admin.can:comments.moderate')->group(function () {
+        Route::get('/comments', [Admin\CommentController::class, 'index']);
+        Route::post('/comments/{id}/ban', [Admin\CommentController::class, 'ban'])->whereNumber('id');
+        Route::post('/comments/{id}/unban', [Admin\CommentController::class, 'unban'])->whereNumber('id');
+        Route::delete('/comments/{id}', [Admin\CommentController::class, 'destroy'])->whereNumber('id');
+    });
+
     Route::middleware('admin.can:notifications.send')->group(function () {
         Route::get('/notifications', [Admin\NotificationController::class, 'index']);
         Route::post('/notifications/broadcast', [Admin\NotificationController::class, 'broadcast']);

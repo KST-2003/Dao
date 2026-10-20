@@ -17,6 +17,7 @@ return [
     'CART_EMPTY' => 'Your bag is empty.',
     'CART_INVALID' => 'Some items in your bag need your attention.',
     'CATEGORY_IN_USE' => 'This category still has products or sub-categories.',
+    'COMMENT_EMPTY' => 'Write something or add a photo first.',
     'COUPON_EXPIRED' => 'This code has expired.',
     'COUPON_MIN_SUBTOTAL' => 'Add a little more to use this code.',
     'COUPON_NOT_APPLICABLE' => 'This code doesn\'t apply to items in your bag.',

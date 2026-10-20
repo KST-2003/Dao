@@ -20,6 +20,7 @@ const CustomerDetail = lazy(() => import('@/pages/CustomerDetailPage'))
 const CouponRedemptions = lazy(() => import('@/pages/CouponRedemptionsPage'))
 const Points = lazy(() => import('@/pages/PointsPage'))
 const Reviews = lazy(() => import('@/pages/ReviewsPage'))
+const Comments = lazy(() => import('@/pages/CommentsPage'))
 const Notifications = lazy(() => import('@/pages/NotificationsPage'))
 const Settings = lazy(() => import('@/pages/SettingsPage'))
 const AdminUsers = lazy(() => import('@/pages/AdminUsersPage'))
@@ -64,6 +65,7 @@ export default function App() {
             <Route path="categories" element={g(['products.manage'], <Categories />)} />
             <Route path="collections" element={g(['products.manage'], <Collections />)} />
             <Route path="reviews" element={g(['reviews.moderate'], <Reviews />)} />
+            <Route path="comments" element={g(['comments.moderate'], <Comments />)} />
             <Route path="customers" element={g(['customers.view'], <Customers />)} />
             <Route path="customers/:id" element={g(['customers.view'], <CustomerDetail />)} />
             <Route path="membership" element={g(['loyalty.manage'], <Tiers />)} />

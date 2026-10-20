@@ -95,6 +95,7 @@ class RecipeController extends AdminController
                     'step_number' => $i + 1, 'instruction' => array_filter($row['instruction']),
                     'image_url' => $row['image_url'] ?? null, 'timer_seconds' => $row['timer_seconds'] ?? null,
                     'video_seconds' => $row['video_seconds'] ?? null,
+                    'video_end_seconds' => $row['video_end_seconds'] ?? null,
                 ]);
             }
         }

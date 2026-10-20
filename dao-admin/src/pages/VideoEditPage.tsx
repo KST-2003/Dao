@@ -1,6 +1,7 @@
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
+import { useAuth } from '@/auth/AuthProvider'
 import { ProductPicker } from '@/components/resource/ProductPicker'
 import { TagsInput } from '@/components/resource/TagsInput'
 import {
@@ -22,6 +23,7 @@ export default function VideoEditPage() {
   const { id } = useParams()
   const isNew = id === 'new'
   const navigate = useNavigate()
+  const { can } = useAuth()
   const toast = useToast()
   const [form, setForm] = useState<VideoForm>(blank)
   const [confirm, setConfirm] = useState(false)
@@ -46,7 +48,7 @@ export default function VideoEditPage() {
 
   return (
     <form onSubmit={(e) => { e.preventDefault(); save.mutate() }} className="space-y-6">
-      <DAOAdminHeader title={isNew ? 'New video' : (form.translations.en?.title as string) || 'Video'} actions={<Button type="submit" loading={save.isPending}>Save</Button>} />
+      <DAOAdminHeader title={isNew ? 'New video' : (form.translations.en?.title as string) || 'Video'} actions={<>{!isNew && can('comments.moderate') ? <Button type="button" variant="secondary" onClick={() => navigate(`/comments?video=${id}`)}>Moderate comments</Button> : null}<Button type="submit" loading={save.isPending}>Save</Button></>} />
       <div className="grid gap-6 xl:grid-cols-3">
         <div className="space-y-6 xl:col-span-2">
           <DAOAdminCard title="Title & description (EN · TH · MY)">

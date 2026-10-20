@@ -9,7 +9,7 @@ class RecipeStep extends Model
 {
     public $timestamps = false;
 
-    protected $fillable = ['step_number', 'instruction', 'image_url', 'timer_seconds', 'video_seconds'];
+    protected $fillable = ['step_number', 'instruction', 'image_url', 'timer_seconds', 'video_seconds', 'video_end_seconds'];
 
     protected function casts(): array
     {

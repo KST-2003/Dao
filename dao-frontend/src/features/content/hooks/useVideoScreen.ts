@@ -7,14 +7,12 @@ import { useRequireAuth } from '@/shared/hooks/useRequireAuth';
 import { useSaveVideoToGallery } from '@/shared/hooks/useSaveVideoToGallery';
 import { analytics } from '@/shared/services/analytics/AnalyticsService';
 import { useIsSaved } from '@/shared/store/savedStore';
-import { recordView, useComments, usePostComment, useRelatedVideos, useRequestVideoDownload, useToggleLike, useVideo } from '../api';
+import { recordView, useRelatedVideos, useRequestVideoDownload, useToggleLike, useVideo } from '../api';
 
 export function useVideoScreen() {
   const id = Number(useLocalSearchParams<{ id: string }>().id);
   const video = useVideo(id);
   const related = useRelatedVideos(id);
-  const comments = useComments(id);
-  const post = usePostComment(id);
   const like = useToggleLike(id);
   const toggleSaved = useToggleSaved();
   const requireAuth = useRequireAuth();
@@ -23,7 +21,6 @@ export function useVideoScreen() {
   const gallery = useSaveVideoToGallery();
   const saved = useIsSaved('video', id, video.data?.is_saved ?? false);
   const [showComments, setShowComments] = useState(false);
-  const [comment, setComment] = useState('');
 
   useEffect(() => {
     if (video.data?.id) {
@@ -32,16 +29,12 @@ export function useVideoScreen() {
   }, [video.data?.id]);
 
   return {
+    id,
     video,
     related,
-    comments: comments.data?.pages.flatMap((p) => p.data) ?? [],
     showComments,
     openComments: () => setShowComments(true),
     closeComments: () => setShowComments(false),
-    comment,
-    setComment,
-    posting: post.isPending,
-    postComment: requireAuth(() => comment.trim() && post.mutate(comment.trim(), { onSuccess: () => setComment('') })),
     toggleLike: requireAuth(() => video.data && like.mutate(!video.data.is_liked)),
     saved,
     toggleSave: () => toggleSaved('video', id, saved),

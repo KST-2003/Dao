@@ -10,7 +10,8 @@ import { useReelItem } from '../hooks/useReelItem';
 import { HeartBurst } from './HeartBurst';
 import { ReelPlayer } from './ReelPlayer';
 import { REEL_BAR_ZONE } from './ReelProgress';
-import { ReelCommentsSheet, ReelProductsSheet } from './ReelSheets';
+import { ReelCommentsSheet } from './CommentsSheet';
+import { ReelProductsSheet } from './ReelSheets';
 
 function Rail({ icon, label, onPress, active, name }: { icon: keyof typeof Ionicons.glyphMap; label?: string; onPress: () => void; active?: boolean; name: string }) {
   const { colors } = useTheme();

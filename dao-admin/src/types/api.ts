@@ -21,7 +21,7 @@ export interface AdminMe {
 
 export type Permission =
   | '*' | 'dashboard.view' | 'products.manage' | 'inventory.manage' | 'orders.view' | 'orders.manage'
-  | 'customers.view' | 'customers.manage' | 'loyalty.manage' | 'marketing.manage' | 'content.manage' | 'reviews.moderate'
+  | 'customers.view' | 'customers.manage' | 'loyalty.manage' | 'marketing.manage' | 'content.manage' | 'reviews.moderate' | 'comments.moderate'
   | 'notifications.send' | 'settings.manage' | 'admins.manage' | 'audit.view'
 
 export interface DashboardMetrics {

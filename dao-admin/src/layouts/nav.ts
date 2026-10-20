@@ -1,5 +1,5 @@
 import {
-  Award, BadgePercent, BarChart3, Bell, Boxes, CalendarClock, ChefHat, ClipboardList, FolderTree, Gift, Image, Layers, MessageSquareQuote,
+  Award, BadgePercent, BarChart3, Bell, Boxes, CalendarClock, ChefHat, ClipboardList, FolderTree, Gift, Image, Layers, MessageSquareQuote, MessagesSquare,
   PlayCircle, Settings, ShieldCheck, ShoppingBag, Sparkles, Star, Tags, Users, type LucideIcon,
 } from 'lucide-react'
 import type { Permission } from '@/types/api'
@@ -42,6 +42,7 @@ export const NAV: NavGroup[] = [
     label: 'Content',
     items: [
       { to: '/videos', label: 'Videos & Vlogs', icon: PlayCircle, perms: ['content.manage'] },
+      { to: '/comments', label: 'Comments', icon: MessagesSquare, perms: ['comments.moderate'] },
       { to: '/video-categories', label: 'Video categories', icon: Tags, perms: ['content.manage'] },
       { to: '/recipes', label: 'Kitchen recipes', icon: ChefHat, perms: ['content.manage'] },
     ],
