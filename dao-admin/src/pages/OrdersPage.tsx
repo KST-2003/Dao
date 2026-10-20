@@ -1,4 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
+import { RotateCcw } from 'lucide-react'
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { DAOAdminHeader, DAODataTable, DAOStatusBadge, Input, Select, type Column } from '@/components/ui'
@@ -33,8 +34,13 @@ export default function OrdersPage() {
         <Select className="max-w-48" value={status} onChange={(e) => { setStatus(e.target.value); setPage(1) }}>
           <option value="">All statuses</option>{ORDER_STATUSES.map((s) => <option key={s} value={s}>{s.replace('_', ' ')}</option>)}
         </Select>
-        <Input type="date" className="max-w-40" value={from} onChange={(e) => setFrom(e.target.value)} aria-label="From" />
-        <Input type="date" className="max-w-40" value={to} onChange={(e) => setTo(e.target.value)} aria-label="To" />
+        <Input type="date" className="max-w-40" value={from} max={to || undefined} onChange={(e) => { setFrom(e.target.value); setPage(1) }} aria-label="From date" title="Placed from" />
+        <Input type="date" className="max-w-40" value={to} min={from || undefined} onChange={(e) => { setTo(e.target.value); setPage(1) }} aria-label="To date" title="Placed until" />
+        {from || to ? (
+          <button type="button" aria-label="Clear dates" title="Clear dates" onClick={() => { setFrom(''); setTo(''); setPage(1) }} className="grid size-10 place-items-center self-end rounded-full text-ink-muted hover:bg-muted hover:text-ink">
+            <RotateCcw className="size-4" />
+          </button>
+        ) : null}
       </div>
       <DAODataTable columns={columns} query={query} page={page} onPage={setPage} rowKey={(o) => o.id} onRowClick={(o) => navigate(`/orders/${o.id}`)} />
     </>
