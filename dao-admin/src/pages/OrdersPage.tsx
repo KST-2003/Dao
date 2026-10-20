@@ -36,11 +36,9 @@ export default function OrdersPage() {
         </Select>
         <Input type="date" className="max-w-40" value={from} max={to || undefined} onChange={(e) => { setFrom(e.target.value); setPage(1) }} aria-label="From date" title="Placed from" />
         <Input type="date" className="max-w-40" value={to} min={from || undefined} onChange={(e) => { setTo(e.target.value); setPage(1) }} aria-label="To date" title="Placed until" />
-        {from || to ? (
-          <button type="button" aria-label="Clear dates" title="Clear dates" onClick={() => { setFrom(''); setTo(''); setPage(1) }} className="grid size-10 place-items-center self-end rounded-full text-ink-muted hover:bg-muted hover:text-ink">
-            <RotateCcw className="size-4" />
-          </button>
-        ) : null}
+        <button type="button" aria-label="Clear dates" title="Clear dates" disabled={!from && !to} onClick={() => { setFrom(''); setTo(''); setPage(1) }} className="grid size-10 place-items-center rounded-full text-ink-muted hover:bg-muted hover:text-ink disabled:opacity-40 disabled:hover:bg-transparent disabled:hover:text-ink-muted">
+          <RotateCcw className="size-4" />
+        </button>
       </div>
       <DAODataTable columns={columns} query={query} page={page} onPage={setPage} rowKey={(o) => o.id} onRowClick={(o) => navigate(`/orders/${o.id}`)} />
     </>
